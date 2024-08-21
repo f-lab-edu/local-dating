@@ -1,5 +1,7 @@
 package com.local_dating.user_service.presentation;
 
+import com.local_dating.user_service.presentation.dto.UserDTO;
+
 import com.local_dating.user_service.domain.entity.User;
 import com.local_dating.user_service.domain.repository.UserRepository;
 import org.springframework.stereotype.Controller;
@@ -18,9 +20,18 @@ public class UserController {
     }
 
     @PostMapping(value = "/register")
-    public String register(@RequestBody User user) {
-        userRepository.save(user);
+    public String register(@RequestBody UserDTO user) {
+        UserVO vo = mapper.toUserVO(user)
+        userRepository.save(vo);
         return "register";
+    }
+
+    @PostMapping(value = "/register")
+    public UserDTO getUser(String userId) {
+        UserVO vo = service.getUser(userId);
+        CoinVO coin = service.getCoin(userId);
+        UserInfoDTO dto = mapper.toUserDTO(vo, coin)
+       return dto;
     }
 
     @PostMapping(value = "/login")
