@@ -1,4 +1,4 @@
-package com.local_dating.user_service.entity;
+package com.local_dating.user_service.domain.entity;
 
 import jakarta.persistence.*;
 

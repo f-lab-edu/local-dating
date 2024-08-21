@@ -1,5 +1,6 @@
-package com.local_dating.user_service.config;
+package com.local_dating.user_service.infrastructure.config;
 
+import com.local_dating.user_service.application.CustomUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -13,9 +14,16 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    public final CustomUserDetailsService userDetailsService;
+
+    public SecurityConfig(CustomUserDetailsService userDetailsService) {
+        this.userDetailsService = userDetailsService;
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
+        return http
                 .csrf(csrf -> csrf.disable())
                 //.csrf().disable()
                 .authorizeHttpRequests((requests) -> requests
@@ -26,12 +34,13 @@ public class SecurityConfig {
                         .loginPage("/login")
                         .permitAll()
                 )*/
-                .logout((logout) -> logout.permitAll());
+                .logout((logout) -> logout.permitAll()).build();
 
-        return http.build();
+        //return http.build();
     }
 
-    @Bean
+
+    /*@Bean
     public UserDetailsService userDetailsService() {
         UserDetails user =
                 User.withDefaultPasswordEncoder()
@@ -41,5 +50,5 @@ public class SecurityConfig {
                         .build();
 
         return new InMemoryUserDetailsManager(user);
-    }
+    }*/
 }
