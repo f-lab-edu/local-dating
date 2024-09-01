@@ -1,5 +1,6 @@
 package com.local_dating.user_service.domain.entity;
 
+import com.local_dating.user_service.domain.vo.UserVO;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,6 +12,16 @@ import java.time.LocalDateTime;
 @Entity
 @Table
 public class User {
+
+    public User() {
+    }
+
+    public User(UserVO vo) {
+        this.userid = vo.userid();
+        this.pwd = vo.pwd();
+        this.name = vo.name();
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -25,7 +36,8 @@ public class User {
     @Column(name = "name")
     private String name;
 
-    @Column(name = "birth", length = 8)
+    @Column(name = "birth")
+    //@Column(name = "birth", length = 8)
     private String birth;
 
     //@Column(length = 1)
