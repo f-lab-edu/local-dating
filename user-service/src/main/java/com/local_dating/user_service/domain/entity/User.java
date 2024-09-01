@@ -12,14 +12,15 @@ import java.time.LocalDateTime;
 @Entity
 @Table
 public class User {
-
     public User() {
     }
 
     public User(UserVO vo) {
-        this.userid = vo.userid();
+        this.userId = vo.userId();
         this.pwd = vo.pwd();
         this.name = vo.name();
+        this.birth = vo.birth();
+        this.phone = vo.phone();
     }
 
     @Id
@@ -27,8 +28,8 @@ public class User {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "userid")
-    private String userid;
+    @Column(name = "user_id")
+    private String userId;
 
     @Column(name = "pwd")
     private String pwd;
@@ -71,17 +72,17 @@ public class User {
     private LocalDateTime lastLoginDate;
 
     @Column(name = "last_pwd_mod_date")
-    private LocalDateTime lastPwdModdate;
+    private LocalDateTime lastPwdModDate;
 
-    @Column(name = "indate")
-    private LocalDateTime indate;
+    @Column(name = "in_date")
+    private LocalDateTime inDate;
 
-    @Column(name = "inuser")
-    private String inuser;
+    @Column(name = "in_user")
+    private String inUser;
 
-    @Column(name = "moddate")
-    private LocalDateTime moddate;
+    @Column(name = "mod_date")
+    private LocalDateTime modDate;
 
-    @Column(name = "moduser")
-    private String moduser;
+    @Column(name = "mod_user")
+    private String modUser;
 }

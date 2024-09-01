@@ -29,11 +29,23 @@ public class JwtUtil {
     }
 
     public String createToken(UserVO user) {
+        /*Claims claims = (Claims) Jwts.claims().setSubject(user.userId());
+        claims.put("pwd",user.pwd());
+        claims.put("name",user.name());
         Date tokenCreateTime = new Date();
         Date tokenValidity = new Date(tokenCreateTime.getTime() + TimeUnit.MINUTES.toMillis(accessTokenValidity));
         return Jwts.builder()
-                .claim("userid",user.userid())
-                .claim("pwd",user.pwd())
+                .setClaims(claims)
+                .setExpiration(tokenValidity)
+                .signWith(SignatureAlgorithm.HS256, secret_key)
+                .compact();*/
+
+        Date tokenCreateTime = new Date();
+        Date tokenValidity = new Date(tokenCreateTime.getTime() + TimeUnit.MINUTES.toMillis(accessTokenValidity));
+        return Jwts.builder()
+                .setSubject(user.userId())
+                //.claim("userId",user.userId())
+                //.claim("pwd",user.pwd())
                 .claim("name",user.name())
                 //.setClaims(claims)
                 .setExpiration(tokenValidity)
@@ -78,7 +90,7 @@ public class JwtUtil {
         }
     }
 
-    public String getEmail(Claims claims) {
+    public String getUserId(Claims claims) {
         return claims.getSubject();
     }
 
