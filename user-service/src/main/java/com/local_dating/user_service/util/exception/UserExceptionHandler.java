@@ -1,6 +1,6 @@
 package com.local_dating.user_service.util.exception;
 
-import com.local_dating.user_service.presentation.UserController;
+import com.local_dating.user_service.presentation.controller.UserController;
 import com.local_dating.user_service.util.MessageCode;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -23,30 +23,30 @@ public class UserExceptionHandler {
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity DataIntegrityViolationException(DataIntegrityViolationException e) {
-        System.out.println(e.getClass().getName() + MessageCode.DATA_INTEGRITY_VIOLATION.getMessage());
+        System.out.println(e.getClass().getName() + MessageCode.DATA_INTEGRITY_VIOLATION_EXCEPTION.getMessage());
         System.out.println(e.getMessage());
-        return new ResponseEntity<>(MessageCode.DATA_INTEGRITY_VIOLATION.getMessage(), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(MessageCode.DATA_INTEGRITY_VIOLATION_EXCEPTION.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(UserAlreadyExistsException.class)
     public ResponseEntity UserAlreadyExistsException(UserAlreadyExistsException e) {
-        System.out.println(e.getClass().getName() + MessageCode.USER_ALREADY_EXISTS.getMessage());
+        System.out.println(e.getClass().getName() + MessageCode.USER_ALREADY_EXISTS_EXCEPTION.getMessage());
         System.out.println(e.getMessage());
-        return new ResponseEntity<>(MessageCode.USER_ALREADY_EXISTS.getMessage(), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(MessageCode.USER_ALREADY_EXISTS_EXCEPTION.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity MethodArgumentNotValidException(MethodArgumentNotValidException e) {
-        System.out.println(e.getClass().getName() + MessageCode.METHOD_ARGUMENT_NOT_VALID.getMessage());
+        System.out.println(e.getClass().getName() + MessageCode.METHOD_ARGUMENT_NOT_VALID_EXCEPTION.getMessage());
         System.out.println(e.getMessage());
-        return new ResponseEntity<>(MessageCode.METHOD_ARGUMENT_NOT_VALID.getMessage(), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(MessageCode.METHOD_ARGUMENT_NOT_VALID_EXCEPTION.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity BadCredentialsException(BadCredentialsException e) {
-        System.out.println(e.getClass().getName() + MessageCode.BAD_CREDENTIAL.getMessage());
+        System.out.println(e.getClass().getName() + MessageCode.BAD_CREDENTIAL_EXCEPTION.getMessage());
         System.out.println(e.getMessage());
-        return new ResponseEntity<>(MessageCode.BAD_CREDENTIAL.getMessage(), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(MessageCode.BAD_CREDENTIAL_EXCEPTION.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     /*@ExceptionHandler(ApplicationException.class)

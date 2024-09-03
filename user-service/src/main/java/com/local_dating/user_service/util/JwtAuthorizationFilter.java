@@ -2,6 +2,7 @@ package com.local_dating.user_service.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
+import io.micrometer.common.util.StringUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,36 +26,38 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
     private final ObjectMapper mapper;
 
-    public JwtAuthorizationFilter(JwtUtil jwtUtil, ObjectMapper mapper) {
+    public JwtAuthorizationFilter(final JwtUtil jwtUtil, final ObjectMapper mapper) {
         this.jwtUtil = jwtUtil;
         this.mapper = mapper;
     }
+
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        Map<String, Object> errorDetails = new HashMap<>();
+    protected void doFilterInternal(final HttpServletRequest request, final HttpServletResponse response, final FilterChain filterChain) throws ServletException, IOException {
+        final Map<String, Object> errorDetails = new HashMap<>();
 
         try {
-            String accessToken = jwtUtil.resolveToken(request);
-            if (accessToken == null ) {
+            final String accessToken = jwtUtil.resolveToken(request);
+            if (StringUtils.isEmpty(accessToken)) {
                 filterChain.doFilter(request, response);
                 return;
             }
-            System.out.println("token : "+accessToken);
-            Claims claims = jwtUtil.resolveClaims(request);
+            System.out.println("token : " + accessToken);
+            final Claims claims = jwtUtil.resolveClaims(request);
 
-            if(claims != null & jwtUtil.validateClaims(claims)){
-                String userId = claims.getSubject();
-                System.out.println("userId: "+userId);
+            if (jwtUtil.validateClaims(claims)) {
+            //if (claims != null & jwtUtil.validateClaims(claims)) {
+                final String userId = claims.getSubject();
+                System.out.println("userId: " + userId);
                 //String email = claims.getSubject();
                 //System.out.println("email : "+email);
-                Authentication authentication =
-                        new UsernamePasswordAuthenticationToken(userId,"",new ArrayList<>());
+                final Authentication authentication =
+                        new UsernamePasswordAuthenticationToken(userId, "", new ArrayList<>());
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
 
-        }catch (Exception e){
+        } catch (Exception e) {
             errorDetails.put("message", "Authentication Error");
-            errorDetails.put("details",e.getMessage());
+            errorDetails.put("details", e.getMessage());
             response.setStatus(HttpStatus.FORBIDDEN.value());
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 

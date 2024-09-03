@@ -20,16 +20,16 @@ public class CustomUserDetailsService implements UserDetailsService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
 
-    public CustomUserDetailsService(UserRepository userRepository, UserMapper userMapper) {
+    public CustomUserDetailsService(final UserRepository userRepository, final UserMapper userMapper) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
     }
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(final String username) throws UsernameNotFoundException {
 
         return userRepository.findByUserId(username)
                 .map(s -> {
-                    List<String> roles = new ArrayList<>();
+                    final List<String> roles = new ArrayList<>();
                     roles.add("USER");
                     return org.springframework.security.core.userdetails.User.builder()
                             .username(s.getUserId())
@@ -53,7 +53,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     public void registerUser(@Valid final UserDTO dto) throws Exception {
 
         userRepository.findByUserId(userMapper.INSTANCE.toUserVO(dto).userId()).ifPresentOrElse(el -> {
-            throw new UserAlreadyExistsException(MessageCode.USER_ALREADY_EXISTS.getMessage() + ": " + dto.userId());
+            throw new UserAlreadyExistsException(MessageCode.USER_ALREADY_EXISTS_EXCEPTION.getMessage() + ": " + dto.userId());
         }, () -> {
             userRepository.save(new User(userMapper.INSTANCE.toUserVO(dto)));
         });

@@ -1,5 +1,6 @@
 package com.local_dating.user_service.domain.entity;
 
+import com.local_dating.user_service.domain.vo.UserProfileVO;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,7 +11,22 @@ import java.time.LocalDateTime;
 @Getter
 @Entity
 @Table
-public class Profile {
+public class UserProfile {
+
+    public UserProfile() {}
+
+    public UserProfile(final UserProfileVO vo) {
+        this.userId = vo.userId();
+        this.infoCd = vo.infoCd();
+        this.infoVal = vo.infoVal();
+    }
+
+    public UserProfile(final String UserId, final UserProfileVO vo) {
+        this.userId = UserId;
+        this.infoCd = vo.infoCd();
+        this.infoVal = vo.infoVal();
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")

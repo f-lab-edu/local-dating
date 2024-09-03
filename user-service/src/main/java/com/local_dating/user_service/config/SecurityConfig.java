@@ -20,13 +20,13 @@ public class SecurityConfig {
     public final CustomUserDetailsService userDetailsService;
     private final JwtAuthorizationFilter jwtAuthorizationFilter;
 
-    public SecurityConfig(CustomUserDetailsService userDetailsService, JwtAuthorizationFilter jwtAuthorizationFilter) {
+    public SecurityConfig(final CustomUserDetailsService userDetailsService, final JwtAuthorizationFilter jwtAuthorizationFilter) {
         this.userDetailsService = userDetailsService;
         this.jwtAuthorizationFilter = jwtAuthorizationFilter;
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(HttpSecurity http, NoOpPasswordEncoder noOpPasswordEncoder)
+    public AuthenticationManager authenticationManager(final HttpSecurity http, final NoOpPasswordEncoder noOpPasswordEncoder)
             throws Exception {
         AuthenticationManagerBuilder authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
         authenticationManagerBuilder.userDetailsService(userDetailsService).passwordEncoder(noOpPasswordEncoder);
@@ -34,7 +34,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(final HttpSecurity http) throws Exception {
         return http
                 .csrf(csrf -> csrf.disable())
                 //.csrf().disable()

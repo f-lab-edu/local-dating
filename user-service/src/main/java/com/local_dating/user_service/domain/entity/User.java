@@ -15,7 +15,7 @@ public class User {
     public User() {
     }
 
-    public User(UserVO vo) {
+    public User(final UserVO vo) {
         this.userId = vo.userId();
         this.pwd = vo.pwd();
         this.name = vo.name();
