@@ -101,6 +101,7 @@ public class UserController {
 
 
     @PostMapping(value = "/profile")
+    @deprecated
     public String profile(final Authentication authentication, @RequestBody final List<UserProfileDTO> userProfileDTO) {
     //public String profile(final Authentication authentication, @RequestBody final UserProfileDTO userProfileDTO) {
 
