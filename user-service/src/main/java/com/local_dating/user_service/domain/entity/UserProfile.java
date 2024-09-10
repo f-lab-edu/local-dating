@@ -4,6 +4,8 @@ import com.local_dating.user_service.domain.vo.UserProfileVO;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -42,12 +44,14 @@ public class UserProfile {
     private String infoVal;
 
     @Column(name = "in_date")
+    @CreationTimestamp
     private LocalDateTime inDate;
 
     @Column(name = "in_user")
     private String inUser;
 
     @Column(name = "mod_date")
+    @UpdateTimestamp
     private LocalDateTime modDate;
 
     @Column(name = "mod_user")

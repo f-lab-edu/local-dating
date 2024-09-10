@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
-public class UserProfileServiceImpl implements UserProfileService {
+public class UserProfileServiceImpl implements UserProfileService_ {
 
     private final UserProfileRepository userProfileRepository;
     private final UserProfileMapper userProfileMapper;
