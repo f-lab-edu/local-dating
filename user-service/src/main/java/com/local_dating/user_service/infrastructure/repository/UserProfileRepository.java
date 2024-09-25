@@ -10,7 +10,9 @@ import java.util.Optional;
 @Repository
 public interface UserProfileRepository extends JpaRepository<UserProfile,Long> {
 
-    Optional<List<UserProfile>> findByUserId(String userId);
+    //UserProfile findByInfoCd(String userId);
+    //List<UserProfile> findByUserId(String userId);
+    List<UserProfile> findByUserId(String userId); //Optional<List<UserProfile>> findByUserId(String userId);
     //Optional<UserProfile> findByUserId(String userId);
     Optional<UserProfile> findByUserIdAndInfoCd(String userId, String infoCd);
     //Optional<UserProfile> findByUserIdAndInfoCdIn(String userId, List<UserProfile> infoCd);

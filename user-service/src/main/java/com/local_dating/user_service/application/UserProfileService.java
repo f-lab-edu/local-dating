@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UserProfileService {
@@ -26,17 +26,20 @@ public class UserProfileService {
         this.userProfileMapper = userProfileMapper;
     }
 
-    public Optional<List<UserProfileVO>> viewProfile(final String userId) throws Exception {
+    public List<UserProfileVO> viewProfile(final String userId) throws Exception {
+    //public Optional<List<UserProfileVO>> viewProfile(final String userId) throws Exception {
     //public Optional<UserProfileVO> viewProfile(final String userId) throws Exception {
 
-        List<UserProfileVO> userProfileVOS = new ArrayList<>();
-        userProfileRepository.findByUserId(userId).ifPresentOrElse(el -> el.stream().forEach(el2 -> {
+        return userProfileRepository.findByUserId(userId).stream().map(userProfileMapper.INSTANCE::toUserProfileVO).collect(Collectors.toUnmodifiableList());
+
+        /*userProfileRepository.findByUserId(userId).ifPresentOrElse(el -> el.stream().forEach(el2 -> {
                     userProfileVOS.add(userProfileMapper.INSTANCE.toUserProfileVO(el2));
+                    System.out.println("있음");
                 }), () -> {
                     System.out.println("빈값");
                 }
         );
-        return Optional.ofNullable(userProfileVOS.isEmpty() ? null : userProfileVOS);
+        return Optional.ofNullable(userProfileVOS.isEmpty() ? null : userProfileVOS);*/
 
         //return userProfileRepository.findByUserId(userId).map(el->userProfileMapper.INSTANCE.toUserProfileVO(el));
         //return userProfileRepository.findByUserId(userId).map(el->userProfileMapper.INSTANCE.toUserProfileVO(el)).orElseGet(()->"zzz");

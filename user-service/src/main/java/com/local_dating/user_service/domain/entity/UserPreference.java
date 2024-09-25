@@ -1,6 +1,6 @@
 package com.local_dating.user_service.domain.entity;
 
-import com.local_dating.user_service.domain.vo.UserProfileVO;
+import com.local_dating.user_service.domain.vo.UserPreferenceVO;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,20 +13,23 @@ import java.time.LocalDateTime;
 @Getter
 @Entity
 @Table
-public class UserProfile {
+public class UserPreference {
 
-    public UserProfile() {}
-
-    public UserProfile(final UserProfileVO vo) {
-        this.userId = vo.userId();
-        this.infoCd = vo.infoCd();
-        this.infoVal = vo.infoVal();
+    public UserPreference() {
     }
 
-    public UserProfile(final String userId, final UserProfileVO vo) {
+    public UserPreference(final UserPreferenceVO userPreferenceVO) {
+        this.userId = userPreferenceVO.userId();
+        this.prefCd = userPreferenceVO.prefCd();
+        this.prefVal = userPreferenceVO.prefVal();
+        this.prior = userPreferenceVO.prior();
+    }
+
+    public UserPreference(final String userId, final UserPreferenceVO userPreferenceVO) {
         this.userId = userId;
-        this.infoCd = vo.infoCd();
-        this.infoVal = vo.infoVal();
+        this.prefCd = userPreferenceVO.prefCd();
+        this.prefVal = userPreferenceVO.prefVal();
+        this.prior = userPreferenceVO.prior();
     }
 
     @Id
@@ -37,11 +40,14 @@ public class UserProfile {
     @Column(name = "user_id")
     private String userId;
 
-    @Column(name = "info_cd")
-    private String infoCd;
+    @Column(name = "prefCd")
+    private String prefCd;
 
-    @Column(name = "info_val")
-    private String infoVal;
+    @Column(name = "prefVal")
+    private String prefVal;
+
+    @Column(name = "prior")
+    private int prior;
 
     @Column(name = "in_date")
     @CreationTimestamp
