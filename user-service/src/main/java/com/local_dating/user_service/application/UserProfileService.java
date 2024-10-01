@@ -7,6 +7,8 @@ import com.local_dating.user_service.infrastructure.repository.UserProfileReposi
 import com.local_dating.user_service.presentation.dto.UserProfileDTO;
 import com.local_dating.user_service.util.MessageCode;
 import com.local_dating.user_service.util.exception.DataAlreadyExistsException;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +28,7 @@ public class UserProfileService {
         this.userProfileMapper = userProfileMapper;
     }
 
+    @Cacheable(value = "profile", key = "#userId")
     public List<UserProfileVO> viewProfile(final String userId) throws Exception {
     //public Optional<List<UserProfileVO>> viewProfile(final String userId) throws Exception {
     //public Optional<UserProfileVO> viewProfile(final String userId) throws Exception {
@@ -47,6 +50,7 @@ public class UserProfileService {
     }
 
     @Transactional
+    @CacheEvict(value = "profile", key = "#userId")
     public int saveProfile(final String userId, final List<UserProfileDTO> userProfileDTO) throws Exception {
     //public int saveProfile(String UserId, UserProfileDTO userProfileDTO) {
 
@@ -75,6 +79,7 @@ public class UserProfileService {
     }
 
     @Transactional
+    @CacheEvict(value = "profile", key = "#userId")
     public void updateProfile(final String userId, final List<UserProfileDTO> userProfileDTO) throws Exception {
     //public int updateProfile(final String userId, final List<UserProfileDTO> userProfileDTO) {
 

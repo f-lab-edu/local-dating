@@ -133,11 +133,12 @@ public class UserController {
     }
 
     @PatchMapping(value = "/profile")
-    public ResponseEntity updateProfile(final Authentication authentication, @RequestBody final List<UserProfileDTO> userProfileDTOList) throws Exception {
+    public void updateProfile(final Authentication authentication, @RequestBody final List<UserProfileDTO> userProfileDTOList) throws Exception {
+    //public ResponseEntity updateProfile(final Authentication authentication, @RequestBody final List<UserProfileDTO> userProfileDTOList) throws Exception {
         String userId = (String) authentication.getPrincipal();
         userProfileService.updateProfile(userId, userProfileDTOList);
 
-        return ResponseEntity.ok().build();
+        //return ResponseEntity.ok().build();
         //return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -149,7 +150,9 @@ public class UserController {
     @GetMapping(value = "/profile")
     public ResponseEntity<?> viewProfile(final Authentication authentication) throws Exception {
 
-        return Optional.of(userProfileService.viewProfile((String) authentication.getPrincipal())).map(list-> ResponseEntity.ok(UserProfileMapper.INSTANCE.toUserProfileDTOList(list))).orElseThrow(()->new DataNotFoundException(DATA_NOT_FOUND_EXCEPTION.getMessage()));
+        return Optional.of(userProfileService.viewProfile((String) authentication.getPrincipal()))
+                .map(list -> ResponseEntity.ok(UserProfileMapper.INSTANCE.toUserProfileDTOList(list)))
+                .orElseThrow(() -> new DataNotFoundException(DATA_NOT_FOUND_EXCEPTION.getMessage()));
         //return userProfileService.viewProfile((String) authentication.getPrincipal()).map(el -> ResponseEntity.ok(UserProfileMapper.INSTANCE.toUserProfileDTOList(el))).orElseThrow(() -> new DataNotFoundException(DATA_NOT_FOUND_EXCEPTION.getMessage())); // Optional 사용 시
         //return userProfileService.viewProfile((String) authentication.getPrincipal()).map(el -> ResponseEntity.ok(UserProfileMapper.INSTANCE.toUserProfileDTO(el))).orElseThrow(() -> new DataNotFoundException(DATA_NOT_FOUND_EXCEPTION.getMessage()));
         //return userProfileService.viewProfile((String) authentication.getPrincipal()).map(el -> ResponseEntity.ok(UserProfileMapper.INSTANCE.toUserProfileDTO(el))).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(new UserProfileDTO()));
@@ -170,13 +173,16 @@ public class UserController {
     }
 
     @PutMapping(value = "/preference")
-    public ResponseEntity updatePreference(final Authentication authentication, @RequestBody final List<UserPreferenceDTO> userPreferenceDTOList) throws Exception {
+    public void updatePreference(final Authentication authentication, @RequestBody final List<UserPreferenceDTO> userPreferenceDTOList) throws Exception {
+    //public ResponseEntity updatePreference(final Authentication authentication, @RequestBody final List<UserPreferenceDTO> userPreferenceDTOList) throws Exception {
         userPreferenceService.updatePreferences(authentication.getPrincipal().toString(), userPreferenceMapper.INSTANCE.toUserPreferenceVOList(userPreferenceDTOList));
-        return ResponseEntity.ok().build();
+        //return ResponseEntity.ok().build();
     }
 
     @GetMapping(value = "/preference")
     public ResponseEntity<List<UserPreferenceDTO>> viewPreference(final Authentication authentication) throws Exception {
-        return Optional.of(userPreferenceService.viewPreference((String) authentication.getPrincipal())).map(list -> ResponseEntity.ok(UserPreferenceMapper.INSTANCE.toUserPreferenceDTOList(list))).orElseThrow(() -> new DataNotFoundException(DATA_NOT_FOUND_EXCEPTION.getMessage()));
+        return Optional.of(userPreferenceService.viewPreference((String) authentication.getPrincipal()))
+                .map(list -> ResponseEntity.ok(UserPreferenceMapper.INSTANCE.toUserPreferenceDTOList(list)))
+                .orElseThrow(() -> new DataNotFoundException(DATA_NOT_FOUND_EXCEPTION.getMessage()));
     }
 }
