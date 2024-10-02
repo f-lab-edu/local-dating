@@ -52,7 +52,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     @Transactional
-    public void registerUser(@Valid final UserDTO dto) throws Exception {
+    public void registerUser(@Valid final UserDTO dto) {
 
         userRepository.findByUserId(userMapper.INSTANCE.toUserVO(dto).userId()).ifPresentOrElse(el -> {
             throw new UserAlreadyExistsException(MessageCode.USER_ALREADY_EXISTS_EXCEPTION.getMessage() + ": " + dto.userId());

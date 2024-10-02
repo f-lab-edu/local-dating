@@ -42,19 +42,27 @@ public class UserController {
     private final JwtUtil jwtUtil;
     private final UserProfileService userProfileService;
     private final UserPreferenceService userPreferenceService;
+    private final UserProfileMapper userProfileMapper;
     private final UserPreferenceMapper userPreferenceMapper;
 
-    public UserController(final CustomUserDetailsService customUserDetailsService, final AuthenticationManager authenticationManager, JwtUtil jwtUtil, UserProfileService userProfileService, UserPreferenceService userPreferenceService, UserPreferenceMapper userPreferenceMapper) {
+    public UserController(final CustomUserDetailsService customUserDetailsService
+            , final AuthenticationManager authenticationManager
+            , JwtUtil jwtUtil
+            , UserProfileService userProfileService
+            , UserPreferenceService userPreferenceService
+            , UserProfileMapper userProfileMapper
+            , UserPreferenceMapper userPreferenceMapper) {
         this.customUserDetailsService = customUserDetailsService;
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
         this.userProfileService = userProfileService;
         this.userPreferenceService = userPreferenceService;
+        this.userProfileMapper = userProfileMapper;
         this.userPreferenceMapper = userPreferenceMapper;
     }
 
     @PostMapping(value = "/register")
-    public ResponseEntity<String> register(@RequestBody @Valid final UserDTO user) throws Exception {
+    public ResponseEntity<String> register(@RequestBody @Valid final UserDTO user) {
 
         customUserDetailsService.registerUser(user);
         return ResponseEntity.status(HttpStatus.CREATED).body(MessageCode.REGISTER_SUCCESS.getMessage());
@@ -114,11 +122,12 @@ public class UserController {
 
     @PostMapping(value = "/profile")
     //@deprecated
-    public ResponseEntity saveProfile(final Authentication authentication, @RequestBody final List<UserProfileDTO> userProfileDTO) throws Exception {
+    public ResponseEntity saveProfile(final Authentication authentication, @RequestBody final List<UserProfileDTO> userProfileDTO) {
     //public String profile(final Authentication authentication, @RequestBody final UserProfileDTO userProfileDTO) {
 
         String userId = (String) authentication.getPrincipal();
-        userProfileService.saveProfile(userId, userProfileDTO);
+        userProfileService.saveProfile(userId, userProfileMapper.INSTANCE.toUserProfileVOList(userProfileDTO));
+        //userProfileService.saveProfile(userId, userProfileDTO);
 
         /*Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String userId = null;
@@ -133,10 +142,12 @@ public class UserController {
     }
 
     @PatchMapping(value = "/profile")
-    public void updateProfile(final Authentication authentication, @RequestBody final List<UserProfileDTO> userProfileDTOList) throws Exception {
+    public void updateProfile(final Authentication authentication, @RequestBody final List<UserProfileDTO> userProfileDTOList) {
     //public ResponseEntity updateProfile(final Authentication authentication, @RequestBody final List<UserProfileDTO> userProfileDTOList) throws Exception {
+        //Optional.of((String) authentication.getPrincipal()).map(s -> userProfileService.updateProfile(s, userProfileMapper.INSTANCE.toUserProfileVOList(userProfileDTOList)))
         String userId = (String) authentication.getPrincipal();
-        userProfileService.updateProfile(userId, userProfileDTOList);
+        userProfileService.updateProfile(userId, userProfileMapper.INSTANCE.toUserProfileVOList(userProfileDTOList));
+        //userProfileService.updateProfile(userId, userProfileDTOList);
 
         //return ResponseEntity.ok().build();
         //return new ResponseEntity<>(HttpStatus.OK);
@@ -148,7 +159,7 @@ public class UserController {
     }*/
 
     @GetMapping(value = "/profile")
-    public ResponseEntity<?> viewProfile(final Authentication authentication) throws Exception {
+    public ResponseEntity<?> viewProfile(final Authentication authentication) {
 
         return Optional.of(userProfileService.viewProfile((String) authentication.getPrincipal()))
                 .map(list -> ResponseEntity.ok(UserProfileMapper.INSTANCE.toUserProfileDTOList(list)))
@@ -166,23 +177,39 @@ public class UserController {
     }*/
 
     @PostMapping(value = "/preference")
-    public ResponseEntity<List<UserPreference>> savePreference(final Authentication authentication, @RequestBody final List<UserPreferenceDTO> userPreferenceDTOList) throws Exception {
+    public ResponseEntity<List<UserPreference>> savePreference(final Authentication authentication, @RequestBody final List<UserPreferenceDTO> userPreferenceDTOList) {
         List<UserPreference> userPreferenceList = userPreferenceService.savePreferences((String) authentication.getPrincipal(), UserPreferenceMapper.INSTANCE.toUserPreferenceVOList(userPreferenceDTOList));
         //userPreferenceService.savePreferences(authentication.getPrincipal(), UserPreferenceMapper.INSTANCE.toUserPreferenceVO());
         return ResponseEntity.status(HttpStatus.CREATED).body(userPreferenceList);
     }
 
     @PutMapping(value = "/preference")
-    public void updatePreference(final Authentication authentication, @RequestBody final List<UserPreferenceDTO> userPreferenceDTOList) throws Exception {
+    public void updatePreference(final Authentication authentication, @RequestBody final List<UserPreferenceDTO> userPreferenceDTOList) {
     //public ResponseEntity updatePreference(final Authentication authentication, @RequestBody final List<UserPreferenceDTO> userPreferenceDTOList) throws Exception {
         userPreferenceService.updatePreferences(authentication.getPrincipal().toString(), userPreferenceMapper.INSTANCE.toUserPreferenceVOList(userPreferenceDTOList));
         //return ResponseEntity.ok().build();
     }
 
     @GetMapping(value = "/preference")
-    public ResponseEntity<List<UserPreferenceDTO>> viewPreference(final Authentication authentication) throws Exception {
-        return Optional.of(userPreferenceService.viewPreference((String) authentication.getPrincipal()))
+    public String viewPreference(final Authentication authentication) {
+
+        String result = userPreferenceService.viewPreference((String) authentication.getPrincipal());
+        if (result.isEmpty()) {
+            throw new DataNotFoundException(DATA_NOT_FOUND_EXCEPTION.getMessage());
+        }
+        return result;
+        /*return Optional.of(userPreferenceService.viewPreference((String) authentication.getPrincipal()))
                 .map(list -> ResponseEntity.ok(UserPreferenceMapper.INSTANCE.toUserPreferenceDTOList(list)))
-                .orElseThrow(() -> new DataNotFoundException(DATA_NOT_FOUND_EXCEPTION.getMessage()));
+                .orElseThrow(() -> new DataNotFoundException(DATA_NOT_FOUND_EXCEPTION.getMessage()));*/
     }
+
+    /*@GetMapping(value = "/preference")
+    public List<UserPreferenceDTO> viewPreference(final Authentication authentication) {
+
+        List<UserPreferenceVO> userPreferenceVOList = userPreferenceService.viewPreference((String) authentication.getPrincipal());
+        if (userPreferenceVOList.isEmpty()) {
+            throw new DataNotFoundException(DATA_NOT_FOUND_EXCEPTION.getMessage());
+        }
+        return UserPreferenceMapper.INSTANCE.toUserPreferenceDTOList(userPreferenceVOList);
+    }*/
 }
