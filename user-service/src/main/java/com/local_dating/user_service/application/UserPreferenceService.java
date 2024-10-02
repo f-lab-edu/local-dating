@@ -7,6 +7,8 @@ import com.local_dating.user_service.infrastructure.repository.UserPreferenceRep
 import com.local_dating.user_service.util.MessageCode;
 import com.local_dating.user_service.util.exception.DataNotFoundException;
 import jakarta.transaction.Transactional;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,6 +26,7 @@ public class UserPreferenceService {
     }
 
     @Transactional
+    @CacheEvict(value = "preference", key = "#userId")
     public List<UserPreference> savePreferences(final String userId, final List<UserPreferenceVO> userPreferenceVOList) throws Exception {
         //public void savePreferences(String user_id, List<UserPreferenceVO> userPreferenceVOList) {
 
@@ -47,6 +50,7 @@ public class UserPreferenceService {
     }
 
     @Transactional
+    @CacheEvict(value = "preference", key = "#userId")
     public void updatePreferences(final String userId, final List<UserPreferenceVO> userPreferenceVOList) throws Exception {
         userPreferenceVOList.stream().map(el -> userPreferenceRepository.findByUserIdAndPrefCd(userId, el.prefCd())
                 .map(el2 -> {
@@ -63,6 +67,7 @@ public class UserPreferenceService {
         //userPreferenceRepository.saveAll()
     }
 
+    @Cacheable(value = "preference", key = "#userId")
     public List<UserPreferenceVO> viewPreference(final String userId) throws Exception {
         return userPreferenceRepository.findByUserId(userId).stream().map(userPreferenceMapper.INSTANCE::toUserPreferenceVO).collect(Collectors.toUnmodifiableList());
     }

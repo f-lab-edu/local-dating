@@ -3,7 +3,8 @@ spring:
     name: user-service
 
   datasource:
-    url: jdbc:mysql://localhost:3306/local_dating
+    url: jdbc:mysql://aws-server:3306/local_dating
+    #url: jdbc:mysql://localhost:3306/local_dating
     username: root
     password: 1234
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -17,3 +18,16 @@ spring:
         dialect: org.hibernate.dialect.MySQL8Dialect
         format_sql: true
         use_sql_comments: true
+
+  data:
+    redis:
+      host: aws-server
+      port: 6379
+
+logging:
+  level:
+    #org.springframework.web: DEBUG
+    #guru.springframework.controllers: DEBUG
+    org.springframework.cache: DEBUG
+    #org.hibernate: DEBUG
+    #org: INFO
