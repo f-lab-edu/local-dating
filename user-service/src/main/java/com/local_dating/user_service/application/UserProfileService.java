@@ -6,6 +6,7 @@ import com.local_dating.user_service.domain.vo.UserProfileVO;
 import com.local_dating.user_service.infrastructure.repository.UserProfileRepository;
 import com.local_dating.user_service.util.MessageCode;
 import com.local_dating.user_service.util.exception.DataAlreadyExistsException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -16,16 +17,17 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class UserProfileService {
 //public class UserProfileService implements UserProfileService_ {
 
     private final UserProfileRepository userProfileRepository;
     private final UserProfileMapper userProfileMapper;
 
-    public UserProfileService(UserProfileRepository userProfileRepository, UserProfileMapper userProfileMapper) {
+    /*public UserProfileService(UserProfileRepository userProfileRepository, UserProfileMapper userProfileMapper) {
         this.userProfileRepository = userProfileRepository;
         this.userProfileMapper = userProfileMapper;
-    }
+    }*/
 
     @Cacheable(value = "profile", key = "#userId")
     public List<UserProfileVO> viewProfile(final String userId) {

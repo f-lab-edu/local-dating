@@ -9,6 +9,7 @@ import com.local_dating.user_service.infrastructure.repository.UserPreferenceRep
 import com.local_dating.user_service.util.MessageCode;
 import com.local_dating.user_service.util.exception.DataNotFoundException;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -17,17 +18,18 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class UserPreferenceService {
 
-    public final UserPreferenceRepository userPreferenceRepository;
-    public final UserPreferenceMapper userPreferenceMapper;
-    public final ObjectMapper objectMapper;
+    private final UserPreferenceRepository userPreferenceRepository;
+    private final UserPreferenceMapper userPreferenceMapper;
+    private final ObjectMapper objectMapper;
 
-    public UserPreferenceService(UserPreferenceRepository userPreferenceRepository, UserPreferenceMapper userPreferenceMapper, ObjectMapper objectMapper) {
+    /*public UserPreferenceService(UserPreferenceRepository userPreferenceRepository, UserPreferenceMapper userPreferenceMapper, ObjectMapper objectMapper) {
         this.userPreferenceRepository = userPreferenceRepository;
         this.userPreferenceMapper = userPreferenceMapper;
         this.objectMapper = objectMapper;
-    }
+    }*/
 
     @Transactional
     @CacheEvict(value = "preference", key = "#userId")

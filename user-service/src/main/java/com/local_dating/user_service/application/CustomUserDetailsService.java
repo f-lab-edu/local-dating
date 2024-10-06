@@ -7,6 +7,7 @@ import com.local_dating.user_service.presentation.dto.UserDTO;
 import com.local_dating.user_service.util.MessageCode;
 import com.local_dating.user_service.util.exception.UserAlreadyExistsException;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -17,14 +18,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
 
-    public CustomUserDetailsService(final UserRepository userRepository, final UserMapper userMapper) {
+    /*public CustomUserDetailsService(final UserRepository userRepository, final UserMapper userMapper) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
-    }
+    }*/
     @Override
     public UserDetails loadUserByUsername(final String username) throws UsernameNotFoundException {
 

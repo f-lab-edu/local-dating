@@ -15,8 +15,8 @@ import com.local_dating.user_service.util.JwtUtil;
 import com.local_dating.user_service.util.MessageCode;
 import com.local_dating.user_service.util.exception.DataNotFoundException;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -28,6 +28,7 @@ import java.util.Optional;
 import static com.local_dating.user_service.util.MessageCode.DATA_NOT_FOUND_EXCEPTION;
 
 @RestController
+@RequiredArgsConstructor
 //@PropertySource("classpath:message/message.properties")
 public class UserController {
 
@@ -45,7 +46,7 @@ public class UserController {
     private final UserProfileMapper userProfileMapper;
     private final UserPreferenceMapper userPreferenceMapper;
 
-    public UserController(final CustomUserDetailsService customUserDetailsService
+    /*public UserController(final CustomUserDetailsService customUserDetailsService
             , final AuthenticationManager authenticationManager
             , JwtUtil jwtUtil
             , UserProfileService userProfileService
@@ -59,13 +60,16 @@ public class UserController {
         this.userPreferenceService = userPreferenceService;
         this.userProfileMapper = userProfileMapper;
         this.userPreferenceMapper = userPreferenceMapper;
-    }
+    }*/
 
     @PostMapping(value = "/register")
-    public ResponseEntity<String> register(@RequestBody @Valid final UserDTO user) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public String register(@RequestBody @Valid final UserDTO user) {
+    //public ResponseEntity<String> register(@RequestBody @Valid final UserDTO user) {
 
         customUserDetailsService.registerUser(user);
-        return ResponseEntity.status(HttpStatus.CREATED).body(MessageCode.REGISTER_SUCCESS.getMessage());
+        return MessageCode.REGISTER_SUCCESS.getMessage();
+        //return ResponseEntity.status(HttpStatus.CREATED).body(MessageCode.REGISTER_SUCCESS.getMessage());
         //return new ResponseEntity<>(MessageCode.REGISTER_SUCCESS.getMessage(), HttpStatus.OK);
         //return new ResponseEntity<>(registerSuccess, HttpStatus.OK);
 
@@ -88,7 +92,8 @@ public class UserController {
     }*/
 
     @PostMapping(value = "/login")
-    public ResponseEntity login(@RequestBody @Valid final UserDTO userDTO) {
+    public LoginRes login(@RequestBody @Valid final UserDTO userDTO) {
+    //public ResponseEntity login(@RequestBody @Valid final UserDTO userDTO) {
 
         final Authentication authentication =
                 authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userDTO.userId() , userDTO.pwd()));
@@ -97,8 +102,9 @@ public class UserController {
         final String token = jwtUtil.createToken(user);
         final LoginRes loginRes = new LoginRes(userId, token);
 
+        return loginRes;
+        //return ResponseEntity.ok(loginRes);
         //return ResponseEntity.ok(new LoginRes(authentication.getName(), jwtUtil.createToken(new UserVO(userId, userDTO.pwd(), userDTO.name(), userDTO.birth(), userDTO.phone()))));
-        return ResponseEntity.ok(loginRes);
 
         /*try {
             final Authentication authentication =
@@ -121,8 +127,10 @@ public class UserController {
 
 
     @PostMapping(value = "/profile")
+    @ResponseStatus(HttpStatus.CREATED)
     //@deprecated
-    public ResponseEntity saveProfile(final Authentication authentication, @RequestBody final List<UserProfileDTO> userProfileDTO) {
+    public void saveProfile(final Authentication authentication, @RequestBody final List<UserProfileDTO> userProfileDTO) {
+    //public ResponseEntity saveProfile(final Authentication authentication, @RequestBody final List<UserProfileDTO> userProfileDTO) {
     //public String profile(final Authentication authentication, @RequestBody final UserProfileDTO userProfileDTO) {
 
         String userId = (String) authentication.getPrincipal();
@@ -136,7 +144,7 @@ public class UserController {
             userId = userDetails.getUsername(); // 보통 username이 사용자 ID로 사용됨
         }*/
 
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        //return ResponseEntity.status(HttpStatus.CREATED).build();
         //return new ResponseEntity<>(HttpStatus.CREATED);
         //return "토큰정보: " + userId;
     }
@@ -159,10 +167,12 @@ public class UserController {
     }*/
 
     @GetMapping(value = "/profile")
-    public ResponseEntity<?> viewProfile(final Authentication authentication) {
+    public List viewProfile(final Authentication authentication) {
+    //public ResponseEntity<?> viewProfile(final Authentication authentication) {
 
         return Optional.of(userProfileService.viewProfile((String) authentication.getPrincipal()))
-                .map(list -> ResponseEntity.ok(UserProfileMapper.INSTANCE.toUserProfileDTOList(list)))
+                .map(list -> UserProfileMapper.INSTANCE.toUserProfileDTOList(list))
+                //.map(list -> ResponseEntity.ok(UserProfileMapper.INSTANCE.toUserProfileDTOList(list)))
                 .orElseThrow(() -> new DataNotFoundException(DATA_NOT_FOUND_EXCEPTION.getMessage()));
         //return userProfileService.viewProfile((String) authentication.getPrincipal()).map(el -> ResponseEntity.ok(UserProfileMapper.INSTANCE.toUserProfileDTOList(el))).orElseThrow(() -> new DataNotFoundException(DATA_NOT_FOUND_EXCEPTION.getMessage())); // Optional 사용 시
         //return userProfileService.viewProfile((String) authentication.getPrincipal()).map(el -> ResponseEntity.ok(UserProfileMapper.INSTANCE.toUserProfileDTO(el))).orElseThrow(() -> new DataNotFoundException(DATA_NOT_FOUND_EXCEPTION.getMessage()));
@@ -177,10 +187,12 @@ public class UserController {
     }*/
 
     @PostMapping(value = "/preference")
-    public ResponseEntity<List<UserPreference>> savePreference(final Authentication authentication, @RequestBody final List<UserPreferenceDTO> userPreferenceDTOList) {
+    public List savePreference(final Authentication authentication, @RequestBody final List<UserPreferenceDTO> userPreferenceDTOList) {
+    //public ResponseEntity<List<UserPreference>> savePreference(final Authentication authentication, @RequestBody final List<UserPreferenceDTO> userPreferenceDTOList) {
         List<UserPreference> userPreferenceList = userPreferenceService.savePreferences((String) authentication.getPrincipal(), UserPreferenceMapper.INSTANCE.toUserPreferenceVOList(userPreferenceDTOList));
         //userPreferenceService.savePreferences(authentication.getPrincipal(), UserPreferenceMapper.INSTANCE.toUserPreferenceVO());
-        return ResponseEntity.status(HttpStatus.CREATED).body(userPreferenceList);
+        return userPreferenceList;
+        //return ResponseEntity.status(HttpStatus.CREATED).body(userPreferenceList);
     }
 
     @PutMapping(value = "/preference")
