@@ -1,11 +1,13 @@
 package com.local_dating.user_service.presentation.controller;
 
 import com.local_dating.user_service.application.CustomUserDetailsService;
+import com.local_dating.user_service.application.KafkaProducer;
 import com.local_dating.user_service.application.UserPreferenceService;
 import com.local_dating.user_service.application.UserProfileService;
 import com.local_dating.user_service.domain.entity.UserPreference;
 import com.local_dating.user_service.domain.mapper.UserPreferenceMapper;
 import com.local_dating.user_service.domain.mapper.UserProfileMapper;
+import com.local_dating.user_service.domain.vo.UserLoginLogVO;
 import com.local_dating.user_service.domain.vo.UserVO;
 import com.local_dating.user_service.presentation.dto.LoginRes;
 import com.local_dating.user_service.presentation.dto.UserDTO;
@@ -14,6 +16,7 @@ import com.local_dating.user_service.presentation.dto.UserProfileDTO;
 import com.local_dating.user_service.util.JwtUtil;
 import com.local_dating.user_service.util.MessageCode;
 import com.local_dating.user_service.util.exception.DataNotFoundException;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,6 +25,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -45,6 +49,7 @@ public class UserController {
     private final UserPreferenceService userPreferenceService;
     private final UserProfileMapper userProfileMapper;
     private final UserPreferenceMapper userPreferenceMapper;
+    private final KafkaProducer kafkaProducer;
 
     /*public UserController(final CustomUserDetailsService customUserDetailsService
             , final AuthenticationManager authenticationManager
@@ -92,7 +97,7 @@ public class UserController {
     }*/
 
     @PostMapping(value = "/login")
-    public LoginRes login(@RequestBody @Valid final UserDTO userDTO) {
+    public LoginRes login(@RequestBody @Valid final UserDTO userDTO, HttpServletRequest request) {
     //public ResponseEntity login(@RequestBody @Valid final UserDTO userDTO) {
 
         final Authentication authentication =
@@ -101,6 +106,9 @@ public class UserController {
         final UserVO user = new UserVO(userId, userDTO.pwd(), userDTO.name(), userDTO.birth(), userDTO.phone());
         final String token = jwtUtil.createToken(user);
         final LoginRes loginRes = new LoginRes(userId, token);
+
+        kafkaProducer.sentLoginLog("my-topic", new UserLoginLogVO(userId, request.getRemoteAddr(), "N", LocalDateTime.now()));
+        //kafkaProducer.sendMessage("my-topic", "Login Success for userId: " + userId);
 
         return loginRes;
         //return ResponseEntity.ok(loginRes);
