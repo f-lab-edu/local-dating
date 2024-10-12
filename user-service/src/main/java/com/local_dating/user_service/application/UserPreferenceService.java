@@ -1,5 +1,7 @@
 package com.local_dating.user_service.application;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.local_dating.user_service.domain.entity.UserPreference;
 import com.local_dating.user_service.domain.mapper.UserPreferenceMapper;
 import com.local_dating.user_service.domain.vo.UserPreferenceVO;
@@ -7,6 +9,7 @@ import com.local_dating.user_service.infrastructure.repository.UserPreferenceRep
 import com.local_dating.user_service.util.MessageCode;
 import com.local_dating.user_service.util.exception.DataNotFoundException;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -15,19 +18,22 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class UserPreferenceService {
 
-    public final UserPreferenceRepository userPreferenceRepository;
-    public final UserPreferenceMapper userPreferenceMapper;
+    private final UserPreferenceRepository userPreferenceRepository;
+    private final UserPreferenceMapper userPreferenceMapper;
+    private final ObjectMapper objectMapper;
 
-    public UserPreferenceService(UserPreferenceRepository userPreferenceRepository, UserPreferenceMapper userPreferenceMapper) {
+    /*public UserPreferenceService(UserPreferenceRepository userPreferenceRepository, UserPreferenceMapper userPreferenceMapper, ObjectMapper objectMapper) {
         this.userPreferenceRepository = userPreferenceRepository;
         this.userPreferenceMapper = userPreferenceMapper;
-    }
+        this.objectMapper = objectMapper;
+    }*/
 
     @Transactional
     @CacheEvict(value = "preference", key = "#userId")
-    public List<UserPreference> savePreferences(final String userId, final List<UserPreferenceVO> userPreferenceVOList) throws Exception {
+    public List<UserPreference> savePreferences(final String userId, final List<UserPreferenceVO> userPreferenceVOList) {
         //public void savePreferences(String user_id, List<UserPreferenceVO> userPreferenceVOList) {
 
         /*return userPreferenceVOList.stream()
@@ -51,7 +57,7 @@ public class UserPreferenceService {
 
     @Transactional
     @CacheEvict(value = "preference", key = "#userId")
-    public void updatePreferences(final String userId, final List<UserPreferenceVO> userPreferenceVOList) throws Exception {
+    public void updatePreferences(final String userId, final List<UserPreferenceVO> userPreferenceVOList) {
         userPreferenceVOList.stream().map(el -> userPreferenceRepository.findByUserIdAndPrefCd(userId, el.prefCd())
                 .map(el2 -> {
                     el2.setPrefCd(el.prefCd());
@@ -67,8 +73,43 @@ public class UserPreferenceService {
         //userPreferenceRepository.saveAll()
     }
 
-    @Cacheable(value = "preference", key = "#userId")
-    public List<UserPreferenceVO> viewPreference(final String userId) throws Exception {
-        return userPreferenceRepository.findByUserId(userId).stream().map(userPreferenceMapper.INSTANCE::toUserPreferenceVO).collect(Collectors.toUnmodifiableList());
+    @Cacheable(value = "preference", key = "#userId", cacheManager = "jsonCacheManager")
+    public String viewPreference(final String userId) {
+    /*@Cacheable(value = "preference", key = "#userId")
+    public List<UserPreferenceVO> viewPreference(final String userId) {*/
+    //public List<UserPreferenceVO> viewPreference(final String userId) throws Exception {
+        return userPreferenceRepository.findByUserId(userId)
+                .stream()
+                .map(userPreferenceMapper.INSTANCE::toUserPreferenceVO)
+                .collect(Collectors.collectingAndThen(Collectors.toUnmodifiableList(), list -> {
+                    if (list.isEmpty()) {
+                        throw new DataNotFoundException(MessageCode.DATA_NOT_FOUND_EXCEPTION.getMessage());
+                    }
+                    try {
+                        return objectMapper.writeValueAsString(list);
+                    } catch (JsonProcessingException e) {
+                        throw new RuntimeException(e);
+                    }
+                    //return list;
+                }));
+        //return userPreferenceRepository.findByUserId(userId).stream().map(userPreferenceMapper.INSTANCE::toUserPreferenceVO).collect(Collectors.toUnmodifiableList());
     }
+
+    /*
+    @Cacheable(value = "preference", key = "#userId")
+    public List<UserPreferenceVO> viewPreference(final String userId) {
+        //public List<UserPreferenceVO> viewPreference(final String userId) throws Exception {
+        return userPreferenceRepository.findByUserId(userId)
+                .stream()
+                .map(userPreferenceMapper.INSTANCE::toUserPreferenceVO)
+                .collect(Collectors.collectingAndThen(Collectors.toUnmodifiableList(), list -> {
+                    if (list.isEmpty()) {
+                        throw new DataNotFoundException(MessageCode.DATA_NOT_FOUND_EXCEPTION.getMessage());
+                    }
+                    return list;
+                }));
+        //return userPreferenceRepository.findByUserId(userId).stream().map(userPreferenceMapper.INSTANCE::toUserPreferenceVO).collect(Collectors.toUnmodifiableList());
+    }
+    */
+
 }

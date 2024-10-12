@@ -4,9 +4,9 @@ import com.local_dating.user_service.domain.entity.UserProfile;
 import com.local_dating.user_service.domain.mapper.UserProfileMapper;
 import com.local_dating.user_service.domain.vo.UserProfileVO;
 import com.local_dating.user_service.infrastructure.repository.UserProfileRepository;
-import com.local_dating.user_service.presentation.dto.UserProfileDTO;
 import com.local_dating.user_service.util.MessageCode;
 import com.local_dating.user_service.util.exception.DataAlreadyExistsException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -17,19 +17,20 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class UserProfileService {
 //public class UserProfileService implements UserProfileService_ {
 
     private final UserProfileRepository userProfileRepository;
     private final UserProfileMapper userProfileMapper;
 
-    public UserProfileService(UserProfileRepository userProfileRepository, UserProfileMapper userProfileMapper) {
+    /*public UserProfileService(UserProfileRepository userProfileRepository, UserProfileMapper userProfileMapper) {
         this.userProfileRepository = userProfileRepository;
         this.userProfileMapper = userProfileMapper;
-    }
+    }*/
 
     @Cacheable(value = "profile", key = "#userId")
-    public List<UserProfileVO> viewProfile(final String userId) throws Exception {
+    public List<UserProfileVO> viewProfile(final String userId) {
     //public Optional<List<UserProfileVO>> viewProfile(final String userId) throws Exception {
     //public Optional<UserProfileVO> viewProfile(final String userId) throws Exception {
 
@@ -51,16 +52,19 @@ public class UserProfileService {
 
     @Transactional
     @CacheEvict(value = "profile", key = "#userId")
-    public int saveProfile(final String userId, final List<UserProfileDTO> userProfileDTO) throws Exception {
+    public int saveProfile(final String userId, final List<UserProfileVO> userProfileVOS) {
+    //public int saveProfile(final String userId, final List<UserProfileDTO> userProfileDTO) throws Exception {
     //public int saveProfile(String UserId, UserProfileDTO userProfileDTO) {
 
         List<UserProfile> userProfileList = new ArrayList<>();
 
-        userProfileDTO.stream().forEach(el -> {
+        userProfileVOS.stream().forEach(el -> {
+        //userProfileDTO.stream().forEach(el -> {
             userProfileRepository.findByUserIdAndInfoCd(userId, el.infoCd()).ifPresentOrElse(el2 -> {
                 throw new DataAlreadyExistsException(MessageCode.DATA_ALREADY_EXISTS_EXCEPTION.getMessage() + " / " + el.userId() + " / " + el.infoCd() + " / " + el.infoVal());
             }, () -> {
-                userProfileRepository.save(new UserProfile(userId, userProfileMapper.INSTANCE.toUserProfileVO(el))); // 데이터 없으면 저장
+                userProfileRepository.save(new UserProfile(userId, el));
+                //userProfileRepository.save(new UserProfile(userId, userProfileMapper.INSTANCE.toUserProfileVO(el))); // 데이터 없으면 저장
             });
         });
 
@@ -80,14 +84,17 @@ public class UserProfileService {
 
     @Transactional
     @CacheEvict(value = "profile", key = "#userId")
-    public void updateProfile(final String userId, final List<UserProfileDTO> userProfileDTO) throws Exception {
+    public void updateProfile(final String userId, final List<UserProfileVO> userProfileVOS) {
+    //public void updateProfile(final String userId, final List<UserProfileDTO> userProfileDTO) throws Exception {
     //public int updateProfile(final String userId, final List<UserProfileDTO> userProfileDTO) {
 
-        userProfileDTO.stream().forEach(el -> {
+        userProfileVOS.stream().forEach(el -> {
+        //userProfileDTO.stream().forEach(el -> {
             userProfileRepository.findByUserIdAndInfoCd(userId, el.infoCd()).ifPresentOrElse(el2 -> {
                 el2.setInfoVal(el.infoVal()); // 데이터 있으면 업데이트
             }, () -> {
-                userProfileRepository.save(new UserProfile(userId, userProfileMapper.INSTANCE.toUserProfileVO(el))); // 데이터 없으면 저장
+                userProfileRepository.save(new UserProfile(userId, el));
+                //userProfileRepository.save(new UserProfile(userId, userProfileMapper.INSTANCE.toUserProfileVO(el))); // 데이터 없으면 저장
             });
         });
 

@@ -16,4 +16,5 @@ public interface UserProfileMapper {
     UserProfileVO toUserProfileVO(UserProfile entity);
     UserProfileDTO toUserProfileDTO(UserProfileVO vo);
     List<UserProfileDTO> toUserProfileDTOList(List<UserProfileVO> vo);
+    List<UserProfileVO> toUserProfileVOList(List<UserProfileDTO> dto);
 }

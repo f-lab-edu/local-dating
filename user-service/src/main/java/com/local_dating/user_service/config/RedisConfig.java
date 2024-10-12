@@ -3,6 +3,7 @@ package com.local_dating.user_service.config;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -17,16 +18,20 @@ import java.util.Collections;
 @EnableCaching
 public class RedisConfig {
     @Bean
+    @Primary
     public LettuceConnectionFactory redisConnectionFactory() {
 
         return new LettuceConnectionFactory(new RedisStandaloneConfiguration("aws-server", 6379));
     }
 
     @Bean
-    RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
+    @Primary
+    RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
+    //RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
 
         RedisTemplate<String, Object> template = new RedisTemplate<>();
-        template.setConnectionFactory(connectionFactory);
+        template.setConnectionFactory(redisConnectionFactory);
+        //template.setConnectionFactory(connectionFactory);
 
         // 직렬화 설정
         Jackson2JsonRedisSerializer<Object> serializer = new Jackson2JsonRedisSerializer<>(Object.class);
@@ -37,8 +42,11 @@ public class RedisConfig {
     }
 
     @Bean
-    public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
-        return RedisCacheManager.builder(connectionFactory)
+    @Primary
+    public RedisCacheManager cacheManager(RedisConnectionFactory redisConnectionFactory) {
+    //public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
+        return RedisCacheManager.builder(redisConnectionFactory)
+        //return RedisCacheManager.builder(connectionFactory)
                 .cacheDefaults(RedisCacheConfiguration.defaultCacheConfig())
                 .transactionAware()
                 .withInitialCacheConfigurations(Collections.singletonMap("predefined",

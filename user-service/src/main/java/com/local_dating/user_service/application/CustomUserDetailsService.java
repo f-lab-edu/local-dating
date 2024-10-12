@@ -7,6 +7,7 @@ import com.local_dating.user_service.presentation.dto.UserDTO;
 import com.local_dating.user_service.util.MessageCode;
 import com.local_dating.user_service.util.exception.UserAlreadyExistsException;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -17,14 +18,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
 
-    public CustomUserDetailsService(final UserRepository userRepository, final UserMapper userMapper) {
+    /*public CustomUserDetailsService(final UserRepository userRepository, final UserMapper userMapper) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
-    }
+    }*/
     @Override
     public UserDetails loadUserByUsername(final String username) throws UsernameNotFoundException {
 
@@ -52,7 +54,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     @Transactional
-    public void registerUser(@Valid final UserDTO dto) throws Exception {
+    public void registerUser(@Valid final UserDTO dto) {
 
         userRepository.findByUserId(userMapper.INSTANCE.toUserVO(dto).userId()).ifPresentOrElse(el -> {
             throw new UserAlreadyExistsException(MessageCode.USER_ALREADY_EXISTS_EXCEPTION.getMessage() + ": " + dto.userId());

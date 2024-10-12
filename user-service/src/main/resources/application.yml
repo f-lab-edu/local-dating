@@ -29,5 +29,6 @@ logging:
     #org.springframework.web: DEBUG
     #guru.springframework.controllers: DEBUG
     org.springframework.cache: DEBUG
+    org.springframework.data.redis: DEBUG
     #org.hibernate: DEBUG
     #org: INFO
