@@ -1,5 +1,7 @@
 package com.local_dating.user_service.presentation.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.local_dating.user_service.application.CustomUserDetailsService;
 import com.local_dating.user_service.application.KafkaProducer;
 import com.local_dating.user_service.application.UserPreferenceService;
@@ -24,6 +26,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -50,6 +53,8 @@ public class UserController {
     private final UserProfileMapper userProfileMapper;
     private final UserPreferenceMapper userPreferenceMapper;
     private final KafkaProducer kafkaProducer;
+    private final RestTemplate restTemplate;
+    private final ObjectMapper objectMapper;
 
     /*public UserController(final CustomUserDetailsService customUserDetailsService
             , final AuthenticationManager authenticationManager
@@ -107,7 +112,13 @@ public class UserController {
         final String token = jwtUtil.createToken(user);
         final LoginRes loginRes = new LoginRes(userId, token);
 
-        kafkaProducer.sentLoginLog("my-topic", new UserLoginLogVO(userId, request.getRemoteAddr(), "N", LocalDateTime.now()));
+        try {
+            restTemplate.postForEntity("localhost:8081/producer", objectMapper.writeValueAsString(new UserLoginLogVO(userId, request.getRemoteAddr(), "N", LocalDateTime.now())), String.class);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        //kafkaProducer.sentLoginLog("my-topic", new UserLoginLogVO(userId, request.getRemoteAddr(), "N", LocalDateTime.now()));
+        //kafkaProducer.sentLoginLog("my-topic", new UserLoginLogVO(userId, request.getRemoteAddr(), "N", LocalDateTime.now()));
         //kafkaProducer.sendMessage("my-topic", "Login Success for userId: " + userId);
 
         return loginRes;
