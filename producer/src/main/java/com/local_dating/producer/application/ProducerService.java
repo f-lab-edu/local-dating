@@ -1,15 +1,14 @@
-package com.local_dating.user_service.application;
+package com.local_dating.producer.application;
 
-import com.local_dating.user_service.domain.vo.UserLoginLogVO;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
-public class KafkaProducer {
+public class ProducerService {
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
-    public KafkaProducer(final KafkaTemplate<String, Object> kafkaTemplate) {
+    public ProducerService(final KafkaTemplate<String, Object> kafkaTemplate) {
         this.kafkaTemplate = kafkaTemplate;
     }
 
@@ -18,11 +17,7 @@ public class KafkaProducer {
         kafkaTemplate.send(topic, message);
     }
 
-    public void sentLoginLog(final String topic, final String message) {
-        kafkaTemplate.send(topic, message);
-    }
-
-    public void sentLoginLog(final String topic, final UserLoginLogVO userLoginLogVO) {
+    /*public void sentLoginLog(final String topic, final UserLoginLogVO userLoginLogVO) {
         kafkaTemplate.send(topic, userLoginLogVO);
-    }
+    }*/
 }

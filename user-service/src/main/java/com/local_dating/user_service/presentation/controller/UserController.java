@@ -1,5 +1,8 @@
 package com.local_dating.user_service.presentation.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import com.local_dating.user_service.application.CustomUserDetailsService;
 import com.local_dating.user_service.application.KafkaProducer;
 import com.local_dating.user_service.application.UserPreferenceService;
@@ -18,12 +21,12 @@ import com.local_dating.user_service.util.MessageCode;
 import com.local_dating.user_service.util.exception.DataNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -32,7 +35,7 @@ import java.util.Optional;
 import static com.local_dating.user_service.util.MessageCode.DATA_NOT_FOUND_EXCEPTION;
 
 @RestController
-@RequiredArgsConstructor
+//@RequiredArgsConstructor
 //@PropertySource("classpath:message/message.properties")
 public class UserController {
 
@@ -50,14 +53,16 @@ public class UserController {
     private final UserProfileMapper userProfileMapper;
     private final UserPreferenceMapper userPreferenceMapper;
     private final KafkaProducer kafkaProducer;
+    private final RestTemplate restTemplate;
+    private final ObjectMapper objectMapper;
 
-    /*public UserController(final CustomUserDetailsService customUserDetailsService
+    public UserController(final CustomUserDetailsService customUserDetailsService
             , final AuthenticationManager authenticationManager
             , JwtUtil jwtUtil
             , UserProfileService userProfileService
             , UserPreferenceService userPreferenceService
             , UserProfileMapper userProfileMapper
-            , UserPreferenceMapper userPreferenceMapper) {
+            , UserPreferenceMapper userPreferenceMapper, KafkaProducer kafkaProducer, RestTemplate restTemplate, ObjectMapper objectMapper) {
         this.customUserDetailsService = customUserDetailsService;
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
@@ -65,7 +70,11 @@ public class UserController {
         this.userPreferenceService = userPreferenceService;
         this.userProfileMapper = userProfileMapper;
         this.userPreferenceMapper = userPreferenceMapper;
-    }*/
+        this.kafkaProducer = kafkaProducer;
+        this.restTemplate = restTemplate;
+        this.objectMapper = objectMapper;
+        this.objectMapper.registerModule(new ParameterNamesModule()).findAndRegisterModules();
+    }
 
     @PostMapping(value = "/register")
     @ResponseStatus(HttpStatus.CREATED)
@@ -107,7 +116,12 @@ public class UserController {
         final String token = jwtUtil.createToken(user);
         final LoginRes loginRes = new LoginRes(userId, token);
 
-        kafkaProducer.sentLoginLog("my-topic", new UserLoginLogVO(userId, request.getRemoteAddr(), "N", LocalDateTime.now()));
+        try {
+            kafkaProducer.sentLoginLog("my-topic", objectMapper.writeValueAsString(new UserLoginLogVO(userId, request.getRemoteAddr(), "N", LocalDateTime.now())));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        //kafkaProducer.sentLoginLog("my-topic", new UserLoginLogVO(userId, request.getRemoteAddr(), "N", LocalDateTime.now()));
         //kafkaProducer.sendMessage("my-topic", "Login Success for userId: " + userId);
 
         return loginRes;
@@ -232,4 +246,14 @@ public class UserController {
         }
         return UserPreferenceMapper.INSTANCE.toUserPreferenceDTOList(userPreferenceVOList);
     }*/
+
+    @PatchMapping(value = "/preferenceprior")
+    public void updatePreferencePriority(final Authentication authentication, @RequestBody final List<UserPreferenceDTO> userPreferenceDTOList) {
+        userPreferenceService.updatePreferencesPriority(authentication.getPrincipal().toString(), userPreferenceMapper.INSTANCE.toUserPreferenceVOList(userPreferenceDTOList));
+    }
+
+    @GetMapping(value = "recomcard")
+    public void recomcard(final Authentication authentication) {
+
+    }
 }

@@ -73,6 +73,20 @@ public class UserPreferenceService {
         //userPreferenceRepository.saveAll()
     }
 
+    @Transactional
+    @CacheEvict(value = "preference", key = "#userId")
+    public void updatePreferencesPriority(final String userId, final List<UserPreferenceVO> userPreferenceVOList) {
+        userPreferenceVOList.stream().map(el -> userPreferenceRepository.findByUserIdAndPrefCd(userId, el.prefCd())
+                .map(el2 -> {
+                    el2.setPrefCd(el.prefCd());
+                    el2.setPrior(el.prior());
+                    return el2;
+                })
+                .orElseThrow(() -> {
+                    throw new DataNotFoundException(MessageCode.DATA_NOT_FOUND_EXCEPTION.getMessage());
+                })).collect(Collectors.toUnmodifiableList());
+    }
+
     @Cacheable(value = "preference", key = "#userId", cacheManager = "jsonCacheManager")
     public String viewPreference(final String userId) {
     /*@Cacheable(value = "preference", key = "#userId")
