@@ -18,6 +18,10 @@ public class KafkaProducer {
         kafkaTemplate.send(topic, message);
     }
 
+    public void sentLoginLog(final String topic, final String message) {
+        kafkaTemplate.send(topic, message);
+    }
+
     public void sentLoginLog(final String topic, final UserLoginLogVO userLoginLogVO) {
         kafkaTemplate.send(topic, userLoginLogVO);
     }
