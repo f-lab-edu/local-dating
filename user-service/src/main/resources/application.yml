@@ -24,6 +24,17 @@ spring:
       host: aws-server
       port: 6379
 
+  kafka:
+    bootstrap-servers: msk 1 2 3
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    properties:
+      security.protocol: SASL_SSL
+      sasl.mechanism: AWS_MSK_IAM
+      sasl.jaas.config: software.amazon.msk.auth.iam.IAMLoginModule required;
+      sasl.client.callback.handler.class: software.amazon.msk.auth.iam.IAMClientCallbackHandler
+
 #  kafka:
 #    bootstrap-servers: aws-server:9091,aws-server:9092,aws-server:9093
 #    #bootstrap-servers: aws-server:9091,aws-server:9092,aws-server:9093
