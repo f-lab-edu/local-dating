@@ -1,5 +1,6 @@
 package com.local_dating.user_service.domain.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.local_dating.user_service.domain.vo.UserProfileVO;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -56,4 +57,9 @@ public class UserProfile {
 
     @Column(name = "mod_user")
     private String modUser;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", referencedColumnName = "card_id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT), insertable = false, updatable = false)
+    @JsonIgnore
+    private UserRecomCard userRecomCard;
 }

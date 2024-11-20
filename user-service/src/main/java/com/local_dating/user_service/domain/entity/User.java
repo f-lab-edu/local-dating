@@ -21,6 +21,7 @@ public class User {
         this.userId = vo.userId();
         this.pwd = vo.pwd();
         this.name = vo.name();
+        this.nickname = vo.nickname();
         this.birth = vo.birth();
         this.phone = vo.phone();
     }
@@ -38,6 +39,9 @@ public class User {
 
     @Column(name = "name")
     private String name;
+    
+    @Column(name = "nickname")
+    private String nickname; //추가
 
     @Column(name = "birth")
     //@Column(name = "birth", length = 8)
@@ -89,4 +93,7 @@ public class User {
 
     @Column(name = "mod_user")
     private String modUser;
+
+    //@OneToMany(mappedBy = "a", fetch = FetchType.LAZY)
+    //private List<UserRecomCard> userRecomCards;
 }

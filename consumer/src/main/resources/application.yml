@@ -7,6 +7,7 @@ spring:
 
   datasource:
     url: jdbc:mysql://aws-server:3306/local_dating
+    #url: jdbc:mysql://aws-server:3306/local_dating
     #url: jdbc:mysql://localhost:3306/local_dating
     username: root
     password: 1234
@@ -23,15 +24,16 @@ spring:
         use_sql_comments: true
 
   kafka:
-    bootstrap-servers: msk-server 1 2 3
+    bootstrap-servers: aws-server:19091, aws-server:19092, aws-server:19093
+    #bootstrap-servers: msk-server 1 2 3
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
-    properties:
-      security.protocol: SASL_SSL
-      sasl.mechanism: AWS_MSK_IAM
-      sasl.jaas.config: software.amazon.msk.auth.iam.IAMLoginModule required;
-      sasl.client.callback.handler.class: software.amazon.msk.auth.iam.IAMClientCallbackHandler
+    #properties:
+      #security.protocol: SASL_SSL
+      #sasl.mechanism: AWS_MSK_IAM
+      #sasl.jaas.config: software.amazon.msk.auth.iam.IAMLoginModule required;
+      #sasl.client.callback.handler.class: software.amazon.msk.auth.iam.IAMClientCallbackHandler
 
 logging:
   level:
