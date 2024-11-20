@@ -6,5 +6,5 @@ import jakarta.validation.constraints.NotNull;
 import org.springframework.validation.annotation.Validated;
 
 @Validated
-public record UserDTO(@NotEmpty(message = "id빈값") @JsonProperty("userId") String userId, @NotNull(message = "pwd빈값") String pwd, String name, String birth, String phone) {
+public record UserDTO(@NotEmpty(message = "id빈값") @JsonProperty("userId") String userId, @NotNull(message = "pwd빈값") String pwd, String name, String nickname, String birth, String phone) {
 }

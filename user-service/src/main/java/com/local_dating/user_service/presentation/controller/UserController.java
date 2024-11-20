@@ -111,7 +111,7 @@ public class UserController {
         final Authentication authentication =
                 authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userDTO.userId() , userDTO.pwd()));
         final String userId = authentication.getName();
-        final UserVO user = new UserVO(userId, userDTO.pwd(), userDTO.name(), userDTO.birth(), userDTO.phone());
+        final UserVO user = new UserVO(userId, userDTO.pwd(), userDTO.name(), userDTO.nickname(), userDTO.birth(), userDTO.phone());
         final String token = jwtUtil.createToken(user);
         final LoginRes loginRes = new LoginRes(userId, token);
 
@@ -170,7 +170,7 @@ public class UserController {
         //return "토큰정보: " + userId;
     }
 
-    @PatchMapping(value = "/v1/user/profile")
+    @PatchMapping(value = "/v1/users/profile")
     public void updateProfile(final Authentication authentication, @RequestBody final List<UserProfileDTO> userProfileDTOList) {
     //public ResponseEntity updateProfile(final Authentication authentication, @RequestBody final List<UserProfileDTO> userProfileDTOList) throws Exception {
         //Optional.of((String) authentication.getPrincipal()).map(s -> userProfileService.updateProfile(s, userProfileMapper.INSTANCE.toUserProfileVOList(userProfileDTOList)))
@@ -187,7 +187,7 @@ public class UserController {
         return "Hello, " + authentication.getName() + "!";
     }*/
 
-    @GetMapping(value = "/v1/user/profile")
+    @GetMapping(value = "/v1/users/profile")
     public List viewProfile(final Authentication authentication) {
     //public ResponseEntity<?> viewProfile(final Authentication authentication) {
 
@@ -207,7 +207,7 @@ public class UserController {
         return new ResponseEntity<>("에러났다", HttpStatus.OK);
     }*/
 
-    @PostMapping(value = "/v1/user/preference")
+    @PostMapping(value = "/v1/users/preference")
     public List savePreference(final Authentication authentication, @RequestBody final List<UserPreferenceDTO> userPreferenceDTOList) {
     //public ResponseEntity<List<UserPreference>> savePreference(final Authentication authentication, @RequestBody final List<UserPreferenceDTO> userPreferenceDTOList) {
         List<UserPreference> userPreferenceList = userPreferenceService.savePreferences((String) authentication.getPrincipal(), UserPreferenceMapper.INSTANCE.toUserPreferenceVOList(userPreferenceDTOList));
@@ -216,14 +216,14 @@ public class UserController {
         //return ResponseEntity.status(HttpStatus.CREATED).body(userPreferenceList);
     }
 
-    @PutMapping(value = "/v1/user/preference")
+    @PutMapping(value = "/v1/users/preference")
     public void updatePreference(final Authentication authentication, @RequestBody final List<UserPreferenceDTO> userPreferenceDTOList) {
     //public ResponseEntity updatePreference(final Authentication authentication, @RequestBody final List<UserPreferenceDTO> userPreferenceDTOList) throws Exception {
         userPreferenceService.updatePreferences(authentication.getPrincipal().toString(), userPreferenceMapper.INSTANCE.toUserPreferenceVOList(userPreferenceDTOList));
         //return ResponseEntity.ok().build();
     }
 
-    @GetMapping(value = "/v1/user/preference")
+    @GetMapping(value = "/v1/users/preference")
     public String viewPreference(final Authentication authentication) {
 
         String result = userPreferenceService.viewPreference((String) authentication.getPrincipal());
@@ -246,18 +246,18 @@ public class UserController {
         return UserPreferenceMapper.INSTANCE.toUserPreferenceDTOList(userPreferenceVOList);
     }*/
 
-    @PatchMapping(value = "/v1/user/preference/prior")
+    @PatchMapping(value = "/v1/users/preference/prior")
     public void updatePreferencePriority(final Authentication authentication, @RequestBody final List<UserPreferenceDTO> userPreferenceDTOList) {
         userPreferenceService.updatePreferencesPriority(authentication.getPrincipal().toString(), userPreferenceMapper.INSTANCE.toUserPreferenceVOList(userPreferenceDTOList));
     }
 
-    @GetMapping(value = "/v1/user/cards")
+    /*@GetMapping(value = "/v1/users/cards")
     public List viewRecomcard(final Authentication authentication) {
         return userCardService.getCard(authentication.getPrincipal().toString());
     }
 
-    @PostMapping(value = "/v1/user/cards")
+    @PostMapping(value = "/v1/users/cards")
     public void saveRecomcard(final Authentication authentication) {
         userCardService.setCard(authentication.getPrincipal().toString());
-    }
+    }*/
 }
