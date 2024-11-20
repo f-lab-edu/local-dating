@@ -3,10 +3,7 @@ package com.local_dating.user_service.presentation.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
-import com.local_dating.user_service.application.CustomUserDetailsService;
-import com.local_dating.user_service.application.KafkaProducer;
-import com.local_dating.user_service.application.UserPreferenceService;
-import com.local_dating.user_service.application.UserProfileService;
+import com.local_dating.user_service.application.*;
 import com.local_dating.user_service.domain.entity.UserPreference;
 import com.local_dating.user_service.domain.mapper.UserPreferenceMapper;
 import com.local_dating.user_service.domain.mapper.UserProfileMapper;
@@ -55,6 +52,7 @@ public class UserController {
     private final KafkaProducer kafkaProducer;
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
+    private final UserCardService userCardService;
 
     public UserController(final CustomUserDetailsService customUserDetailsService
             , final AuthenticationManager authenticationManager
@@ -62,7 +60,7 @@ public class UserController {
             , UserProfileService userProfileService
             , UserPreferenceService userPreferenceService
             , UserProfileMapper userProfileMapper
-            , UserPreferenceMapper userPreferenceMapper, KafkaProducer kafkaProducer, RestTemplate restTemplate, ObjectMapper objectMapper) {
+            , UserPreferenceMapper userPreferenceMapper, KafkaProducer kafkaProducer, RestTemplate restTemplate, ObjectMapper objectMapper, UserCardService userCardService) {
         this.customUserDetailsService = customUserDetailsService;
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
@@ -73,10 +71,11 @@ public class UserController {
         this.kafkaProducer = kafkaProducer;
         this.restTemplate = restTemplate;
         this.objectMapper = objectMapper;
+        this.userCardService = userCardService;
         this.objectMapper.registerModule(new ParameterNamesModule()).findAndRegisterModules();
     }
 
-    @PostMapping(value = "/register")
+    @PostMapping(value = "/v1/user/register")
     @ResponseStatus(HttpStatus.CREATED)
     public String register(@RequestBody @Valid final UserDTO user) {
     //public ResponseEntity<String> register(@RequestBody @Valid final UserDTO user) {
@@ -105,7 +104,7 @@ public class UserController {
         return dto;
     }*/
 
-    @PostMapping(value = "/login")
+    @PostMapping(value = "/v1/user/login")
     public LoginRes login(@RequestBody @Valid final UserDTO userDTO, HttpServletRequest request) {
     //public ResponseEntity login(@RequestBody @Valid final UserDTO userDTO) {
 
@@ -148,7 +147,7 @@ public class UserController {
     }
 
 
-    @PostMapping(value = "/profile")
+    @PostMapping(value = "/v1/user/profile")
     @ResponseStatus(HttpStatus.CREATED)
     //@deprecated
     public void saveProfile(final Authentication authentication, @RequestBody final List<UserProfileDTO> userProfileDTO) {
@@ -171,7 +170,7 @@ public class UserController {
         //return "토큰정보: " + userId;
     }
 
-    @PatchMapping(value = "/profile")
+    @PatchMapping(value = "/v1/user/profile")
     public void updateProfile(final Authentication authentication, @RequestBody final List<UserProfileDTO> userProfileDTOList) {
     //public ResponseEntity updateProfile(final Authentication authentication, @RequestBody final List<UserProfileDTO> userProfileDTOList) throws Exception {
         //Optional.of((String) authentication.getPrincipal()).map(s -> userProfileService.updateProfile(s, userProfileMapper.INSTANCE.toUserProfileVOList(userProfileDTOList)))
@@ -188,7 +187,7 @@ public class UserController {
         return "Hello, " + authentication.getName() + "!";
     }*/
 
-    @GetMapping(value = "/profile")
+    @GetMapping(value = "/v1/user/profile")
     public List viewProfile(final Authentication authentication) {
     //public ResponseEntity<?> viewProfile(final Authentication authentication) {
 
@@ -208,7 +207,7 @@ public class UserController {
         return new ResponseEntity<>("에러났다", HttpStatus.OK);
     }*/
 
-    @PostMapping(value = "/preference")
+    @PostMapping(value = "/v1/user/preference")
     public List savePreference(final Authentication authentication, @RequestBody final List<UserPreferenceDTO> userPreferenceDTOList) {
     //public ResponseEntity<List<UserPreference>> savePreference(final Authentication authentication, @RequestBody final List<UserPreferenceDTO> userPreferenceDTOList) {
         List<UserPreference> userPreferenceList = userPreferenceService.savePreferences((String) authentication.getPrincipal(), UserPreferenceMapper.INSTANCE.toUserPreferenceVOList(userPreferenceDTOList));
@@ -217,14 +216,14 @@ public class UserController {
         //return ResponseEntity.status(HttpStatus.CREATED).body(userPreferenceList);
     }
 
-    @PutMapping(value = "/preference")
+    @PutMapping(value = "/v1/user/preference")
     public void updatePreference(final Authentication authentication, @RequestBody final List<UserPreferenceDTO> userPreferenceDTOList) {
     //public ResponseEntity updatePreference(final Authentication authentication, @RequestBody final List<UserPreferenceDTO> userPreferenceDTOList) throws Exception {
         userPreferenceService.updatePreferences(authentication.getPrincipal().toString(), userPreferenceMapper.INSTANCE.toUserPreferenceVOList(userPreferenceDTOList));
         //return ResponseEntity.ok().build();
     }
 
-    @GetMapping(value = "/preference")
+    @GetMapping(value = "/v1/user/preference")
     public String viewPreference(final Authentication authentication) {
 
         String result = userPreferenceService.viewPreference((String) authentication.getPrincipal());
@@ -247,13 +246,18 @@ public class UserController {
         return UserPreferenceMapper.INSTANCE.toUserPreferenceDTOList(userPreferenceVOList);
     }*/
 
-    @PatchMapping(value = "/preferenceprior")
+    @PatchMapping(value = "/v1/user/preference/prior")
     public void updatePreferencePriority(final Authentication authentication, @RequestBody final List<UserPreferenceDTO> userPreferenceDTOList) {
         userPreferenceService.updatePreferencesPriority(authentication.getPrincipal().toString(), userPreferenceMapper.INSTANCE.toUserPreferenceVOList(userPreferenceDTOList));
     }
 
-    @GetMapping(value = "recomcard")
-    public void recomcard(final Authentication authentication) {
+    @GetMapping(value = "/v1/user/cards")
+    public List viewRecomcard(final Authentication authentication) {
+        return userCardService.getCard(authentication.getPrincipal().toString());
+    }
 
+    @PostMapping(value = "/v1/user/cards")
+    public void saveRecomcard(final Authentication authentication) {
+        userCardService.setCard(authentication.getPrincipal().toString());
     }
 }
