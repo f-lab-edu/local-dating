@@ -30,6 +30,7 @@ public class UserCardService {
     private final UserRecomCardMapper userRecomCardMapper;
     private final UserRecomCardRepositoryCustom userRecomCardRepositoryCustom;
     private final Random random = new Random();
+    private final UserRecomCardRepository userRecomCardRepository;
 
     // 현재 사용자의 선호 정보를 바탕으로 사용자 정보를 가져와서 카드로 넣어서 리턴함
 
@@ -37,6 +38,10 @@ public class UserCardService {
 
         return userRecomCardMapper.toUserRecomCardVOs(userRecomCardRepositoryCustom.findValidCard(userId));
         //return userRecomCardMapper.toUserRecomCardVO(recomCardRepository.findByUserId(userId));
+    }
+
+    public List getCardDetail(final String userId, final String targetId) {
+        return userRecomCardRepository.findUserRecomCardWithUserProfile(targetId);
     }
 
     public void setCard(final String userId) {

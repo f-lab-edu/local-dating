@@ -1,44 +1,42 @@
 package com.local_dating.user_service.domain.entity;
 
-import com.local_dating.user_service.domain.vo.UserRecomCardVO;
+import com.local_dating.user_service.domain.vo.UserCoinVO;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
-@Getter
 @Setter
-@Table
+@Getter
 @Entity
+@Table
 @NoArgsConstructor
-public class UserRecomCard {
+public class UserCoin {
 
-    public UserRecomCard(final UserRecomCardVO vo) {
+    public UserCoin(UserCoinVO vo) {
         this.userId = vo.userId();
-        this.cardId = vo.cardId();
-        this.useYn = vo.useYn();
-        //this.useyn = vo.useyn();
+        this.balance = vo.balance();
+    }
+
+    public UserCoin(String userId, Long balance) {
+        this.userId = userId;
+        this.balance = balance;
     }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private long id;
+    private Long seq;
 
     @Column(name = "user_id")
     private String userId;
 
-    @Column(name = "card_id")
-    private String cardId;
-
-    @Column(name = "use_yn")
-    private String useYn;
-    //private String useyn;
+    @Column(name = "balance")
+    private Long balance;
 
     @Column(name = "in_date")
     @CreationTimestamp
@@ -47,6 +45,10 @@ public class UserRecomCard {
     @Column(name = "in_user")
     private String inUser;
 
-    @OneToMany(mappedBy = "userRecomCard", fetch = FetchType.LAZY)
-    private List<UserProfile> userProfiles = new ArrayList<>();
+    @Column(name = "mod_date")
+    @UpdateTimestamp
+    private LocalDateTime modDate;
+
+    @Column(name = "mod_user")
+    private String modUser;
 }
