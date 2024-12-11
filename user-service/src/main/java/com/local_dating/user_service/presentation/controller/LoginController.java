@@ -34,9 +34,9 @@ public class LoginController {
     public LoginRes login(@RequestBody @Valid final UserDTO userDTO, HttpServletRequest request) {
 
         final Authentication authentication =
-                authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userDTO.userId() , userDTO.pwd()));
+                authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userDTO.loginId(), userDTO.pwd()));
         final String userId = authentication.getName();
-        final UserVO user = new UserVO(userId, userDTO.pwd(), userDTO.name(), userDTO.nickname(), userDTO.birth(), userDTO.phone());
+        final UserVO user = new UserVO(Long.parseLong(userId), userDTO.pwd(), userDTO.name(), userDTO.nickname(), userDTO.birth(), userDTO.phone());
         final String token = jwtUtil.createToken(user);
         final LoginRes loginRes = new LoginRes(userId, token);
 

@@ -18,7 +18,8 @@ public class User {
     }
 
     public User(final UserVO vo) {
-        this.userId = vo.userId();
+        this.id = vo.id();
+        //this.userId = vo.userId();
         this.pwd = vo.pwd();
         this.name = vo.name();
         this.nickname = vo.nickname();
@@ -31,8 +32,10 @@ public class User {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "user_id")
-    private String userId;
+    @Column(name = "login_id")
+    private String loginId;
+    /*@Column(name = "user_id")
+    private String userId;*/
 
     @Column(name = "pwd")
     private String pwd;

@@ -1,6 +1,5 @@
 package com.local_dating.user_service.util.exception;
 
-import com.local_dating.user_service.presentation.controller.UserController;
 import com.local_dating.user_service.util.MessageCode;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -10,7 +9,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-@RestControllerAdvice(assignableTypes = {UserController.class})
+@RestControllerAdvice
+//@RestControllerAdvice(assignableTypes = {UserController.class})
 public class UserExceptionHandler {
 
     @ExceptionHandler(Exception.class)

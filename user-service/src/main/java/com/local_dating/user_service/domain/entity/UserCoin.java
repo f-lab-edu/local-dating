@@ -30,7 +30,7 @@ public class UserCoin {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private Long seq;
+    private Long id;
 
     @Column(name = "user_id")
     private String userId;
