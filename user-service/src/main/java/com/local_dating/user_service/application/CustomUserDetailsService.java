@@ -35,12 +35,13 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .map(s -> {
                     final List<String> roles = new ArrayList<>();
                     roles.add("USER");
-                    return org.springframework.security.core.userdetails.User.builder()
-                            .username(String.valueOf(s.getId()))
-                            //.username(s.getUserId())
+                    return new CustomUserDetails(s.getNo(), s.getLoginId(), s.getPwd());
+                    /*return org.springframework.security.core.userdetails.User.builder()
+                            //.username(String.valueOf(s.getId()))
+                            .username(s.getLoginId())
                             .password(s.getPwd())
                             .roles(roles.toArray(new String[0]))
-                            .build();
+                            .build();*/
                 })
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
 
@@ -58,7 +59,8 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Transactional
     public void registerUser(@Valid final UserDTO dto) {
 
-        userRepository.findById(userMapper.INSTANCE.toUserVO(dto).id()).ifPresentOrElse(el -> {
+        userRepository.findById(userMapper.INSTANCE.toUserVO(dto).no()).ifPresentOrElse(el -> {
+        //userRepository.findById(userMapper.INSTANCE.toUserVO(dto).id()).ifPresentOrElse(el -> {
         //userRepository.findByUserId(userMapper.INSTANCE.toUserVO(dto).userId()).ifPresentOrElse(el -> {
             throw new UserAlreadyExistsException(MessageCode.USER_ALREADY_EXISTS_EXCEPTION.getMessage() + ": " + dto.loginId());
             //throw new UserAlreadyExistsException(MessageCode.USER_ALREADY_EXISTS_EXCEPTION.getMessage() + ": " + dto.userId());
