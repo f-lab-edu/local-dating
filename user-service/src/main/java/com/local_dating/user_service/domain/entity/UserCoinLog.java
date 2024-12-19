@@ -17,8 +17,8 @@ public class UserCoinLog {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "seq")
-    private Long seq;
+    @Column(name = "id")
+    private Long id;
 
     @Column(name = "user_id")
     private String userId;

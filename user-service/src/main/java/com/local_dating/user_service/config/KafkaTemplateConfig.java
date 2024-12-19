@@ -21,6 +21,7 @@ public class KafkaTemplateConfig {
 
         Map<String, Object> configProps = new HashMap<>();
         configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "aws-server:19091, aws-server:19092, aws-server:19093");
+        //configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "aws-server:19091, aws-server:19092, aws-server:19093");
         //configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "msk-server 1 2 3");
         //configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "aws-server:19091,aws-server:19092,aws-server:19093");
         //configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka1:9091,kafka2:9092,kafka3:9093");

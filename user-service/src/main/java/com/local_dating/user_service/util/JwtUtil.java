@@ -46,7 +46,8 @@ public class JwtUtil {
         Date tokenCreateTime = new Date();
         Date tokenValidity = new Date(tokenCreateTime.getTime() + TimeUnit.MINUTES.toMillis(accessTokenValidity));
         return Jwts.builder()
-                .setSubject(user.userId())
+                .setSubject(String.valueOf(user.id()))
+                //.setSubject(user.userId())
                 //.claim("userId",user.userId())
                 //.claim("pwd",user.pwd())
                 .claim("name",user.name())

@@ -24,12 +24,12 @@ public class CoinController {
     private final KafkaProducer kafkaProducer;
     private final ObjectMapper objectMapper;
 
-    @GetMapping(value = "/v1/users/coin")
+    @GetMapping(value = "/v1/users/{id}/coin")
     public Long viewCoin(final Authentication authentication) {
         return userCoinService.viewCoin(authentication.getPrincipal().toString());
     }
 
-    @PostMapping(value = "/v1/users/coin")
+    @PostMapping(value = "/v1/users/{id}/coin")
     public void saveCoin(final Authentication authentication, final UserCoinDTO userCoinDTO) {
         String userId = authentication.getPrincipal().toString();
         userCoinService.saveCoin(userId, userCoinMapper.INSTANCE.toUserCoinVO(userCoinDTO));
