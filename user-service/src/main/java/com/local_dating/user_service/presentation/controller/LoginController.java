@@ -3,6 +3,7 @@ package com.local_dating.user_service.presentation.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.local_dating.user_service.application.CustomUserDetails;
 import com.local_dating.user_service.application.KafkaProducer;
 import com.local_dating.user_service.domain.vo.UserLoginLogVO;
 import com.local_dating.user_service.domain.vo.UserVO;
@@ -36,7 +37,9 @@ public class LoginController {
         final Authentication authentication =
                 authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userDTO.loginId(), userDTO.pwd()));
         final String userId = authentication.getName();
-        final UserVO user = new UserVO(Long.parseLong(userId), userDTO.pwd(), userDTO.name(), userDTO.nickname(), userDTO.birth(), userDTO.phone());
+        final CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        final UserVO user = new UserVO(userDetails.getId(), userId, userDTO.pwd(), userDTO.name(), userDTO.nickname(), userDTO.birth(), userDTO.phone());
+        //final UserVO user = new UserVO(Long.parseLong(userId), userDTO.pwd(), userDTO.name(), userDTO.nickname(), userDTO.birth(), userDTO.phone());
         final String token = jwtUtil.createToken(user);
         final LoginRes loginRes = new LoginRes(userId, token);
 
