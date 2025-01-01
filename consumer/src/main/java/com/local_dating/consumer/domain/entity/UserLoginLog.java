@@ -30,10 +30,12 @@ public class UserLoginLog {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private Long id;
+    private Long no;
+    //private Long id;
 
     @Column(name = "user_id")
-    private String userId;
+    private Long userId;
+    //private String userId;
 
     @Column(name = "ip")
     private String ip;

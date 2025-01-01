@@ -1,6 +1,8 @@
 package com.local_dating.user_service.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.local_dating.user_service.application.CustomUserDetails;
+import com.local_dating.user_service.application.CustomUserDetailsService;
 import io.jsonwebtoken.Claims;
 import io.micrometer.common.util.StringUtils;
 import jakarta.servlet.FilterChain;
@@ -16,7 +18,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,10 +26,12 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final ObjectMapper mapper;
+    private final CustomUserDetailsService customUserDetailsService;
 
-    public JwtAuthorizationFilter(final JwtUtil jwtUtil, final ObjectMapper mapper) {
+    public JwtAuthorizationFilter(final JwtUtil jwtUtil, final ObjectMapper mapper, CustomUserDetailsService customUserDetailsService) {
         this.jwtUtil = jwtUtil;
         this.mapper = mapper;
+        this.customUserDetailsService = customUserDetailsService;
     }
 
     @Override
@@ -41,17 +44,21 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                 filterChain.doFilter(request, response);
                 return;
             }
-            System.out.println("token : " + accessToken);
+            logger.debug("token : " + accessToken);
             final Claims claims = jwtUtil.resolveClaims(request);
 
             if (jwtUtil.validateClaims(claims)) {
             //if (claims != null & jwtUtil.validateClaims(claims)) {
                 final String userId = claims.getSubject();
-                System.out.println("userId: " + userId);
+                logger.debug("userId: " + userId);
                 //String email = claims.getSubject();
                 //System.out.println("email : "+email);
+
+                final CustomUserDetails userDetails = (CustomUserDetails) customUserDetailsService.loadUserByUsername(userId);
                 final Authentication authentication =
-                        new UsernamePasswordAuthenticationToken(userId, "", new ArrayList<>());
+                        new UsernamePasswordAuthenticationToken(claims.get("no"), "", userDetails.getAuthorities());
+                        //new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+                        //new UsernamePasswordAuthenticationToken(userId, "", new ArrayList<>());
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
 
