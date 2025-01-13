@@ -6,6 +6,7 @@ import com.local_dating.user_service.presentation.dto.UserProfileDTO;
 import com.local_dating.user_service.util.exception.DataNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,22 +22,25 @@ public class ProfileController {
     private final UserProfileService userProfileService;
     private final UserProfileMapper userProfileMapper;
 
+    @PreAuthorize("isAuthenticated() and #id == authentication.getPrincipal()")
     @PostMapping(value = "/v1/users/{id}/profile")
     @ResponseStatus(HttpStatus.CREATED)
-    public void saveProfile(final Authentication authentication, @RequestBody final List<UserProfileDTO> userProfileDTO) {
+    public void saveProfile(final @PathVariable("id") Integer id, final Authentication authentication, @RequestBody final List<UserProfileDTO> userProfileDTO) {
 
         String userId = (String) authentication.getPrincipal();
         userProfileService.saveProfile(userId, userProfileMapper.INSTANCE.toUserProfileVOList(userProfileDTO));
     }
 
+    @PreAuthorize("isAuthenticated() and #id == authentication.getPrincipal()")
     @PatchMapping(value = "/v1/users/{id}/profile")
-    public void updateProfile(final Authentication authentication, @RequestBody final List<UserProfileDTO> userProfileDTOList) {
+    public void updateProfile(final @PathVariable("id") Integer id, final Authentication authentication, @RequestBody final List<UserProfileDTO> userProfileDTOList) {
         String userId = (String) authentication.getPrincipal();
         userProfileService.updateProfile(userId, userProfileMapper.INSTANCE.toUserProfileVOList(userProfileDTOList));
     }
 
+    @PreAuthorize("isAuthenticated() and #id == authentication.getPrincipal()")
     @GetMapping(value = "/v1/users/{id}/profile")
-    public List viewProfile(final Authentication authentication) {
+    public List viewProfile(final @PathVariable("id") Integer id, final Authentication authentication) {
 
         return Optional.of(userProfileService.viewProfile((String) authentication.getPrincipal()))
                 .map(list -> UserProfileMapper.INSTANCE.toUserProfileDTOList(list))
