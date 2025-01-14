@@ -22,7 +22,7 @@ public class UserRecomCard {
         this.userId = vo.userId();
         this.cardId = vo.cardId();
         this.useYn = vo.useYn();
-        //this.useyn = vo.useyn();
+        this.inUser = vo.userId();
     }
 
     @Id

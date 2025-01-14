@@ -37,7 +37,7 @@ public class UserLoginService {
         final String token = jwtUtil.createToken(user);
         final LoginRes loginRes = new LoginRes(userId, token);
 
-        kafkaProducer.sendMessage("login-log-topic", new UserLoginLogVO(userDetails.getId(), request.getRemoteAddr(), "N", LocalDateTime.now()));
+        kafkaProducer.sendMessage("login-log-topic", new UserLoginLogVO(userDetails.getId(), request.getRemoteAddr(), "N", LocalDateTime.now()), false);
 
         return loginRes;
     }

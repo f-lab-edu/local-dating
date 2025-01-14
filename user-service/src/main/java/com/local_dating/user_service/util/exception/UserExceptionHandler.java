@@ -18,7 +18,7 @@ public class UserExceptionHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(UserExceptionHandler.class);
 
-    @ExceptionHandler(Exception.class)
+    @ExceptionHandler(Exception.class) // 별도 핸들러에 지정되지 않은 모든 예외가 잡힘
     public ResponseEntity handleException(Exception e) {
         logger.error(e.getClass().getName());
         logger.error(e.getMessage());
@@ -59,6 +59,13 @@ public class UserExceptionHandler {
         logger.error(e.getClass().getName() + MessageCode.BAD_CREDENTIAL_EXCEPTION.getMessage());
         logger.error(e.getMessage());
         return new ResponseEntity<>(MessageCode.BAD_CREDENTIAL_EXCEPTION.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(DataNotFoundException.class)
+    public ResponseEntity DataNotFoundException(DataNotFoundException e) {
+        logger.error(e.getClass().getName() + MessageCode.DATA_NOT_FOUND_EXCEPTION.getMessage());
+        logger.error(e.getMessage());
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
     }
 
     /*@ExceptionHandler(ApplicationException.class)

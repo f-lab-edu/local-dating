@@ -27,13 +27,13 @@ public class CoinController {
 
     @PreAuthorize("isAuthenticated() and #id == authentication.getPrincipal()")
     @GetMapping(value = "/v1/users/{id}/coin")
-    public Long viewCoin(final @PathVariable("id") Integer id, final Authentication authentication) {
+    public Long viewCoin(final @PathVariable("id") long id, final Authentication authentication) {
         return userCoinService.viewCoin(authentication.getPrincipal().toString());
     }
 
     @PreAuthorize("isAuthenticated() and #id == authentication.getPrincipal()")
     @PostMapping(value = "/v1/users/{id}/coin")
-    public void saveCoin(final @PathVariable("id") Integer id, final Authentication authentication, final UserCoinDTO userCoinDTO) {
+    public void saveCoin(final @PathVariable("id") long id, final Authentication authentication, final UserCoinDTO userCoinDTO) {
         String userId = authentication.getPrincipal().toString();
         userCoinService.saveCoin(userId, userCoinMapper.INSTANCE.toUserCoinVO(userCoinDTO));
         /*try {
