@@ -44,7 +44,8 @@ public class UserPreferenceRepositoryCustom {
 
         for (UserPreference item : userPreferenceList) {
             BooleanExpression condition = userPreference.prefCd.eq(item.getPrefCd())
-                    .and(userPreference.prefVal.eq(item.getPrefVal()));
+                    .and(userPreference.prefVal.eq(item.getPrefVal()))
+                    .and(userPreference.userId.ne(userId));
 
             // expression이 null이면 첫 조건으로 설정하고, 그렇지 않으면 OR로 결합
             expression = (expression == null) ? condition : expression.or(condition);

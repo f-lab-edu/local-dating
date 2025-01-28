@@ -28,6 +28,8 @@ public class UserProfile {
         this.userId = userId;
         this.infoCd = vo.infoCd();
         this.infoVal = vo.infoVal();
+        this.inUser = userId;
+        this.modUser = userId;
     }
 
     @Id

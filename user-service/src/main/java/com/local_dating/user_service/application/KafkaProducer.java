@@ -19,13 +19,15 @@ public class KafkaProducer {
     }
 
     // 동적으로 토픽을 지정하여 메시지 전송
-    public <T> void sendMessage(final String topic, final T vo) {
+    public <T> void sendMessage(final String topic, final T vo, boolean isThrow) { // isThrow true 시 Exception 발생
 
         try {
             kafkaTemplate.send(topic, objectMapper.writeValueAsString(vo));
         } catch (JsonProcessingException e) {
             log.error(e.getMessage());
-            //throw new RuntimeException(e);
+            if (isThrow) {
+                throw new RuntimeException(e);
+            }
         }
     }
 

@@ -29,10 +29,10 @@ public class UserCoinService {
     public void saveCoin(final String userId, final UserCoinVO userCoinVO) {
         userCoinRepository.findByUserId(userId).map(el -> {
             el.setBalance(el.getBalance() + userCoinVO.balance());
-            kafkaProducer.sendMessage("coin-topic", new UserCoinLogVO(userId, userCoinVO.balance(), "charge", LocalDateTime.now(), userId));
+            kafkaProducer.sendMessage("coin-topic", new UserCoinLogVO(userId, userCoinVO.balance(), "charge", LocalDateTime.now(), userId), false);
             return userCoinRepository.save(el);
         }).orElseGet(()->{
-            kafkaProducer.sendMessage("coin-topic", new UserCoinLogVO(userId, userCoinVO.balance(), "charge", LocalDateTime.now(), userId));
+            kafkaProducer.sendMessage("coin-topic", new UserCoinLogVO(userId, userCoinVO.balance(), "charge", LocalDateTime.now(), userId), false);
             return userCoinRepository.save(new UserCoin(userId, userCoinVO.balance()));
         });
     }

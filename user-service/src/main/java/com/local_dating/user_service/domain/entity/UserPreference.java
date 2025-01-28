@@ -18,11 +18,13 @@ public class UserPreference {
     public UserPreference() {
     }
 
-    public UserPreference(final UserPreferenceVO userPreferenceVO) {
-        this.userId = userPreferenceVO.userId();
-        this.prefCd = userPreferenceVO.prefCd();
-        this.prefVal = userPreferenceVO.prefVal();
-        this.prior = userPreferenceVO.prior();
+    public UserPreference(final UserPreferenceVO vo) {
+        this.userId = vo.userId();
+        this.prefCd = vo.prefCd();
+        this.prefVal = vo.prefVal();
+        this.prior = vo.prior();
+        this.inUser = vo.userId();
+        this.modUser = vo.userId();
     }
 
     public UserPreference(final String userId, final UserPreferenceVO userPreferenceVO) {
@@ -30,6 +32,8 @@ public class UserPreference {
         this.prefCd = userPreferenceVO.prefCd();
         this.prefVal = userPreferenceVO.prefVal();
         this.prior = userPreferenceVO.prior();
+        this.inUser = userId;
+        this.modUser = userId;
     }
 
     @Id

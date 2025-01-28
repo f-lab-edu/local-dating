@@ -14,6 +14,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -47,7 +48,7 @@ public class UserPreferenceService {
                 .collect(Collectors.toUnmodifiableList());*/
 
         return userPreferenceVOList.stream()
-                .filter(el -> userPreferenceRepository.findByUserIdAndPrefCd(userId, el.prefCd()).isEmpty())
+                .filter(el -> userPreferenceRepository.findByUserIdAndPrefCd(userId, el.prefCd()).isEmpty()) //기존에 없는 것만 저장
                 .map(el -> userPreferenceRepository.save(new UserPreference(userId, el)))
                 .collect(Collectors.toUnmodifiableList());
         //return userPreferenceVOList.stream().map(el->userPreferenceRepository.findByUserIdAndPrefCd(user_id, el.prefCd())).filter(el2->el2.isEmpty()).map(()->userPreferenceRepository.save(el)).collect(Collectors.toUnmodifiableList());//  .stream().collect(Collectors.toUnmodifiableList()));// .orElseGet(()->userPreferenceRepository.save(new UserPreference(el))));
@@ -63,6 +64,8 @@ public class UserPreferenceService {
                     el2.setPrefCd(el.prefCd());
                     el2.setPrefVal(el.prefVal());
                     el2.setPrior(el.prior());
+                    el2.setModUser(userId);
+                    el2.setModDate(LocalDateTime.now());
                     return el2;
                 })
                 .orElseThrow(() -> {
@@ -80,6 +83,8 @@ public class UserPreferenceService {
                 .map(el2 -> {
                     el2.setPrefCd(el.prefCd());
                     el2.setPrior(el.prior());
+                    el2.setModUser(userId);
+                    el2.setModDate(LocalDateTime.now());
                     return el2;
                 })
                 .orElseThrow(() -> {

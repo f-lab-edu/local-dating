@@ -25,24 +25,24 @@ public class ProfileController {
     @PreAuthorize("isAuthenticated() and #id == authentication.getPrincipal()")
     @PostMapping(value = "/v1/users/{id}/profile")
     @ResponseStatus(HttpStatus.CREATED)
-    public void saveProfile(final @PathVariable("id") Integer id, final Authentication authentication, @RequestBody final List<UserProfileDTO> userProfileDTO) {
+    public void saveProfile(final @PathVariable("id") long id, final Authentication authentication, @RequestBody final List<UserProfileDTO> userProfileDTO) {
 
-        String userId = (String) authentication.getPrincipal();
+        String userId = authentication.getPrincipal().toString();
         userProfileService.saveProfile(userId, userProfileMapper.INSTANCE.toUserProfileVOList(userProfileDTO));
     }
 
     @PreAuthorize("isAuthenticated() and #id == authentication.getPrincipal()")
     @PatchMapping(value = "/v1/users/{id}/profile")
-    public void updateProfile(final @PathVariable("id") Integer id, final Authentication authentication, @RequestBody final List<UserProfileDTO> userProfileDTOList) {
-        String userId = (String) authentication.getPrincipal();
+    public void updateProfile(final @PathVariable("id") long id, final Authentication authentication, @RequestBody final List<UserProfileDTO> userProfileDTOList) {
+        String userId = authentication.getPrincipal().toString();
         userProfileService.updateProfile(userId, userProfileMapper.INSTANCE.toUserProfileVOList(userProfileDTOList));
     }
 
     @PreAuthorize("isAuthenticated() and #id == authentication.getPrincipal()")
     @GetMapping(value = "/v1/users/{id}/profile")
-    public List viewProfile(final @PathVariable("id") Integer id, final Authentication authentication) {
+    public List viewProfile(final @PathVariable("id") long id, final Authentication authentication) {
 
-        return Optional.of(userProfileService.viewProfile((String) authentication.getPrincipal()))
+        return Optional.of(userProfileService.viewProfile(authentication.getPrincipal().toString()))
                 .map(list -> UserProfileMapper.INSTANCE.toUserProfileDTOList(list))
                 .orElseThrow(() -> new DataNotFoundException(DATA_NOT_FOUND_EXCEPTION.getMessage()));
     }
