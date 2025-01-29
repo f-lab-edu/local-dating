@@ -1,4 +1,4 @@
-package com.local_dating.user_service.presentation.dto;
+package com.local_dating.matching_service.presentation.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
