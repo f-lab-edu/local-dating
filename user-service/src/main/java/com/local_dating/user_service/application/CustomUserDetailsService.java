@@ -59,7 +59,8 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Transactional
     public void registerUser(@Valid final UserDTO dto) {
 
-        userRepository.findById(userMapper.INSTANCE.toUserVO(dto).no()).ifPresentOrElse(el -> {
+        userRepository.findByLoginId(userMapper.INSTANCE.toUserVO(dto).loginId()).ifPresentOrElse(el -> {
+        //userRepository.findById(userMapper.INSTANCE.toUserVO(dto).no()).ifPresentOrElse(el -> {
         //userRepository.findById(userMapper.INSTANCE.toUserVO(dto).id()).ifPresentOrElse(el -> {
         //userRepository.findByUserId(userMapper.INSTANCE.toUserVO(dto).userId()).ifPresentOrElse(el -> {
             throw new UserAlreadyExistsException(MessageCode.USER_ALREADY_EXISTS_EXCEPTION.getMessage() + ": " + dto.loginId());

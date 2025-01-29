@@ -44,8 +44,8 @@ public class UserPreferenceRepositoryCustom {
 
         for (UserPreference item : userPreferenceList) {
             BooleanExpression condition = userPreference.prefCd.eq(item.getPrefCd())
-                    .and(userPreference.prefVal.eq(item.getPrefVal()))
-                    .and(userPreference.userId.ne(userId));
+                    .and(userPreference.prefVal.eq(item.getPrefVal()));
+                    //.and(userPreference.userId.ne(userId));
 
             // expression이 null이면 첫 조건으로 설정하고, 그렇지 않으면 OR로 결합
             expression = (expression == null) ? condition : expression.or(condition);
@@ -57,9 +57,22 @@ public class UserPreferenceRepositoryCustom {
                         userPreference.userId, userPreference.userId.count()))
                 .from(userPreference)
                 //.selectFrom(userPreference)
-                .where(expression)
+                .where(expression.and(userPreference.userId.ne(userId)))
                 .groupBy(userPreference.userId)
                 //.where(userPreference.prefCd.in(1, 2, 3).and(userPreference.userId.ne(userId)))
+                .fetch();
+    }
+
+    public List<UserPreferenceCountVO2> findRecommendUserAlter(String userId) {
+        QUserPreference userPreference = QUserPreference.userPreference;
+
+        return queryFactory
+                .select(Projections.constructor(UserPreferenceCountVO2.class,
+                        userPreference.userId, userPreference.userId.count()))
+                .from(userPreference)
+                .where(userPreference.userId.ne(userId))
+                .groupBy(userPreference.userId)
+                //.orderBy(userPreference.modDate.desc())
                 .fetch();
     }
 
