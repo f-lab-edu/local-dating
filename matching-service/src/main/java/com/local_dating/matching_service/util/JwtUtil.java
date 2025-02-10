@@ -1,8 +1,10 @@
-package com.local_dating.user_service.util;
+package com.local_dating.matching_service.util;
 
-import com.local_dating.user_service.domain.vo.UserVO;
-import com.local_dating.user_service.util.exception.InvalidateClaimsException;
-import io.jsonwebtoken.*;
+import com.local_dating.matching_service.util.exception.InvalidateClaimsException;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtParser;
+import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -15,14 +17,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import static java.util.Objects.isNull;
 
 @Component
 public class JwtUtil {
     private final SecretKey secret_key = Keys.hmacShaKeyFor("thisisaverysecretkeyandsecure123".getBytes(StandardCharsets.UTF_8));
-    //private final String secret_key = "mysecretkey";
     private long accessTokenValidity = 60*60*1000;
 
     private final JwtParser jwtParser;
@@ -32,35 +32,6 @@ public class JwtUtil {
 
     public JwtUtil(){
         this.jwtParser = Jwts.parser().setSigningKey(secret_key).build();
-    }
-
-    public String createToken(final UserVO user) {
-        /*Claims claims = (Claims) Jwts.claims().setSubject(user.userId());
-        claims.put("pwd",user.pwd());
-        claims.put("name",user.name());
-        Date tokenCreateTime = new Date();
-        Date tokenValidity = new Date(tokenCreateTime.getTime() + TimeUnit.MINUTES.toMillis(accessTokenValidity));
-        return Jwts.builder()
-                .setClaims(claims)
-                .setExpiration(tokenValidity)
-                .signWith(SignatureAlgorithm.HS256, secret_key)
-                .compact();*/
-
-        Date tokenCreateTime = new Date();
-        Date tokenValidity = new Date(tokenCreateTime.getTime() + TimeUnit.MINUTES.toMillis(accessTokenValidity));
-        return Jwts.builder()
-                .setSubject(user.loginId()) //.setSubject(String.valueOf(user.id()))
-                .claim("no", user.no()) // user테이블 id
-                //.setSubject(user.userId())
-                //.claim("userId",user.userId())
-                //.claim("pwd",user.pwd())
-                .claim("name",user.name())
-                .claim("role", "USER")
-                //.claim("role", "ROLE_USER")
-                //.setClaims(claims)
-                .setExpiration(tokenValidity)
-                .signWith(SignatureAlgorithm.HS256, secret_key)
-                .compact();
     }
 
     private Claims parseJwtClaims(final String token) {
@@ -99,11 +70,6 @@ public class JwtUtil {
         } else {
             throw new InvalidateClaimsException(MessageCode.INVALIDATE_CLAIMS_EXCEPTION.getMessage());
         }
-        /*try {
-            return claims.getExpiration().after(new Date());
-        } catch (Exception e) {
-            throw e;
-        }*/
     }
 
     public String getUserId(Claims claims) {
@@ -114,7 +80,6 @@ public class JwtUtil {
         return (List<String>) claims.get("roles");
     }
 
-    // JWT 토큰을 기반으로 Authentication 객체 생성
     public Authentication getAuthenticationFromToken(String token) {
         try {
             Claims claims = parseJwtClaims(token.replace(TOKEN_PREFIX, "")); // Bearer 제거 후 파싱
@@ -124,5 +89,4 @@ public class JwtUtil {
             throw new RuntimeException("Invalid JWT Token", e);
         }
     }
-
 }
