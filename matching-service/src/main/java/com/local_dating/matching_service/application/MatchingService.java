@@ -23,19 +23,30 @@ public class MatchingService {
     private final UserServiceClient userServiceClient;
 
     @Transactional
-    public void requestMatching(final long userid, final String authentication, final MatchingVO matchingVO) {
+    public int requestMatching(final long userid, final String authentication, final MatchingVO matchingVO) {
 
-        //matchingeRepository.save(new Matching(matchingVO));
-        System.out.println("zzz");
-        userServiceClient.saveCoin(userid, authentication, new UserCoinDTO(String.valueOf(userid), -10000L));
+        if (userServiceClient.viewCoin(userid, authentication) >= 10000L) {
+            userServiceClient.saveCoin(userid, authentication, new UserCoinDTO(String.valueOf(userid), -10000L));
 
+            Matching matching = matchingMapper.INSTANCE.matchingVOtoMatching(matchingVO, "000", userid
+                    , LocalDateTime.now(), userid, LocalDateTime.now());
+            matchingeRepository.save(matching);
+            return 0;
+        } else {
+            return -1; //실패
+        }
+
+        /*Matching matching = matchingMapper.INSTANCE.matchingVOtoMatching(matchingVO, "000", userid
+                , LocalDateTime.now(), userid, LocalDateTime.now());*/
+        /*
         Matching matching = matchingMapper.INSTANCE.matchingVOtoMatching(matchingVO);
         matching.setStatusCd("000");
         matching.setInUser(userid);
         matching.setModUser(userid);
         matching.setInDate(LocalDateTime.now());
         matching.setModDate(LocalDateTime.now());
-        matchingeRepository.save(matching);
+        */
+        //matchingeRepository.save(matching);
         //matchingeRepository.save(matchingMapper.INSTANCE.matchingVOtoMatching(matchingVO));
     }
 

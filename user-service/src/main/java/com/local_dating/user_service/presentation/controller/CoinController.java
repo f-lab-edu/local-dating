@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -26,13 +25,13 @@ public class CoinController {
 
     @PreAuthorize("isAuthenticated() and #id == authentication.getPrincipal()")
     @GetMapping(value = "/v1/users/{id}/coin")
-     public Long viewCoin(final @PathVariable("id") long id, final Authentication authentication) {
-        return userCoinService.viewCoin(authentication.getPrincipal().toString());
+    public Long viewCoin(final @PathVariable("id") long id, final @RequestHeader("Authorization") String authentication) {
+        return userCoinService.viewCoin(jwtUtil.getAuthenticationFromToken(authentication).getPrincipal().toString());
     }
 
     @PreAuthorize("isAuthenticated() and #id == authentication.getPrincipal()")
     @PostMapping(value = "/v1/users/{id}/coin")
-    public void saveCoin(final @PathVariable("id") long id, final @RequestHeader("Authorization") String authentication, final UserCoinDTO userCoinDTO) {
+    public void saveCoin(final @PathVariable("id") long id, final @RequestHeader("Authorization") String authentication, @RequestBody final UserCoinDTO userCoinDTO) {
 
         String userId = jwtUtil.getAuthenticationFromToken(authentication).getPrincipal().toString();
         userCoinService.saveCoin(userId, userCoinMapper.INSTANCE.toUserCoinVO(userCoinDTO));

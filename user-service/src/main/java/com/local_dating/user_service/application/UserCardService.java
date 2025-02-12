@@ -59,7 +59,7 @@ public class UserCardService {
         userPreferenceList2 = userPreferenceList2.subList(0, Math.min(3,userPreferenceList2.size()));
 
         List<UserPreferenceCountVO2> recommendUser = userPreferenceRepositoryCustom.findRecommendUser(userId, Stream.concat(userPreferenceList1.stream(), userPreferenceList2.stream()).toList());
-        if (recommendUser.size() == 0) {
+        if (recommendUser.isEmpty()) {
             recommendUser = userPreferenceRepositoryCustom.findRecommendUserAlter(userId);
             //recommendUser = userPreferenceRepository.findTop3ByUserIdNOTOrderByModDateDesc(userId);
         }
