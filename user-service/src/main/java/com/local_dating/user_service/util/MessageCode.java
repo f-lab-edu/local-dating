@@ -9,7 +9,8 @@ public enum MessageCode {
     , METHOD_ARGUMENT_NOT_VALID_EXCEPTION("잘못된 데이터입력")
     , DATA_INTEGRITY_VIOLATION_EXCEPTION("데이터 오류")
     , BAD_CREDENTIAL_EXCEPTION("잘못된 회원정보")
-    , INVALIDATE_CLAIMS_EXCEPTION("인증 오류");
+    , INVALIDATE_CLAIMS_EXCEPTION("인증 오류")
+    , INSUFFICIENT_COIN("코인 부족");
 
     private final String message;
 

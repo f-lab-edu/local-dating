@@ -22,7 +22,7 @@ public class UserCoin {
         this.balance = vo.balance();
     }
 
-    public UserCoin(String userId, Long balance) {
+    public UserCoin(Long userId, Long balance) {
         this.userId = userId;
         this.balance = balance;
     }
@@ -33,7 +33,7 @@ public class UserCoin {
     private Long id;
 
     @Column(name = "user_id")
-    private String userId;
+    private Long userId;
 
     @Column(name = "balance")
     private Long balance;

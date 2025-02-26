@@ -7,6 +7,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @RestControllerAdvice
 public class MatchExceptionHandler {
 
@@ -18,6 +21,22 @@ public class MatchExceptionHandler {
         logger.error(e.getMessage());
         return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity handleException(BusinessException e) {
+
+        logger.error(e.getClass().getName());
+        logger.error(e.getMessage());
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("errorCode", e.getMessageCode().getCode());
+        response.put("errorMessage", e.getMessageCode().getMessage());
+        response.put("status", e.getMessageCode().getStatus());
+
+        return new ResponseEntity<>(response, e.getMessageCode().getStatus());
+        //return new ResponseEntity<>(e.getMessage(), e.getMessageCode().getStatus());
+    }
+
 /*
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity handleException(AccessDeniedException e) {

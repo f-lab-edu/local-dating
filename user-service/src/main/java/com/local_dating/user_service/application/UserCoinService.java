@@ -17,7 +17,7 @@ public class UserCoinService {
     private final UserCoinRepository userCoinRepository;
     private final KafkaProducer kafkaProducer;
 
-    public Long viewCoin(final String userId) {
+    public Long viewCoin(final Long userId) {
         return userCoinRepository.findByUserId(userId).map(el->{
             return el.getBalance();
         }).orElseGet(()->{
@@ -26,7 +26,7 @@ public class UserCoinService {
     }
 
     @Transactional
-    public void saveCoin(final String userId, final UserCoinVO userCoinVO) {
+    public void saveCoin(final Long userId, final UserCoinVO userCoinVO) {
         userCoinRepository.findByUserId(userId).map(el -> {
             el.setBalance(el.getBalance() + userCoinVO.balance());
             kafkaProducer.sendMessage("coin-topic", new UserCoinLogVO(userId, userCoinVO.balance(), "charge", LocalDateTime.now(), userId), false);
