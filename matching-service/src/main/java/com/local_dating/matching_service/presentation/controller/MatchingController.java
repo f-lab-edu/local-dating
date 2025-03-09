@@ -17,10 +17,9 @@ public class MatchingController {
 
     //@PreAuthorize("isAuthenticated() and #id == authentication.getPrincipal()")
     @PostMapping(value = "/v1/users/{id}/matches")
-    public int requestMatch(final @PathVariable("id") long id, @RequestHeader("Authorization") String authentication, @RequestBody final MatchingDTO dto) {
-    //public void requestMatch(final @PathVariable("id") long userid, final Authentication authentication, @RequestBody final MatchingDTO dto) {
+    public void requestMatch(final @PathVariable("id") long id, @RequestHeader("Authorization") String authentication, @RequestBody final MatchingDTO dto) {
 
-        return matchingService.requestMatching(id, authentication, matchingMapper.INSTANCE.matchingDTOToMatchingVO(dto));
+        matchingService.requestMatching(id, authentication, matchingMapper.INSTANCE.matchingDTOToMatchingVO(dto));
     }
 
     @PutMapping(value = "/v1/users/{id}/matches")
