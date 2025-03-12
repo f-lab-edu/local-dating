@@ -8,6 +8,8 @@ import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 
 @Mapper(componentModel = "spring")
 public interface MatchingMapper {
@@ -21,4 +23,12 @@ public interface MatchingMapper {
     @Mapping(target = "modUser", source = "modUser")
     @Mapping(target = "modDate", source = "modDate")
     Matching matchingVOtoMatching(MatchingVO matchingVO, String statusCd, long inUser, LocalDateTime inDate, long modUser, LocalDateTime modDate);
+
+    List<MatchingVO> matchingstoMatchingVOs(List<Matching> matchings);
+
+    MatchingVO matchingtoMatchingVO(Matching matching);
+
+    List<MatchingDTO> matchingVOsToMatchingDTOs(List<MatchingVO> matchingVOs);
+
+    MatchingDTO matchingVOToMatchingDTO(Optional<MatchingVO> matchingVO);
 }

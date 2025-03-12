@@ -8,7 +8,9 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum MessageCode {
     INVALIDATE_CLAIMS_EXCEPTION("ERROR_CLAIMS", "인증 오류", HttpStatus.BAD_REQUEST)
-    , INSUFFICIENT_COIN("ERROR_COIN", "코인 부족", HttpStatus.BAD_REQUEST);
+    , INSUFFICIENT_COIN("ERROR_COIN", "코인 부족", HttpStatus.BAD_REQUEST)
+    , MATCHING_NOT_FOUND("ERROR_MATCHING", "매칭 없음", HttpStatus.BAD_REQUEST);
+
     //INVALIDATE_CLAIMS_EXCEPTION("인증 오류");
 
     private final String code;
