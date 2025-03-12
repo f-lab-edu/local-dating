@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -64,10 +65,54 @@ public class MatchingService {
     }
 
     @Transactional
-    public void updateMatchingInfo(long userid, MatchingVO matchingVO) {
+    public void updateMatchingInfo(final long userId, final String authentication, final MatchingVO matchingVO) {
+    //public void updateMatchingInfo(final long userId, final MatchingVO matchingVO) {
+
+        if (matchingVO.requId() == userId) { // 요청자 업데이트
+            matchingeRepository.findByIdAndRequId(matchingVO.id(), userId)
+                    .map(el -> {
+                        if (el.getStatusCd().equals("010")) {
+                            //el.setMatchPlace(matchingVO.matchPlace());
+                        } else if (el.getStatusCd().equals("020")) {
+                            //el.setMatchPlace(matchingVO.matchTime());
+                        }
+                        //el.setRequStatusCd(matchingVO.requStatusCd());
+                        return el;
+                    }).orElseThrow(() -> new BusinessException(MessageCode.MATCHING_NOT_FOUND));
+        } else { // 수신자 업데이트
+            matchingeRepository.findByIdAndRecvId(matchingVO.id(), userId)
+                    .map(el -> {
+                        if (el.getStatusCd().equals("000")) {
+                            Optional.ofNullable(userServiceClient.viewCoin(userId, authentication))
+                                    .filter(coin -> coin >= 10000L)
+                                    .map(coin -> {
+                                        userServiceClient.saveCoin(userId, authentication, new UserCoinDTO(String.valueOf(userId), -10000L));
+                                        el.setRecvStatusCd("010");
+                                        el.setStatusCd("010");
+                                        return el;
+                                    })
+                                    .orElseThrow(() -> new BusinessException(MessageCode.INSUFFICIENT_COIN));
+                        }
+                        return el;
+                    });
+        }
 
         //userServiceClient.saveCoin(userid);
-        matchingeRepository.save(matchingMapper.INSTANCE.matchingVOtoMatching(matchingVO));
+        //matchingeRepository.save(matchingMapper.INSTANCE.matchingVOtoMatching(matchingVO));
+    }
+
+    public List<MatchingVO> getMatchingInfos(final long userId) {
+        return matchingMapper.INSTANCE.matchingstoMatchingVOs(matchingeRepository.findByRequIdOrRecvIdAndStatusCdNot(userId, userId,"090"));
+        //return matchingMapper.INSTANCE.matchingstoMatchingVOs(matchingeRepository.findByRecvIdAndStatusCdNot(userId, "090"));
+        //return matchingMapper.INSTANCE.matchingstoMatchingVOs(matchingeRepository.findByRecvIdAndStatusCdNot090(userId));
+        //return matchingeRepository.findByRecvIdAndStatusCdNot090(userId);
+    }
+
+    public Optional<MatchingVO> getMatchingInfo(final long userId, final long matchId) {
+        return Optional.ofNullable(matchingeRepository.findById(matchId).map(el -> {
+            return matchingMapper.INSTANCE.matchingtoMatchingVO(el);
+        }).orElseThrow(() -> new BusinessException(MessageCode.MATCHING_NOT_FOUND)));
+        //return matchingMapper.INSTANCE.matchingtoMatchingVO(matchingeRepository.findById(matchId));
     }
 
 }
