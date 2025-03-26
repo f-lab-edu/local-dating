@@ -21,4 +21,8 @@ public interface MatchingeRepository extends JpaRepository<Matching, Long> {
     public Optional<Matching> findById(long id);
     //public List<Matching> findByRecvIdAndStatusCdNot(long id, String status);
     //public List<Matching> findByRecvIdAndStatusCdNot090(long id);
+
+    public List<Matching> findByRecvIdAndStatusCdNotIn(long id, List<String> statusCd);
+
+    public List<Matching> findByRequIdAndStatusCdNotIn(long id, List<String> statusCd);
 }

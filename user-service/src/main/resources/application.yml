@@ -61,3 +61,4 @@ logging:
     org.springframework.data.redis: DEBUG
     #org.hibernate: DEBUG
     #org: INFO
+    org.hibernate.orm.jdbc.bind: trace

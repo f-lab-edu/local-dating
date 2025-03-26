@@ -36,4 +36,17 @@ public class UserCoinService {
             return userCoinRepository.save(new UserCoin(userId, userCoinVO.balance()));
         });
     }
+
+    @Transactional
+    public void updateCoin(final Long userId, final UserCoinVO userCoinVO) {
+        userCoinRepository.findByUserId(userCoinVO.userId()).map(el -> {
+            el.setBalance(el.getBalance() + userCoinVO.balance());
+            kafkaProducer.sendMessage("coin-topic", new UserCoinLogVO(userCoinVO.userId(), userCoinVO.balance(), userCoinVO.coinActionType().getCode(), LocalDateTime.now(), userCoinVO.userId()), false);
+            return userCoinRepository.save(el);
+        }).orElseGet(() -> {
+            kafkaProducer.sendMessage("coin-topic", new UserCoinLogVO(userCoinVO.userId(), userCoinVO.balance(), userCoinVO.coinActionType().getCode(), LocalDateTime.now(), userCoinVO.userId()), false);
+            return userCoinRepository.save(new UserCoin(userCoinVO.userId(), userCoinVO.balance()));
+        });
+    }
+
 }
