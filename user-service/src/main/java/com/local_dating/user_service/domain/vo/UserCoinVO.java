@@ -1,4 +1,6 @@
 package com.local_dating.user_service.domain.vo;
 
-public record UserCoinVO(Long userId, Long balance) {
+import com.local_dating.user_service.domain.type.CoinActionType;
+
+public record UserCoinVO(Long userId, Long balance, CoinActionType coinActionType) {
 }

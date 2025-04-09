@@ -4,7 +4,7 @@ import com.local_dating.matching_service.presentation.dto.UserCoinDTO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
-@FeignClient(name = "user-service", url = "http://localhost:8081")
+@FeignClient(name = "user-service", url = "http://localhost:8080")
 public interface UserServiceClient {
 
     @GetMapping(value = "/v1/users/{id}/coin")
@@ -13,4 +13,7 @@ public interface UserServiceClient {
     @PostMapping("/v1/users/{id}/coin")
     void saveCoin(final @PathVariable("id") long id, final @RequestHeader("Authorization") String authentication, @RequestBody final UserCoinDTO userCoinDTO);
     //public void saveCoin(final @PathVariable("id") long id, final @RequestHeader("Authorization") String authentication, final UserCoinDTO userCoinDTO);
+
+    @PostMapping("/v1/users/{id}/coins")
+    void updateCoin(final @PathVariable("id") long id, final @RequestHeader("Authorization") String authentication, @RequestBody final UserCoinDTO userCoinDTO);
 }

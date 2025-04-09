@@ -38,6 +38,12 @@ public class CoinController {
         userCoinService.saveCoin(id, userCoinMapper.INSTANCE.toUserCoinVO(userCoinDTO));
     }
 
+    @PreAuthorize("isAuthenticated() and #id == authentication.getPrincipal()")
+    @PostMapping(value = "/v1/users/{id}/coins")
+    public void updateCoin(final @PathVariable("id") long id, final @RequestHeader("Authorization") String authentication, @RequestBody final UserCoinDTO userCoinDTO) {
+        userCoinService.updateCoin(id, userCoinMapper.INSTANCE.toUserCoinVO(userCoinDTO));
+    }
+
     /*@PreAuthorize("isAuthenticated() and #id == authentication.getPrincipal()")
     @PostMapping(value = "/v1/users/{id}/coin")
     public void saveCoin(final @PathVariable("id") long id, final Authentication authentication, final UserCoinDTO userCoinDTO) {
