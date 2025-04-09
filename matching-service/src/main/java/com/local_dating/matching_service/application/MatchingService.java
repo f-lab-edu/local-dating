@@ -3,6 +3,7 @@ package com.local_dating.matching_service.application;
 import com.local_dating.matching_service.domain.entity.Matching;
 import com.local_dating.matching_service.domain.mapper.MatchingMapper;
 import com.local_dating.matching_service.domain.type.CoinActionType;
+import com.local_dating.matching_service.domain.type.MatchingType;
 import com.local_dating.matching_service.domain.vo.MatchingVO;
 import com.local_dating.matching_service.infrastructure.repository.MatchingeRepository;
 import com.local_dating.matching_service.presentation.dto.UserCoinDTO;
@@ -125,7 +126,22 @@ public class MatchingService {
     }
 
     @Transactional
-    public void AcceptMatching(final long userId, final String authentication, final MatchingVO matchingVO) {
+    public void acceptMatching(final long userId, final String authentication, final MatchingVO matchingVO) {
+        Matching matching = matchingeRepository.findByIdAndRecvId(matchingVO.id(), userId)
+                .orElseThrow(() -> new BusinessException(MessageCode.MATCHING_NOT_FOUND));
+        minusCoin(userId, authentication);
+        matching.setStatusCd(MatchingType.MATCHED.getCode());
+    }
+
+    @Transactional
+    public void rejectMatching(final long userId, final String authentication, final MatchingVO matchingVO) {
+        Matching matching = matchingeRepository.findByIdAndRecvId(matchingVO.id(), userId)
+                .orElseThrow(() -> new BusinessException(MessageCode.MATCHING_NOT_FOUND));
+        retoreCoin(userId, authentication, String.valueOf(matching.getRequId()));
+        matching.setStatusCd(MatchingType.END.getCode());
+    }
+
+    /*public void AcceptMatching(final long userId, final String authentication, final MatchingVO matchingVO) {
         matchingeRepository.findByIdAndRecvId(matchingVO.id(), userId)
                 .map(el -> {
                     Optional.ofNullable(userServiceClient.viewCoin(userId, authentication))
@@ -140,16 +156,42 @@ public class MatchingService {
                 })
                 .orElseThrow(() -> new BusinessException(MessageCode.MATCHING_NOT_FOUND));
     }
+    */
 
-    @Transactional
+    /*@Transactional
     public void rejectMatching(final long userId, final String authentication, final MatchingVO matchingVO) {
         matchingeRepository.findByIdAndRecvId(matchingVO.id(), userId)
                 .map(el -> {
-                    userServiceClient.updateCoin(userId, authentication, new UserCoinDTO(String.valueOf(el.getRequId()), 10000L, CoinActionType.RECHARGE)); // 코인 되돌려주기 requ사용자
                     el.setStatusCd("END");
+                    userServiceClient.updateCoin(userId, authentication, new UserCoinDTO(String.valueOf(el.getRequId()), 10000L, CoinActionType.RESTORE)); // 코인 되돌려주기 requ사용자
                     return el;
                 })
                 .orElseThrow(() -> new BusinessException(MessageCode.MATCHING_NOT_FOUND));
+    }
+    */
+
+    public void minusCoin(final long userId, final String authentication) {
+        Optional.ofNullable(userServiceClient.viewCoin(userId, authentication))
+                .filter(coin -> coin >= 10000L)
+                .map(coin -> {
+                    userServiceClient.updateCoin(userId, authentication, new UserCoinDTO(String.valueOf(userId), -10000L, CoinActionType.CONSUME));
+                    return coin;
+                })
+                .orElseThrow(() -> new BusinessException(MessageCode.INSUFFICIENT_COIN));
+    }
+
+    public void retoreCoin(final long userId, final String authentication, final String requId) {
+        userServiceClient.updateCoin(userId, authentication, new UserCoinDTO(requId, 10000L, CoinActionType.RESTORE));
+    }
+
+    public void viewSchedule(final long userId, final String authentication, final MatchingVO matchingVO) {
+
+    }
+
+    @Transactional
+    public void updateSchedule(final long userId, final String authentication) {
+
+
     }
 
 }

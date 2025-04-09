@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -60,11 +62,13 @@ public class Matching {
     private long inUser;
 
     @Column(name = "in_date")
+    @CreationTimestamp
     private LocalDateTime inDate;
 
     @Column(name = "mod_user")
     private long modUser;
 
     @Column(name = "mod_date")
+    @UpdateTimestamp
     private LocalDateTime modDate;
 }
