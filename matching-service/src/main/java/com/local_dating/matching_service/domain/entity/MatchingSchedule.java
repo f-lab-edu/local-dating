@@ -28,11 +28,20 @@ public class MatchingSchedule {
     @Column(name = "user_id")
     private Long userId;
 
+    @Column(name = "schedule_status")
+    private String scheduleStatus;
+
     @Column(name = "matching_date")
     private LocalDate matchingDate;
 
     @Column(name = "matching_time")
     private LocalTime matchingTime;
+
+    @Column(name = "matching_time2")
+    private LocalTime matchingTime2;
+
+    //@Column(name ="pair_id")
+    //private Long pairId;
 
     @Column(name = "in_user")
     private long inUser;

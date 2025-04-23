@@ -117,6 +117,12 @@ public class MatchingService {
         //return matchingMapper.INSTANCE.matchingtoMatchingVO(matchingeRepository.findById(matchId));
     }
 
+    public Optional<MatchingVO> getMatchingInfo(final Long matchId) {
+        return Optional.ofNullable(matchingeRepository.findById(matchId).map(el -> {
+            return matchingMapper.INSTANCE.matchingtoMatchingVO(el);
+        }).orElseThrow(() -> new BusinessException(MessageCode.MATCHING_NOT_FOUND)));
+    }
+
     public List<MatchingVO> getReceivedMatches(final long userId) {
         return matchingMapper.INSTANCE.matchingstoMatchingVOs(matchingeRepository.findByRecvIdAndStatusCdNotIn(userId, List.of("CANCELED", "END")));
     }
