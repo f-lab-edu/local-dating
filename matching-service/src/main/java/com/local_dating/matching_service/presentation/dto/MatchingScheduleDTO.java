@@ -5,5 +5,5 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-public record MatchingScheduleDTO(Long matchingId, Long userId, @JsonFormat(pattern = "yyyyMMdd") LocalDate matchingDate, @JsonFormat(pattern = "HHmm") LocalTime matchingTime) {
+public record MatchingScheduleDTO(Long matchingId, Long userId, @JsonFormat(pattern = "yyyyMMdd") LocalDate matchingDate, @JsonFormat(pattern = "HHmm") LocalTime matchingTime, @JsonFormat(pattern = "HHmm") LocalTime matchingTime2) {
 }

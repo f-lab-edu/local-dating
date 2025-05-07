@@ -17,9 +17,15 @@ public interface MatchingScheduleMapper {
 
     MatchingScheduleVO matchingScheduleDTOToMatchingScheduleVO(MatchingScheduleDTO matchingScheduleDTO);
 
+    MatchingScheduleVO matchingScheduleToMatchingScheduleVO(MatchingSchedule matchingSchedule);
+
+    MatchingScheduleDTO matchingScheduleVOToMatchingScheduleDTO(MatchingScheduleVO matchingScheduleVO);
+
     List<MatchingScheduleVO> matchingScheduleDTOsToMatchingScheduleVOs(List<MatchingScheduleDTO> matchingScheduleDTOs);
 
     List<MatchingScheduleDTO> matchingScheduleVOsToMatchingScheduleDTOs(List<MatchingScheduleVO> matchingScheduleVOs);
 
     MatchingSchedule matchingScheduleVOToMatchingSchedule(MatchingScheduleVO matchingScheduleVO);
+
+
 }

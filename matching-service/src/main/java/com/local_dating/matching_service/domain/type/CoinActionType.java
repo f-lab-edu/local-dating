@@ -8,7 +8,8 @@ import lombok.RequiredArgsConstructor;
 public enum CoinActionType {
     CHARGE("CHARGE", "충전")
     , CONSUME("CONSUME", "소모")
-    , RESTORE("RESTORE", "복구");
+    , RESTORE("RESTORE", "복구")
+    , TICKET_PRICE("10000", "티켓가격");
 
     private final String code;
     private final String message;

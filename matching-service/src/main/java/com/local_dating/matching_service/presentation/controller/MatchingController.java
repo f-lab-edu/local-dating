@@ -25,9 +25,10 @@ public class MatchingController {
     //@PreAuthorize("isAuthenticated() and #id == authentication.getPrincipal()")
     @PostMapping(value = "/v1/matches/users/{id}/matches")
     @Operation(summary = "매칭 생성", description = "매칭을 생성한다")
-    public void requestMatch(final @PathVariable("id") long id, @RequestHeader("Authorization") String authentication, @RequestBody final MatchingDTO dto) {
+    public MatchingDTO requestMatch(final @PathVariable("id") long id, @RequestHeader("Authorization") String authentication, @RequestBody final MatchingDTO dto) {
+    //public void requestMatch(final @PathVariable("id") long id, @RequestHeader("Authorization") String authentication, @RequestBody final MatchingDTO dto) {
 
-        matchingService.requestMatching(id, authentication, matchingMapper.INSTANCE.matchingDTOToMatchingVO(dto));
+        return matchingMapper.INSTANCE.matchingVOToMatchingDTO(matchingService.requestMatching(id, authentication, matchingMapper.INSTANCE.matchingDTOToMatchingVO(dto)));
     }
 
     @PatchMapping(value = "/v1/matches/users/{id}/matches")
@@ -66,14 +67,14 @@ public class MatchingController {
 
     @PutMapping(value = "/v1/matches/users/{id}/accept-matches")
     @Operation(summary = "매칭 수락", description = "보낸 매칭에 대한 수락, 코인 지불")
-    public void acceptMatch(@PathVariable("id") final long userId, @RequestHeader("Authorization") String authentication, @RequestBody final MatchingDTO dto) {
-        matchingService.acceptMatching(userId, authentication, matchingMapper.INSTANCE.matchingDTOToMatchingVO(dto));
+    public MatchingDTO acceptMatch(@PathVariable("id") final long userId, @RequestHeader("Authorization") String authentication, @RequestBody final MatchingDTO dto) {
+        return matchingMapper.INSTANCE.matchingVOToMatchingDTO(matchingService.acceptMatching(userId, authentication, matchingMapper.INSTANCE.matchingDTOToMatchingVO(dto)));
     }
 
     @PutMapping(value = "/v1/matches/users/{id}/reject-matches")
     @Operation(summary = "매칭 거절", description = "보낸 매칭에 대한 거절, 요청자 코인 환불")
-    public void rejectMatch(@PathVariable("id") final long userId, @RequestHeader("Authorization") String authentication, @RequestBody final MatchingDTO dto) {
-        matchingService.rejectMatching(userId, authentication, matchingMapper.INSTANCE.matchingDTOToMatchingVO(dto));
+    public MatchingDTO rejectMatch(@PathVariable("id") final long userId, @RequestHeader("Authorization") String authentication, @RequestBody final MatchingDTO dto) {
+        return matchingMapper.INSTANCE.matchingVOToMatchingDTO(matchingService.rejectMatching(userId, authentication, matchingMapper.INSTANCE.matchingDTOToMatchingVO(dto)));
     }
 
 }
