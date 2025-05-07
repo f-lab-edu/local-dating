@@ -30,7 +30,8 @@ public class MatchingService {
 
     @Transactional
     //public int requestMatching(final long userid, final String authentication, final MatchingVO matchingVO) {
-    public void requestMatching(final long userid, final String authentication, final MatchingVO matchingVO) {
+    //public void requestMatching(final long userid, final String authentication, final MatchingVO matchingVO) {
+    public MatchingVO requestMatching(final long userid, final String authentication, final MatchingVO matchingVO) {
 /*
         if (userServiceClient.viewCoin(userid, authentication) >= 10000L) {
             userServiceClient.saveCoin(userid, authentication, new UserCoinDTO(String.valueOf(userid), -10000L));
@@ -45,28 +46,29 @@ public class MatchingService {
 
         Long coinz = userServiceClient.viewCoin(userid, authentication);
         log.info("viewCoin result: {}", coinz); // ✅ 코인 값 확인
-        Optional.ofNullable(userServiceClient.viewCoin(userid, authentication))
-                .filter(coin -> coin >= 10000L)
+        return Optional.ofNullable(userServiceClient.viewCoin(userid, authentication))
+                .filter(coin -> coin >= Long.valueOf(CoinActionType.TICKET_PRICE.getCode()))
                 .map(coin -> {
-                    userServiceClient.saveCoin(userid, authentication, new UserCoinDTO(String.valueOf(userid), -10000L, CoinActionType.CONSUME));
+                    userServiceClient.saveCoin(userid, authentication, new UserCoinDTO(String.valueOf(userid), -Long.valueOf(CoinActionType.TICKET_PRICE.getCode()), CoinActionType.CONSUME));
 
-                    Matching matching = matchingMapper.INSTANCE.matchingVOtoMatching(matchingVO, "000", userid
+                    Matching matching = matchingMapper.INSTANCE.matchingVOtoMatching(matchingVO, MatchingType.NEW.getCode(), userid
                             , LocalDateTime.now(), userid, LocalDateTime.now());
-                    return matchingeRepository.save(matching);
+                    return matchingMapper.INSTANCE.matchingtoMatchingVO(matchingeRepository.save(matching));
                 })
                 .orElseThrow(() -> new BusinessException(MessageCode.INSUFFICIENT_COIN));
-
-/*        if (userServiceClient.viewCoin(userid, authentication) >= 10000L) {
-            userServiceClient.saveCoin(userid, authentication, new UserCoinDTO(String.valueOf(userid), -10000L));
-
-            Matching matching = matchingMapper.INSTANCE.matchingVOtoMatching(matchingVO, "000", userid
-                    , LocalDateTime.now(), userid, LocalDateTime.now());
-            matchingeRepository.save(matching);
-        } else {
-        }*/
     }
 
     @Transactional
+    public void updateMatchingInfo(final long userId, final String authentication, final MatchingVO matchingVO) {
+
+        if (matchingVO.requId() == userId) { // 요청자 업데이트
+            this.updateMatchingInfRequ(matchingVO, userId);
+        } else { // 수신자 업데이트
+            this.updateMatchingInfRecv(matchingVO, userId, authentication);
+        }
+    }
+
+    /*@Transactional
     public void updateMatchingInfo(final long userId, final String authentication, final MatchingVO matchingVO) {
     //public void updateMatchingInfo(final long userId, final MatchingVO matchingVO) {
 
@@ -99,12 +101,10 @@ public class MatchingService {
                     });
         }
 
-        //userServiceClient.saveCoin(userid);
-        //matchingeRepository.save(matchingMapper.INSTANCE.matchingVOtoMatching(matchingVO));
-    }
+    }*/
 
     public List<MatchingVO> getMatchingInfos(final long userId) {
-        return matchingMapper.INSTANCE.matchingstoMatchingVOs(matchingeRepository.findByRequIdOrRecvIdAndStatusCdNot(userId, userId,"090"));
+        return matchingMapper.INSTANCE.matchingstoMatchingVOs(matchingeRepository.findByRequIdOrRecvIdAndStatusCdNot(userId, userId,MatchingType.END.getCode()));
         //return matchingMapper.INSTANCE.matchingstoMatchingVOs(matchingeRepository.findByRecvIdAndStatusCdNot(userId, "090"));
         //return matchingMapper.INSTANCE.matchingstoMatchingVOs(matchingeRepository.findByRecvIdAndStatusCdNot090(userId));
         //return matchingeRepository.findByRecvIdAndStatusCdNot090(userId);
@@ -132,19 +132,27 @@ public class MatchingService {
     }
 
     @Transactional
-    public void acceptMatching(final long userId, final String authentication, final MatchingVO matchingVO) {
-        Matching matching = matchingeRepository.findByIdAndRecvId(matchingVO.id(), userId)
+    public MatchingVO acceptMatching(final long userId, final String authentication, final MatchingVO matchingVO) {
+        Matching matching = this.setMatchingStatus(userId, matchingVO, MatchingType.MATCHED);
+        minusCoin(userId, authentication);
+
+        return matchingMapper.INSTANCE.matchingtoMatchingVO(matching);
+        /*Matching matching = matchingeRepository.findByIdAndRecvId(matchingVO.id(), userId)
                 .orElseThrow(() -> new BusinessException(MessageCode.MATCHING_NOT_FOUND));
         minusCoin(userId, authentication);
-        matching.setStatusCd(MatchingType.MATCHED.getCode());
+        matching.setStatusCd(MatchingType.MATCHED.getCode());*/
     }
 
     @Transactional
-    public void rejectMatching(final long userId, final String authentication, final MatchingVO matchingVO) {
-        Matching matching = matchingeRepository.findByIdAndRecvId(matchingVO.id(), userId)
+    public MatchingVO rejectMatching(final long userId, final String authentication, final MatchingVO matchingVO) {
+        Matching matching = this.setMatchingStatus(userId, matchingVO, MatchingType.END);
+        retoreCoin(userId, authentication, String.valueOf(matching.getRequId()));
+
+        return matchingMapper.INSTANCE.matchingtoMatchingVO(matching);
+        /*Matching matching = matchingeRepository.findByIdAndRecvId(matchingVO.id(), userId)
                 .orElseThrow(() -> new BusinessException(MessageCode.MATCHING_NOT_FOUND));
         retoreCoin(userId, authentication, String.valueOf(matching.getRequId()));
-        matching.setStatusCd(MatchingType.END.getCode());
+        matching.setStatusCd(MatchingType.END.getCode());*/
     }
 
     /*public void AcceptMatching(final long userId, final String authentication, final MatchingVO matchingVO) {
@@ -178,16 +186,17 @@ public class MatchingService {
 
     public void minusCoin(final long userId, final String authentication) {
         Optional.ofNullable(userServiceClient.viewCoin(userId, authentication))
-                .filter(coin -> coin >= 10000L)
+                .filter(coin -> coin >= Long.valueOf(CoinActionType.TICKET_PRICE.getCode()))
+                //.filter(coin -> coin >= 10000L)
                 .map(coin -> {
-                    userServiceClient.updateCoin(userId, authentication, new UserCoinDTO(String.valueOf(userId), -10000L, CoinActionType.CONSUME));
+                    userServiceClient.updateCoin(userId, authentication, new UserCoinDTO(String.valueOf(userId), -Long.valueOf(CoinActionType.TICKET_PRICE.getCode()), CoinActionType.CONSUME));
                     return coin;
                 })
                 .orElseThrow(() -> new BusinessException(MessageCode.INSUFFICIENT_COIN));
     }
 
     public void retoreCoin(final long userId, final String authentication, final String requId) {
-        userServiceClient.updateCoin(userId, authentication, new UserCoinDTO(requId, 10000L, CoinActionType.RESTORE));
+        userServiceClient.updateCoin(userId, authentication, new UserCoinDTO(requId, Long.valueOf(CoinActionType.TICKET_PRICE.getCode()), CoinActionType.RESTORE));
     }
 
     public void viewSchedule(final long userId, final String authentication, final MatchingVO matchingVO) {
@@ -198,6 +207,44 @@ public class MatchingService {
     public void updateSchedule(final long userId, final String authentication) {
 
 
+    }
+
+    private Matching setMatchingStatus(final long userId, final MatchingVO matchingVO, final MatchingType matchingType) {
+        Matching matching = matchingeRepository.findByIdAndRecvId(matchingVO.id(), userId)
+                .orElseThrow(() -> new BusinessException(MessageCode.MATCHING_NOT_FOUND));
+        matching.setStatusCd(matchingType.getCode());
+        return matching;
+    }
+
+    private void updateMatchingInfRequ(final MatchingVO matchingVO, final long userId) {
+        matchingeRepository.findByIdAndRequId(matchingVO.id(), userId)
+                .map(el -> {
+                    if (el.getStatusCd().equals("010")) {
+                        //el.setMatchPlace(matchingVO.matchPlace());
+                    } else if (el.getStatusCd().equals("020")) {
+                        //el.setMatchPlace(matchingVO.matchTime());
+                    }
+                    //el.setRequStatusCd(matchingVO.requStatusCd());
+                    return el;
+                }).orElseThrow(() -> new BusinessException(MessageCode.MATCHING_NOT_FOUND));
+    }
+
+    private void updateMatchingInfRecv(final MatchingVO matchingVO, final long userId, final String authentication) {
+        matchingeRepository.findByIdAndRecvId(matchingVO.id(), userId)
+                .map(el -> {
+                    if (el.getStatusCd().equals(MatchingType.NEW.getCode())) {
+                        Optional.ofNullable(userServiceClient.viewCoin(userId, authentication))
+                                .filter(coin -> coin >= Long.valueOf(CoinActionType.TICKET_PRICE.getCode()))
+                                .map(coin -> {
+                                    userServiceClient.saveCoin(userId, authentication, new UserCoinDTO(String.valueOf(userId), -Long.valueOf(CoinActionType.TICKET_PRICE.getCode()), CoinActionType.CONSUME));
+                                    el.setRecvStatusCd(MatchingType.MATCHED.getCode());
+                                    el.setStatusCd(MatchingType.MATCHED.getCode());
+                                    return el;
+                                })
+                                .orElseThrow(() -> new BusinessException(MessageCode.INSUFFICIENT_COIN));
+                    }
+                    return el;
+                });
     }
 
 }

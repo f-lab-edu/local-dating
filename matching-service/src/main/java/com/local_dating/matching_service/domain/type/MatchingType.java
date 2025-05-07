@@ -7,7 +7,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum MatchingType {
 
-    MATCHED("MATCHED", "매칭")
+    NEW("NEW", "신규매칭")
+    , MATCHED("MATCHED", "매칭")
     , END("END", "종료")
     , SAME("SAME", "스케줄 일치")
     , REQUEST("REQUEST", "스케줄 요청");
