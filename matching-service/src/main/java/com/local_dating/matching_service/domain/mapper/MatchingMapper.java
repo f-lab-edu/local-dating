@@ -31,4 +31,6 @@ public interface MatchingMapper {
     List<MatchingDTO> matchingVOsToMatchingDTOs(List<MatchingVO> matchingVOs);
 
     MatchingDTO matchingVOToMatchingDTO(Optional<MatchingVO> matchingVO);
+
+    MatchingDTO matchingVOToMatchingDTO(MatchingVO matchingVO);
 }
