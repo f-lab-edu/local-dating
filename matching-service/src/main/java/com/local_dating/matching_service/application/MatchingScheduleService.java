@@ -2,6 +2,7 @@ package com.local_dating.matching_service.application;
 
 import com.local_dating.matching_service.domain.entity.MatchingSchedule;
 import com.local_dating.matching_service.domain.mapper.MatchingScheduleMapper;
+import com.local_dating.matching_service.domain.type.MatchingScheduleType;
 import com.local_dating.matching_service.domain.type.MatchingType;
 import com.local_dating.matching_service.domain.vo.MatchingScheduleVO;
 import com.local_dating.matching_service.domain.vo.MatchingVO;
@@ -35,6 +36,7 @@ public class MatchingScheduleService {
 
     public List<MatchingScheduleVO> viewScheduleSame(final Long matchingId, final Long userId) {
         return matchingScheduleMapper.INSTANCE.matchingSchedulesToMatchingScheduleVOs(matchingScheduleRepository.findMatchingSchedulesByMatchingIdAndScheduleStatus(matchingId, MatchingType.SAME.getCode()));
+        //return matchingScheduleMapper.INSTANCE.matchingSchedulesToMatchingScheduleVOs(matchingScheduleRepository.findMatchingSchedulesByMatchingIdAndScheduleStatus(matchingId, MatchingType.SAME.getCode()));
         //return matchingScheduleMapper.INSTANCE.matchingSchedulesToMatchingScheduleVOs(matchingScheduleRepository.findMatchingSchedulesByMatchingIdAndUserIdAndScheduleStatus(matchingId, userId, MatchingType.SAME.getCode()));
     }
 
@@ -44,7 +46,7 @@ public class MatchingScheduleService {
         List<MatchingSchedule> matchingScheduleList = matchingScheduleVOs.stream()
                 .map(el -> matchingScheduleRepository
                         .findMatchingScheduleByMatchingIdAndUserIdAndMatchingDateAndMatchingTime(id, userId, el.matchingDate(), el.matchingTime())
-                        .orElseGet(() -> matchingScheduleRepository.save(matchingScheduleMapper.INSTANCE.matchingScheduleVOToMatchingSchedule(el))
+                        .orElseGet(() -> matchingScheduleRepository.save(matchingScheduleMapper.INSTANCE.matchingScheduleVOToMatchingSchedule(el, MatchingScheduleType.SUBMITTED.getCode()))
                         )
                 ).collect(Collectors.toUnmodifiableList());
 
@@ -83,13 +85,14 @@ public class MatchingScheduleService {
 
     @Transactional
     public MatchingScheduleVO updateSchedule(final Long id, final Long userId, final MatchingScheduleVO matchingScheduleVO) {
-        MatchingSchedule matchingSchedule = matchingScheduleRepository.findMatchingScheduleByIdAndUserId(id, userId).map(el -> {
+        MatchingSchedule matchingSchedule = matchingScheduleRepository.findMatchingScheduleByIdAndUserIdAndScheduleStatus(id, userId, MatchingScheduleType.SUBMITTED.getCode()).map(el -> {
             el.setMatchingDate(matchingScheduleVO.matchingDate());
             el.setMatchingTime(matchingScheduleVO.matchingTime());
             return el;
         }).orElseThrow(() -> new BusinessException(MessageCode.MATCHING_SCHEDULE_NOT_FOUND));
 
-        checkMatchingSchedule(id);
+        checkMatchingSchedule(matchingSchedule.getMatchingId());
+        //checkMatchingSchedule(id);
 
         return matchingScheduleMapper.INSTANCE.matchingScheduleToMatchingScheduleVO(matchingSchedule);
     }
@@ -163,7 +166,7 @@ public class MatchingScheduleService {
 
     @Transactional
     public MatchingScheduleVO requestMatchingSchedule(final Long id, final Long scheduleId) {
-        return this.setScheduleStatus(id, scheduleId, MatchingType.SAME, MatchingType.REQUEST);
+        return this.setScheduleStatus(id, scheduleId, MatchingType.SAME, MatchingScheduleType.SUBMITTED);
         /*matchingScheduleRepository.findMatchingScheduleByIdAndScheduleIdAndScheduleStatus(id, scheduleId, MatchingType.SAME.getCode())
                 //matchingScheduleRepository.findMatchingScheduleByIdAndScheduleId(id, scheduleId)
                 .map(el -> {
@@ -174,18 +177,13 @@ public class MatchingScheduleService {
 
     @Transactional
     public MatchingScheduleVO acceptMatchingSchedule(final Long id, final Long scheduleId) {
-        return this.setScheduleStatus(id, scheduleId, MatchingType.REQUEST, MatchingType.MATCHED);
-        /*matchingScheduleRepository.findMatchingScheduleByIdAndScheduleIdAndScheduleStatus(id, scheduleId, MatchingType.REQUEST.getCode())
-                .map(el -> {
-                    el.setScheduleStatus(MatchingType.MATCHED.getCode());
-                    return el;
-                }).orElseThrow(() -> new BusinessException(MessageCode.MATCHING_SCHEDULE_NOT_FOUND));*/
+        return this.setScheduleStatus(id, scheduleId, MatchingType.REQUEST, MatchingScheduleType.CONFIRMED);
     }
 
     @Transactional
     public MatchingScheduleVO rejectMatchingSchedule(final Long id, final Long scheduleId) {
     //public void rejectMatchingSchedule(final Long id, final Long scheduleId) {
-        return this.setScheduleStatus(id, scheduleId, MatchingType.SAME, MatchingType.END);
+        return this.setScheduleStatus(id, scheduleId, MatchingType.SAME, MatchingScheduleType.REJECTED);
         /*matchingScheduleRepository.findMatchingScheduleByIdAndScheduleIdAndScheduleStatus(id, scheduleId, MatchingType.SAME.getCode())
                 .map(el -> {
                     el.setScheduleStatus(MatchingType.END.getCode());
@@ -193,8 +191,9 @@ public class MatchingScheduleService {
                 }).orElseThrow(() -> new BusinessException(MessageCode.MATCHING_SCHEDULE_NOT_FOUND));*/
     }
 
-    private MatchingScheduleVO setScheduleStatus(final Long id, final Long scheduleId, final MatchingType checkType, final MatchingType setType) {
-        return matchingScheduleRepository.findMatchingScheduleByIdAndScheduleIdAndScheduleStatus(id, scheduleId, checkType.getCode())
+    private MatchingScheduleVO setScheduleStatus(final Long id, final Long scheduleId, final MatchingType checkType, final MatchingScheduleType setType) {
+    //private MatchingScheduleVO setScheduleStatus(final Long id, final Long scheduleId, final MatchingType checkType, final MatchingType setType) {
+        return matchingScheduleRepository.findMatchingScheduleByIdAndMatchingIdAndScheduleStatus(id, scheduleId, checkType.getCode())
                 .map(el -> {
                     el.setScheduleStatus(setType.getCode());
                     return matchingScheduleMapper.INSTANCE.matchingScheduleToMatchingScheduleVO(el);
