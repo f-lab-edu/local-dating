@@ -19,7 +19,7 @@ public class MatchingScheduleController {
     private final MatchingScheduleMapper matchingScheduleMapper;
 
     @GetMapping(value = "/v1/matches/{id}/users/{userId}/schedules")
-    @Operation(summary = "매칭 스케줄 조회", description = "특정 매칭에 대해서 들어간 일정 확인")
+    @Operation(summary = "매칭 스케줄 조회", description = "특정 매칭에 대해서 추가한 일정 확인")
     public List<MatchingScheduleDTO> viewMatchingSchedule(@RequestHeader("Authorization") String authentication, @PathVariable Long id, @PathVariable Long userId) {
         return matchingScheduleMapper.matchingScheduleVOsToMatchingScheduleDTOs(matchingScheduleService.viewSchedule(id, userId));
     }
@@ -31,6 +31,7 @@ public class MatchingScheduleController {
     }
 
     @PostMapping(value = "/v1/matches/{id}/users/{userId}/schedules")
+    @Operation(summary = "매칭 스케줄 추가", description = "특정 매칭에 대해서 스케줄 추가") // 확인
     public List<MatchingScheduleDTO> saveMatchingSchedule(@PathVariable final Long id, @PathVariable("userId") final Long userId
             , @RequestHeader("Authorization") String authentication
             , @RequestBody final List<MatchingScheduleDTO> matchingScheduleDTOs) {
@@ -40,7 +41,9 @@ public class MatchingScheduleController {
         );
     }
 
-    @PutMapping(value = "/v1/matches/{id}/users/{userId}/schedules")
+    @PutMapping(value = "/v1/matches/{id}/users/{userId}/schedules/{scheduleId}")
+    //@PutMapping(value = "/v1/matches/{id}/users/{userId}/schedules")
+    @Operation(summary = "매칭 스케줄 업데이트", description = "특정 매칭 스케줄 정보 업데이트") // 확인
     public MatchingScheduleDTO updateMatchingSchedule(@PathVariable final Long id, @PathVariable("userId") final Long userId
             , @RequestHeader("Authorization") String authentication
             , @RequestBody final MatchingScheduleDTO matchingScheduleDTO) {
@@ -50,7 +53,8 @@ public class MatchingScheduleController {
         );
     }
 
-    @PutMapping(value = "/v1/matches/{id}/users/{userId}/accept-schedules/{scheduleId}")
+    @PutMapping(value = "/v1/matches/{id}/users/{userId}/request-schedules/{scheduleId}")
+    //@PutMapping(value = "/v1/matches/{id}/users/{userId}/accept-schedules/{scheduleId}")
     public MatchingScheduleDTO requestMatchSchedule(@PathVariable final Long id, @PathVariable("scheduleId") final Long scheduleId, @RequestHeader("Authorization") String authentication) {
         return matchingScheduleMapper.INSTANCE.matchingScheduleVOToMatchingScheduleDTO(matchingScheduleService.requestMatchingSchedule(id, scheduleId));
     }
