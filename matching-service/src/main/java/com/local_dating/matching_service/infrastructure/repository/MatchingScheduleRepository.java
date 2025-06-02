@@ -12,11 +12,13 @@ import java.util.Optional;
 @Repository
 public interface MatchingScheduleRepository extends JpaRepository<MatchingSchedule, Long> {
 
-    public Optional<MatchingSchedule> findMatchingScheduleByIdAndScheduleId(Long id, Long scheduleId);
+    public Optional<MatchingSchedule> findMatchingScheduleByIdAndMatchingId(Long scheduleId, Long id);
 
-    public Optional<MatchingSchedule> findMatchingScheduleByIdAndScheduleIdAndScheduleStatus(Long id, Long scheduleId, String status);
+    public Optional<MatchingSchedule> findMatchingScheduleByIdAndMatchingIdAndScheduleStatus(Long scheduleId, Long id, String status);
 
     public Optional<MatchingSchedule> findMatchingScheduleByIdAndUserId(Long id, Long userId);
+
+    public Optional<MatchingSchedule> findMatchingScheduleByIdAndUserIdAndScheduleStatus(Long id, Long userId, String status);
 
     public List<MatchingSchedule> findMatchingSchedulesByMatchingIdAndUserId(Long id, Long userId);
 

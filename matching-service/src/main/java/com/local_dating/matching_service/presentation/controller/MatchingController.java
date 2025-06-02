@@ -23,10 +23,9 @@ public class MatchingController {
     private final JwtUtil jwtUtil;
 
     //@PreAuthorize("isAuthenticated() and #id == authentication.getPrincipal()")
-    @PostMapping(value = "/v1/matches/users/{id}/matches")
-    @Operation(summary = "매칭 생성", description = "매칭을 생성한다")
+    @PostMapping(value = "/v1/matches/users/{id}")
+    @Operation(summary = "매칭 요청", description = "매칭을 요청한다")
     public MatchingDTO requestMatch(final @PathVariable("id") long id, @RequestHeader("Authorization") String authentication, @RequestBody final MatchingDTO dto) {
-    //public void requestMatch(final @PathVariable("id") long id, @RequestHeader("Authorization") String authentication, @RequestBody final MatchingDTO dto) {
 
         return matchingMapper.INSTANCE.matchingVOToMatchingDTO(matchingService.requestMatching(id, authentication, matchingMapper.INSTANCE.matchingDTOToMatchingVO(dto)));
     }
@@ -52,7 +51,7 @@ public class MatchingController {
 
     @GetMapping(value = "/v1/matches/users/{id}/received-matches")
     //@PreAuthorize("isAuthenticated() and #id == authentication.getPrincipal()")
-    @Operation(summary = "매칭 조회", description = "받은 매칭")
+    @Operation(summary = "받은 매칭 조회", description = "사용자가 요청받은 매칭")
     public List<MatchingDTO> getReceivedMatches(@PathVariable("id") final long userId) {
         //String userId = authentication.getPrincipal().toString();
         return matchingMapper.INSTANCE.matchingVOsToMatchingDTOs(matchingService.getReceivedMatches(userId));
@@ -60,7 +59,7 @@ public class MatchingController {
 
     @GetMapping(value = "/v1/matches/users/{id}/sent-matches")
     //@PreAuthorize("isAuthenticated() and #id == authentication.getPrincipal()")
-    @Operation(summary = "매칭 조회", description = "보낸 매칭")
+    @Operation(summary = "보낸 매칭 조회", description = "사용자가 요청한 매칭")
     public List<MatchingDTO> getSentMatches(@PathVariable("id") final long userId, final Authentication authentication) {
         return matchingMapper.INSTANCE.matchingVOsToMatchingDTOs(matchingService.getSentMatches(userId));
     }
