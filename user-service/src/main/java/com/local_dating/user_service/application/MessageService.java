@@ -3,6 +3,7 @@ package com.local_dating.user_service.application;
 import com.local_dating.user_service.util.MessageCode;
 import com.local_dating.user_service.util.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -12,6 +13,7 @@ import java.util.concurrent.CompletableFuture;
 @Service
 public class MessageService {
 
+    @Async
     public CompletableFuture<Void> sendVerificationEmail(String email, String code) {
         return CompletableFuture.runAsync(() -> {
             try {
@@ -33,7 +35,6 @@ public class MessageService {
         });
     }
     /*
-    @Async
     public void sendVerificationEmail(String email, String code) {
 
         log.info("sendVerificationEmail 시간: " + LocalDateTime.now());
