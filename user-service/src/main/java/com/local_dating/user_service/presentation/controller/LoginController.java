@@ -2,13 +2,16 @@ package com.local_dating.user_service.presentation.controller;
 
 
 import com.local_dating.user_service.application.UserLoginService;
+import com.local_dating.user_service.domain.mapper.UserMapper;
 import com.local_dating.user_service.presentation.dto.LoginRes;
 import com.local_dating.user_service.presentation.dto.UserDTO;
+import com.local_dating.user_service.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -16,11 +19,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class LoginController {
 
     private final UserLoginService userLoginService;
+    private final UserMapper userMapper;
+    private final JwtUtil jwtUtil;
 
     @PostMapping(value = "/v1/users/login")
     public LoginRes login(@RequestBody @Valid final UserDTO userDTO, HttpServletRequest request) {
 
-        return userLoginService.login(userDTO, request);
+        return userLoginService.login(userMapper.INSTANCE.toUserVO(userDTO), request);
+        //return userLoginService.login(userDTO, request);
 
         /*final Authentication authentication =
                 authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userDTO.loginId(), userDTO.pwd()));
@@ -44,4 +50,11 @@ public class LoginController {
 
         return loginRes;*/
     }
+
+    @PostMapping("/v1/users/refresh")
+    public LoginRes refresh(@RequestHeader("Refresh-Token") String authentication, HttpServletRequest request) {
+        String refreshToken = jwtUtil.resolveRefreshToken(authentication);
+        return userLoginService.refreshTokens(refreshToken, request); //test3
+    }
+
 }

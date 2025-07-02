@@ -51,7 +51,7 @@ public class UserExceptionHandler {
     public ResponseEntity MethodArgumentNotValidException(MethodArgumentNotValidException e) {
         logger.error(e.getClass().getName() + MessageCode.METHOD_ARGUMENT_NOT_VALID_EXCEPTION.getMessage());
         logger.error(e.getMessage());
-        return new ResponseEntity<>(MessageCode.METHOD_ARGUMENT_NOT_VALID_EXCEPTION.getMessage(), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(MessageCode.METHOD_ARGUMENT_NOT_VALID_EXCEPTION.getMessage() + " : " + e.getFieldError().getDefaultMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(BadCredentialsException.class)

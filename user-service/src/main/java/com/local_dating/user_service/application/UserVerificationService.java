@@ -83,14 +83,14 @@ public class UserVerificationService {
             if (failCnt == null) {
                 redisTemplateLong.opsForValue().set("userValidationCodeFailCnt:" + id, 1L);
                 throw new BusinessException(MessageCode.INVALID_VERIFICATION_CODE);
-            } else {
-                redisTemplateLong.opsForValue().increment("userValidationCodeFailCnt:" + id);
             }
+            redisTemplateLong.opsForValue().increment("userValidationCodeFailCnt:" + id);
+
             if (failCnt >= 4) {
                 throw new BusinessException(MessageCode.EXCEEDED_MAX_ATTEMPTS);
-            } else {
-                throw new BusinessException(MessageCode.INVALID_VERIFICATION_CODE);
             }
+            throw new BusinessException(MessageCode.INVALID_VERIFICATION_CODE);
+
         } else {
             redisTemplate.delete("userValidationCode:" + id);
             redisTemplateLong.delete("userValidationCodeFailCnt:" + id);
