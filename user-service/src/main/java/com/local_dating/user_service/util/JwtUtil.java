@@ -15,26 +15,29 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import static java.util.Objects.isNull;
 
 @Component
 public class JwtUtil {
+
     private final SecretKey secret_key = Keys.hmacShaKeyFor("thisisaverysecretkeyandsecure123".getBytes(StandardCharsets.UTF_8));
     //private final String secret_key = "mysecretkey";
-    private long accessTokenValidity = 60*60*1000;
+    //private long accessTokenValidity = 60*60*1000;
+    private long accessTokenValidity = 60 * 60 * 1000;
+    private long refreshTokenValidity = 24 * 60 * 60 * 1000;
 
     private final JwtParser jwtParser;
 
     private final String TOKEN_HEADER = "Authorization";
+    private final String REFRESH_HEADER = "Refresh-Token";
     private final String TOKEN_PREFIX = "Bearer ";
 
-    public JwtUtil(){
+    public JwtUtil() {
         this.jwtParser = Jwts.parser().setSigningKey(secret_key).build();
     }
 
-    public String createToken(final UserVO user) {
+    public String createAccessToken(final UserVO user) {
         /*Claims claims = (Claims) Jwts.claims().setSubject(user.userId());
         claims.put("pwd",user.pwd());
         claims.put("name",user.name());
@@ -47,23 +50,38 @@ public class JwtUtil {
                 .compact();*/
 
         Date tokenCreateTime = new Date();
-        Date tokenValidity = new Date(tokenCreateTime.getTime() + TimeUnit.MINUTES.toMillis(accessTokenValidity));
+        Date tokenValidity = new Date(tokenCreateTime.getTime() + accessTokenValidity);
+        //Date tokenValidity = new Date(tokenCreateTime.getTime() + TimeUnit.MINUTES.toMillis(accessTokenValidity));
         return Jwts.builder()
-                .setSubject(user.loginId()) //.setSubject(String.valueOf(user.id()))
+                .setSubject(user.loginId())
                 .claim("no", user.no()) // user테이블 id
-                //.setSubject(user.userId())
-                //.claim("userId",user.userId())
                 //.claim("pwd",user.pwd())
                 .claim("name",user.name())
                 .claim("role", "USER")
                 //.claim("role", "ROLE_USER")
-                //.setClaims(claims)
                 .setExpiration(tokenValidity)
                 .signWith(SignatureAlgorithm.HS256, secret_key)
                 .compact();
     }
 
-    private Claims parseJwtClaims(final String token) {
+    public String createRefreshToken(final UserVO user) {
+
+        Date tokenCreateTime = new Date();
+        Date tokenValidity = new Date(tokenCreateTime.getTime() + refreshTokenValidity);
+        //Date tokenValidity = new Date(tokenCreateTime.getTime() + TimeUnit.MINUTES.toMillis(accessTokenValidity));
+        return Jwts.builder()
+                .setSubject(user.loginId())
+                .claim("no", user.no()) // user테이블 id
+                .claim("name",user.name())
+                .claim("role", "USER")
+
+                .setExpiration(tokenValidity)
+                .signWith(SignatureAlgorithm.HS256, secret_key)
+                .compact();
+    }
+
+    public Claims parseJwtClaims(final String token) {
+    //private Claims parseJwtClaims(final String token) {
         return jwtParser.parseClaimsJws(token).getBody();
     }
 
@@ -92,18 +110,21 @@ public class JwtUtil {
         return null;
     }
 
+    public String resolveRefreshToken(String authentication) {
+    //public String resolveRefreshToken(HttpServletRequest request) {
+        String bearer = authentication.getHeader(REFRESH_HEADER);
+        if (bearer != null && bearer.startsWith(TOKEN_PREFIX)) {
+            return bearer.substring(TOKEN_PREFIX.length());
+        }
+        return null;
+    }
+
     public boolean validateClaims(Claims claims) throws AuthenticationException {
         //claims = null; //테스트
         if (!isNull(claims)) {
             return claims.getExpiration().after(new Date());
-        } else {
-            throw new InvalidateClaimsException(MessageCode.INVALIDATE_CLAIMS_EXCEPTION.getMessage());
         }
-        /*try {
-            return claims.getExpiration().after(new Date());
-        } catch (Exception e) {
-            throw e;
-        }*/
+        throw new InvalidateClaimsException(MessageCode.INVALIDATE_CLAIMS_EXCEPTION.getMessage());
     }
 
     public String getUserId(Claims claims) {

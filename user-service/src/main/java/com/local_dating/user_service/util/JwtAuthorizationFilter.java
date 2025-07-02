@@ -36,8 +36,14 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(final HttpServletRequest request, final HttpServletResponse response, final FilterChain filterChain) throws ServletException, IOException {
-        final Map<String, Object> errorDetails = new HashMap<>();
 
+        final String path = request.getRequestURI();
+        if (path.equals("/v1/users/refresh")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        final Map<String, Object> errorDetails = new HashMap<>();
         try {
             final String accessToken = jwtUtil.resolveToken(request);
             if (StringUtils.isEmpty(accessToken)) {
