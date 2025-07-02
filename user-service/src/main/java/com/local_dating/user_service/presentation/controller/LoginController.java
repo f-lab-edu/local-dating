@@ -54,7 +54,7 @@ public class LoginController {
     @PostMapping("/v1/users/refresh")
     public LoginRes refresh(@RequestHeader("Refresh-Token") String authentication, HttpServletRequest request) {
         String refreshToken = jwtUtil.resolveRefreshToken(authentication);
-        return userLoginService.refreshTokens(refreshToken, request);
+        return userLoginService.refreshTokens(refreshToken, request); //test
     }
 
 }
