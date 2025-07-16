@@ -79,6 +79,11 @@ public class UserVerificationService {
     public void checkVerificationCode(final String code, final Long id) {
         String redisCode = redisTemplate.opsForValue().get("userValidationCode:" + id);
         Long failCnt = redisTemplateLong.opsForValue().get("userValidationCodeFailCnt:" + id);
+
+        if (failCnt != null && failCnt >= 5) {
+            throw new BusinessException(MessageCode.EXCEEDED_MAX_ATTEMPTS);
+        }
+
         if (!code.equals(redisCode)) {
             if (failCnt == null) {
                 redisTemplateLong.opsForValue().set("userValidationCodeFailCnt:" + id, 1L);
@@ -86,9 +91,7 @@ public class UserVerificationService {
             }
             redisTemplateLong.opsForValue().increment("userValidationCodeFailCnt:" + id);
 
-            if (failCnt >= 4) {
-                throw new BusinessException(MessageCode.EXCEEDED_MAX_ATTEMPTS);
-            }
+
             throw new BusinessException(MessageCode.INVALID_VERIFICATION_CODE);
 
         } else {

@@ -3,7 +3,10 @@ package com.local_dating.user_service.util;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.local_dating.user_service.application.CustomUserDetails;
 import com.local_dating.user_service.application.CustomUserDetailsService;
+import com.local_dating.user_service.util.exception.BusinessException;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import io.micrometer.common.util.StringUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -35,7 +38,10 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(final HttpServletRequest request, final HttpServletResponse response, final FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(
+            final HttpServletRequest request
+            , final HttpServletResponse response
+            , final FilterChain filterChain) throws ServletException, IOException {
 
         final String path = request.getRequestURI();
         if (path.equals("/v1/users/refresh")) {
@@ -68,6 +74,16 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
 
+        } catch (ExpiredJwtException ex) {
+            // ① “토큰 만료” 예외를 던져서 AuthenticationEntryPoint 로 위임
+            logger.info(ex.getMessage());
+            throw new BusinessException(MessageCode.INSUFFICIENT_AUTHENTICATION);
+            //throw new InsufficientAuthenticationException("Access token expired", ex);
+        } catch (JwtException | IllegalArgumentException ex) {
+            // ② 시그니처 불일치 등은 BadCredentialsException 으로 던져서 401 처리
+            logger.info(ex.getMessage());
+            throw new BusinessException(MessageCode.BAD_CREDENTIAL_EXCEPTION);
+            //throw new BadCredentialsException("Invalid access token", ex);
         } catch (Exception e) {
             errorDetails.put("message", "Authentication Error");
             errorDetails.put("details", e.getMessage());
