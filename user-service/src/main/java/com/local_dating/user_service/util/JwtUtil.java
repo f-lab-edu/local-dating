@@ -112,11 +112,10 @@ public class JwtUtil {
 
     public String resolveRefreshToken(String authentication) {
     //public String resolveRefreshToken(HttpServletRequest request) {
-        String bearer = authentication.getHeader(REFRESH_HEADER);
-        if (bearer != null && bearer.startsWith(TOKEN_PREFIX)) {
-            return bearer.substring(TOKEN_PREFIX.length());
+        if (authentication != null && authentication.startsWith(TOKEN_PREFIX)) {
+            return authentication.substring(TOKEN_PREFIX.length());
         }
-        return null;
+        return authentication;
     }
 
     public boolean validateClaims(Claims claims) throws AuthenticationException {

@@ -17,8 +17,10 @@ public enum MessageCode {
     , INVALID_VERIFICATION_CODE("INVALID_VERIFICATION_CODE", "인증 코드 오류", HttpStatus.BAD_REQUEST)
     , EXCEEDED_MAX_ATTEMPTS("EXCEEDED_MAX_ATTEMPTS", "최대 입력 횟수 초과", HttpStatus.BAD_REQUEST)
     , INSUFFICIENT_COIN("INSUFFICIENT_COIN", "코인 부족", HttpStatus.BAD_REQUEST)
-    , SEND_MESSAGE_FAIL("SEND_MESSAGE_FAIL", "메시지 전송 실패", HttpStatus.INTERNAL_SERVER_ERROR);
-
+    , SEND_MESSAGE_FAIL("SEND_MESSAGE_FAIL", "메시지 전송 실패", HttpStatus.INTERNAL_SERVER_ERROR)
+    , INSUFFICIENT_AUTHENTICATION("INSUFFICIENT_AUTHENTICATION_EXCEPTION", "인증 만료", HttpStatus.UNAUTHORIZED)
+    , INVALIDATE_REFRESH_TOKEN("INVALIDATE_REFRESH_TOKEN_EXCEPTION", "유효하지 않는 리프레시 토큰", HttpStatus.UNAUTHORIZED);
+    
     private final String code;
     private final String message;
     private final HttpStatus status;

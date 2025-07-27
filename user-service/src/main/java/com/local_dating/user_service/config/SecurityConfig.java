@@ -1,7 +1,10 @@
 package com.local_dating.user_service.config;
 
 import com.local_dating.user_service.application.CustomUserDetailsService;
+import com.local_dating.user_service.infrastructure.JwtAccessDeniedHandler;
+import com.local_dating.user_service.infrastructure.JwtAuthenticationEntryPoint;
 import com.local_dating.user_service.util.JwtAuthorizationFilter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -17,15 +20,18 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
+@RequiredArgsConstructor
 public class SecurityConfig {
 
     public final CustomUserDetailsService userDetailsService;
     private final JwtAuthorizationFilter jwtAuthorizationFilter;
+    private final JwtAuthenticationEntryPoint authenticationEntryPoint;
+    private final JwtAccessDeniedHandler accessDeniedHandler;
 
-    public SecurityConfig(final CustomUserDetailsService userDetailsService, final JwtAuthorizationFilter jwtAuthorizationFilter) {
+    /*public SecurityConfig(final CustomUserDetailsService userDetailsService, final JwtAuthorizationFilter jwtAuthorizationFilter) {
         this.userDetailsService = userDetailsService;
         this.jwtAuthorizationFilter = jwtAuthorizationFilter;
-    }
+    }*/
 
     @Bean
     public AuthenticationManager authenticationManager(final HttpSecurity http, final NoOpPasswordEncoder noOpPasswordEncoder)
@@ -41,12 +47,16 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 //.csrf().disable()
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/", "/v1/users/login", "/v1/users/register").permitAll()
+                        .requestMatchers("/", "/v1/users/login", "/v1/users/register", "/v1/users/{id}/refresh").permitAll()
                         //.requestMatchers("/", "/login", "/register").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(authenticationEntryPoint)  // 401 핸들링
+                        .accessDeniedHandler(accessDeniedHandler)            // 403 핸들링
+                )
                 /*.exceptionHandling((exceptions) -> exceptions
                         .authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint())
                         .accessDeniedHandler(new BearerTokenAccessDeniedHandler())*/

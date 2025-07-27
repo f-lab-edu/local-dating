@@ -9,10 +9,7 @@ import com.local_dating.user_service.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -51,10 +48,10 @@ public class LoginController {
         return loginRes;*/
     }
 
-    @PostMapping("/v1/users/refresh")
-    public LoginRes refresh(@RequestHeader("Refresh-Token") String authentication, HttpServletRequest request) {
-        String refreshToken = jwtUtil.resolveRefreshToken(authentication);
-        return userLoginService.refreshTokens(refreshToken, request); //test3
+    @PostMapping("/v1/users/{id}/refresh")
+    public LoginRes refresh(@RequestHeader("Authorization") String authentication, HttpServletRequest request, final @PathVariable("id") long id) {
+
+        return userLoginService.refreshTokens(jwtUtil.resolveRefreshToken(authentication), request, id);
     }
 
 }

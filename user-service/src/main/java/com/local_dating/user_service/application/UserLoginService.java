@@ -4,11 +4,14 @@ import com.local_dating.user_service.domain.vo.UserLoginLogVO;
 import com.local_dating.user_service.domain.vo.UserVO;
 import com.local_dating.user_service.presentation.dto.LoginRes;
 import com.local_dating.user_service.util.JwtUtil;
+import com.local_dating.user_service.util.MessageCode;
+import com.local_dating.user_service.util.exception.BusinessException;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -16,9 +19,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.concurrent.TimeUnit;
 
 @Service
-@RequiredArgsConstructor
 public class UserLoginService {
 
     private final AuthenticationManager authenticationManager;
@@ -27,6 +30,18 @@ public class UserLoginService {
     private static final Logger logger = LoggerFactory.getLogger(UserLoginService.class);
 
     private final UserDetailsService userDetailsService;
+
+    private final RedisTemplate<String, String> redisTemplate;
+
+    public UserLoginService(final AuthenticationManager authenticationManager, final JwtUtil jwtUtil,
+                            final KafkaProducer kafkaProducer, final UserDetailsService userDetailsService,
+                            @Qualifier("stringRedisTemplate") final RedisTemplate<String, String> redisTemplate) {
+        this.authenticationManager = authenticationManager;
+        this.jwtUtil = jwtUtil;
+        this.kafkaProducer = kafkaProducer;
+        this.userDetailsService = userDetailsService;
+        this.redisTemplate = redisTemplate;
+    }
 
     public LoginRes login(final UserVO userVO, HttpServletRequest request) {
         //public LoginRes login(final UserDTO userDTO, HttpServletRequest request) {
@@ -40,16 +55,26 @@ public class UserLoginService {
         final String refreshToken = jwtUtil.createRefreshToken(user);
         final LoginRes loginRes = new LoginRes(userId, accessToken, refreshToken);
 
+        redisTemplate.opsForValue().set("userRefreshToken:" + userDetails.getId(), refreshToken, 30, TimeUnit.DAYS);
         kafkaProducer.sendMessage("login-log-topic", new UserLoginLogVO(userDetails.getId(), request.getRemoteAddr(), "N", LocalDateTime.now()), false);
 
         return loginRes;
     }
 
-    public LoginRes refreshTokens(String refreshToken, HttpServletRequest request) {
-        Claims claims = jwtUtil.parseJwtClaims(refreshToken);
-        /*if (jwtUtil.resolveClaims(request)) {
-            throw new TokenExpiredException("토큰만료");
-        }*/
+    public LoginRes refreshTokens(String refreshToken, HttpServletRequest request, long id) {
+
+        String redisRefreshToken = redisTemplate.opsForValue().get("userRefreshToken:" + id);
+
+        if (!refreshToken.equals(redisRefreshToken)) {
+            throw new BusinessException(MessageCode.INVALIDATE_REFRESH_TOKEN);
+        }
+
+        Claims claims;
+        try {
+            claims = jwtUtil.parseJwtClaims(refreshToken);
+        } catch (Exception e) {
+            throw new BusinessException(MessageCode.INVALIDATE_REFRESH_TOKEN);
+        }
 
         String loginId = claims.getSubject();
         CustomUserDetails userDetails =
@@ -62,6 +87,8 @@ public class UserLoginService {
         );
         String newAccessToken  = jwtUtil.createAccessToken(user);
         String newRefreshToken = jwtUtil.createRefreshToken(user);
+
+        redisTemplate.opsForValue().set("userRefreshToken:" + id, newRefreshToken, 30, TimeUnit.DAYS);
 
         return new LoginRes(loginId, newAccessToken, newRefreshToken);
     }
