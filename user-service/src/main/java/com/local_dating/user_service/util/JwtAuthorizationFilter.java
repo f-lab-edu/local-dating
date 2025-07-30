@@ -76,12 +76,12 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
         } catch (ExpiredJwtException ex) {
             // ① “토큰 만료” 예외를 던져서 AuthenticationEntryPoint 로 위임
-            logger.info(ex.getMessage());
+            logger.info(ex.getMessage(), ex);
             throw new BusinessException(MessageCode.INSUFFICIENT_AUTHENTICATION);
             //throw new InsufficientAuthenticationException("Access token expired", ex);
         } catch (JwtException | IllegalArgumentException ex) {
             // ② 시그니처 불일치 등은 BadCredentialsException 으로 던져서 401 처리
-            logger.info(ex.getMessage());
+            logger.info(ex.getMessage(), ex);
             throw new BusinessException(MessageCode.BAD_CREDENTIAL_EXCEPTION);
             //throw new BadCredentialsException("Invalid access token", ex);
         } catch (Exception e) {
