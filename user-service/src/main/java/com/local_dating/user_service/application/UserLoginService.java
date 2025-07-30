@@ -2,6 +2,7 @@ package com.local_dating.user_service.application;
 
 import com.local_dating.user_service.domain.vo.UserLoginLogVO;
 import com.local_dating.user_service.domain.vo.UserVO;
+import com.local_dating.user_service.infrastructure.cache.CacheTtlProperties;
 import com.local_dating.user_service.presentation.dto.LoginRes;
 import com.local_dating.user_service.util.JwtUtil;
 import com.local_dating.user_service.util.MessageCode;
@@ -21,6 +22,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
 
+import static com.local_dating.user_service.util.HttpServletRequestUtil.getIpAddress;
+
 @Service
 public class UserLoginService {
 
@@ -32,15 +35,18 @@ public class UserLoginService {
     private final UserDetailsService userDetailsService;
 
     private final RedisTemplate<String, String> redisTemplate;
+    private final CacheTtlProperties cacheTtlProperties;
 
     public UserLoginService(final AuthenticationManager authenticationManager, final JwtUtil jwtUtil,
                             final KafkaProducer kafkaProducer, final UserDetailsService userDetailsService,
-                            @Qualifier("stringRedisTemplate") final RedisTemplate<String, String> redisTemplate) {
+                            @Qualifier("stringRedisTemplate") final RedisTemplate<String, String> redisTemplate,
+                            final CacheTtlProperties cacheTtlProperties) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
         this.kafkaProducer = kafkaProducer;
         this.userDetailsService = userDetailsService;
         this.redisTemplate = redisTemplate;
+        this.cacheTtlProperties = cacheTtlProperties;
     }
 
     public LoginRes login(final UserVO userVO, HttpServletRequest request) {
@@ -55,8 +61,9 @@ public class UserLoginService {
         final String refreshToken = jwtUtil.createRefreshToken(user);
         final LoginRes loginRes = new LoginRes(userId, accessToken, refreshToken);
 
-        redisTemplate.opsForValue().set("userRefreshToken:" + userDetails.getId(), refreshToken, 30, TimeUnit.DAYS);
-        kafkaProducer.sendMessage("login-log-topic", new UserLoginLogVO(userDetails.getId(), request.getRemoteAddr(), "N", LocalDateTime.now()), false);
+        redisTemplate.opsForValue().set("userRefreshToken:" + userDetails.getId(), refreshToken, cacheTtlProperties.getRefreshTokenTTL(), TimeUnit.DAYS);
+        //redisTemplate.opsForValue().set("userRefreshToken:" + userDetails.getId(), refreshToken, 30, TimeUnit.DAYS);
+        kafkaProducer.sendMessage("login-log-topic", new UserLoginLogVO(userDetails.getId(), getIpAddress(request), "N", LocalDateTime.now()), false);
 
         return loginRes;
     }
@@ -88,7 +95,7 @@ public class UserLoginService {
         String newAccessToken  = jwtUtil.createAccessToken(user);
         String newRefreshToken = jwtUtil.createRefreshToken(user);
 
-        redisTemplate.opsForValue().set("userRefreshToken:" + id, newRefreshToken, 30, TimeUnit.DAYS);
+        redisTemplate.opsForValue().set("userRefreshToken:" + id, newRefreshToken, cacheTtlProperties.getRefreshTokenTTL(), TimeUnit.DAYS);
 
         return new LoginRes(loginId, newAccessToken, newRefreshToken);
     }

@@ -1,10 +1,7 @@
 package com.local_dating.matching_service.util;
 
 import com.local_dating.matching_service.util.exception.InvalidateClaimsException;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.JwtParser;
-import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -22,19 +19,25 @@ import static java.util.Objects.isNull;
 
 @Component
 public class JwtUtil {
+
     private final SecretKey secret_key = Keys.hmacShaKeyFor("thisisaverysecretkeyandsecure123".getBytes(StandardCharsets.UTF_8));
-    private long accessTokenValidity = 60*60*1000;
+    //private final String secret_key = "mysecretkey";
+    //private long accessTokenValidity = 60*60*1000;
+    private long accessTokenValidity = 60 * 60 * 1000;
+    private long refreshTokenValidity = 24 * 60 * 60 * 1000;
 
     private final JwtParser jwtParser;
 
     private final String TOKEN_HEADER = "Authorization";
+    private final String REFRESH_HEADER = "Refresh-Token";
     private final String TOKEN_PREFIX = "Bearer ";
 
-    public JwtUtil(){
+    public JwtUtil() {
         this.jwtParser = Jwts.parser().setSigningKey(secret_key).build();
     }
 
-    private Claims parseJwtClaims(final String token) {
+    public Claims parseJwtClaims(final String token) {
+        //private Claims parseJwtClaims(final String token) {
         return jwtParser.parseClaimsJws(token).getBody();
     }
 
@@ -63,13 +66,20 @@ public class JwtUtil {
         return null;
     }
 
+    public String resolveRefreshToken(String authentication) {
+        //public String resolveRefreshToken(HttpServletRequest request) {
+        if (authentication != null && authentication.startsWith(TOKEN_PREFIX)) {
+            return authentication.substring(TOKEN_PREFIX.length());
+        }
+        return authentication;
+    }
+
     public boolean validateClaims(Claims claims) throws AuthenticationException {
         //claims = null; //테스트
         if (!isNull(claims)) {
             return claims.getExpiration().after(new Date());
-        } else {
-            throw new InvalidateClaimsException(MessageCode.INVALIDATE_CLAIMS_EXCEPTION.getMessage());
         }
+        throw new InvalidateClaimsException(MessageCode.INVALIDATE_CLAIMS_EXCEPTION.getMessage());
     }
 
     public String getUserId(Claims claims) {
@@ -80,6 +90,7 @@ public class JwtUtil {
         return (List<String>) claims.get("roles");
     }
 
+    // JWT 토큰을 기반으로 Authentication 객체 생성
     public Authentication getAuthenticationFromToken(String token) {
         try {
             Claims claims = parseJwtClaims(token.replace(TOKEN_PREFIX, "")); // Bearer 제거 후 파싱
@@ -89,4 +100,5 @@ public class JwtUtil {
             throw new RuntimeException("Invalid JWT Token", e);
         }
     }
+
 }
