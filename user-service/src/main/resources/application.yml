@@ -62,3 +62,8 @@ logging:
     #org.hibernate: DEBUG
     #org: INFO
     org.hibernate.orm.jdbc.bind: trace
+
+cache:
+  ttl:
+    refreshToken: 30
+    product: 600
