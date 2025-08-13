@@ -29,6 +29,16 @@ public class User {
         this.phone = vo.phone();
     }
 
+    public User(final UserVO vo, final String encodedPwd) {
+        this.no = vo.no();
+        this.loginId = vo.loginId();
+        this.pwd = encodedPwd;
+        this.name = vo.name();
+        this.nickname = vo.nickname();
+        this.birth = vo.birth();
+        this.phone = vo.phone();
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")

@@ -2,8 +2,9 @@ package com.local_dating.user_service.application;
 
 import com.local_dating.user_service.domain.vo.UserLoginLogVO;
 import com.local_dating.user_service.domain.vo.UserVO;
-import com.local_dating.user_service.infrastructure.cache.CacheTtlProperties;
+import com.local_dating.user_service.config.cache.CacheTtlProperties;
 import com.local_dating.user_service.presentation.dto.LoginRes;
+import com.local_dating.user_service.util.HttpServletRequestUtil;
 import com.local_dating.user_service.util.JwtUtil;
 import com.local_dating.user_service.util.MessageCode;
 import com.local_dating.user_service.util.exception.BusinessException;
@@ -21,8 +22,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
-
-import static com.local_dating.user_service.util.HttpServletRequestUtil.getIpAddress;
 
 @Service
 public class UserLoginService {
@@ -63,7 +62,7 @@ public class UserLoginService {
 
         redisTemplate.opsForValue().set("userRefreshToken:" + userDetails.getId(), refreshToken, cacheTtlProperties.getRefreshTokenTTL(), TimeUnit.DAYS);
         //redisTemplate.opsForValue().set("userRefreshToken:" + userDetails.getId(), refreshToken, 30, TimeUnit.DAYS);
-        kafkaProducer.sendMessage("login-log-topic", new UserLoginLogVO(userDetails.getId(), getIpAddress(request), "N", LocalDateTime.now()), false);
+        kafkaProducer.sendMessage("login-log-topic", new UserLoginLogVO(userDetails.getId(), HttpServletRequestUtil.getIpAddress(request), "N", LocalDateTime.now()), false);
 
         return loginRes;
     }

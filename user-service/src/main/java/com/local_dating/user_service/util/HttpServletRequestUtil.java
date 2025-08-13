@@ -17,7 +17,7 @@ public class HttpServletRequestUtil {
             String ip = request.getHeader(header);
             if (ip != null && !ip.isEmpty() && !"unknown".equalsIgnoreCase(ip)) {
                 // X-Forwarded-For에 여러 IP가 있을 때 첫 번째만 사용
-                return ip.contains(",") ? ip.split(",")[0].trim() : ip;
+                return ip.split(",")[0].trim();
             }
         }
 

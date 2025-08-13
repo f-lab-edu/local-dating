@@ -1,6 +1,6 @@
 package com.local_dating.user_service.presentation.controller;
 
-import com.local_dating.user_service.application.CustomUserDetailsService;
+import com.local_dating.user_service.application.UserRegisterService;
 import com.local_dating.user_service.presentation.dto.UserDTO;
 import com.local_dating.user_service.util.MessageCode;
 import jakarta.validation.Valid;
@@ -15,12 +15,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class RegisterController {
 
-    private final CustomUserDetailsService customUserDetailsService;
+    private final UserRegisterService userRegisterService;
 
     @PostMapping(value = "/v1/users/register")
     @ResponseStatus(HttpStatus.CREATED)
     public String register(@RequestBody @Valid final UserDTO user) {
-        customUserDetailsService.registerUser(user);
+        userRegisterService.registerUser(user);
         return MessageCode.REGISTER_SUCCESS.getMessage();
     }
 }
