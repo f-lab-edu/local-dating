@@ -1,4 +1,4 @@
-package com.local_dating.user_service.infrastructure.cache;
+package com.local_dating.user_service.config.cache;
 
 import lombok.Getter;
 import org.springframework.boot.context.properties.ConfigurationProperties;

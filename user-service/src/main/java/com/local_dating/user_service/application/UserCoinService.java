@@ -5,6 +5,8 @@ import com.local_dating.user_service.domain.vo.UserCoinLogVO;
 import com.local_dating.user_service.domain.vo.UserCoinVO;
 import com.local_dating.user_service.infrastructure.repository.UserCoinRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +19,8 @@ public class UserCoinService {
     private final UserCoinRepository userCoinRepository;
     private final KafkaProducer kafkaProducer;
 
+    @Cacheable(value = "coin", key = "#userId")
+    //@Cacheable(value = "coin", key = "#userId", cacheManager = "jsonCacheManager")
     public Long viewCoin(final Long userId) {
         return userCoinRepository.findByUserId(userId).map(el->{
             return el.getBalance();
@@ -26,6 +30,7 @@ public class UserCoinService {
     }
 
     @Transactional
+    @CacheEvict(value = "coin", key = "#userId")
     public void saveCoin(final Long userId, final UserCoinVO userCoinVO) {
         userCoinRepository.findByUserId(userId).map(el -> {
             el.setBalance(el.getBalance() + userCoinVO.balance());
@@ -38,6 +43,7 @@ public class UserCoinService {
     }
 
     @Transactional
+    @CacheEvict(value = "coin", key = "#userId")
     public void updateCoin(final Long userId, final UserCoinVO userCoinVO) {
         userCoinRepository.findByUserId(userCoinVO.userId()).map(el -> {
             el.setBalance(el.getBalance() + userCoinVO.balance());

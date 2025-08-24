@@ -7,6 +7,7 @@ import com.local_dating.matching_service.util.JwtUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,8 +23,8 @@ public class MatchingController {
     private final MatchingMapper matchingMapper;
     private final JwtUtil jwtUtil;
 
-    //@PreAuthorize("isAuthenticated() and #id == authentication.getPrincipal()")
     @PostMapping(value = "/v1/matches/users/{id}")
+    @PreAuthorize("isAuthenticated() and #id == authentication.getPrincipal()")
     @Operation(summary = "매칭 요청", description = "매칭을 요청한다")
     public MatchingDTO requestMatch(final @PathVariable("id") long id, @RequestHeader("Authorization") String authentication, @RequestBody final MatchingDTO dto) {
 
@@ -32,48 +33,53 @@ public class MatchingController {
 
     @PatchMapping(value = "/v1/matches/users/{id}/matches")
     //@PutMapping(value = "/v1/users/{id}/matches")
-    public void updateMatch(@PathVariable("id") long userId, @RequestHeader("Authorization") String authentication, @RequestBody MatchingDTO dto) {
+    @PreAuthorize("isAuthenticated() and #id == authentication.getPrincipal()")
+    public void updateMatch(@PathVariable("id") long id, @RequestHeader("Authorization") String authentication, @RequestBody MatchingDTO dto) {
     //public void updateMatch(@PathVariable("id") long userId, @RequestBody MatchingDTO dto) {
 
-        matchingService.updateMatchingInfo(userId, authentication, matchingMapper.INSTANCE.matchingDTOToMatchingVO(dto));
+        matchingService.updateMatchingInfo(id, authentication, matchingMapper.INSTANCE.matchingDTOToMatchingVO(dto));
         //matchingService.updateMatchingInfo(userId, matchingMapper.INSTANCE.matchingDTOToMatchingVO(dto));
     }
 
     @GetMapping(value = "/v1/matches/users/{id}/matches") //기본 api
-    public List<MatchingDTO> getMatch(@PathVariable("id") long userId) {
-        return matchingMapper.INSTANCE.matchingVOsToMatchingDTOs(matchingService.getMatchingInfos(userId));
+    @PreAuthorize("isAuthenticated() and #id == authentication.getPrincipal()")
+    public List<MatchingDTO> getMatch(@PathVariable("id") long id) {
+        return matchingMapper.INSTANCE.matchingVOsToMatchingDTOs(matchingService.getMatchingInfos(id));
     }
 
     @GetMapping(value = "/v1/matches/users/{id}/matches/{matchId}") //기본 api
-    public Optional<MatchingDTO> getMatch(@PathVariable("id") long userId, @PathVariable("matchId") long matchId) {
-        return Optional.ofNullable(matchingMapper.INSTANCE.matchingVOToMatchingDTO(matchingService.getMatchingInfo(userId, matchId)));
+    @PreAuthorize("isAuthenticated() and #id == authentication.getPrincipal()")
+    public Optional<MatchingDTO> getMatch(@PathVariable("id") long id, @PathVariable("matchId") long matchId) {
+        return Optional.ofNullable(matchingMapper.INSTANCE.matchingVOToMatchingDTO(matchingService.getMatchingInfo(id, matchId)));
     }
 
     @GetMapping(value = "/v1/matches/users/{id}/received-matches")
-    //@PreAuthorize("isAuthenticated() and #id == authentication.getPrincipal()")
+    @PreAuthorize("isAuthenticated() and #id == authentication.getPrincipal()")
     @Operation(summary = "받은 매칭 조회", description = "사용자가 요청받은 매칭")
-    public List<MatchingDTO> getReceivedMatches(@PathVariable("id") final long userId) {
+    public List<MatchingDTO> getReceivedMatches(@PathVariable("id") final long id) {
         //String userId = authentication.getPrincipal().toString();
-        return matchingMapper.INSTANCE.matchingVOsToMatchingDTOs(matchingService.getReceivedMatches(userId));
+        return matchingMapper.INSTANCE.matchingVOsToMatchingDTOs(matchingService.getReceivedMatches(id));
     }
 
     @GetMapping(value = "/v1/matches/users/{id}/sent-matches")
-    //@PreAuthorize("isAuthenticated() and #id == authentication.getPrincipal()")
+    @PreAuthorize("isAuthenticated() and #id == authentication.getPrincipal()")
     @Operation(summary = "보낸 매칭 조회", description = "사용자가 요청한 매칭")
-    public List<MatchingDTO> getSentMatches(@PathVariable("id") final long userId, final Authentication authentication) {
-        return matchingMapper.INSTANCE.matchingVOsToMatchingDTOs(matchingService.getSentMatches(userId));
+
+    public List<MatchingDTO> getSentMatches(@PathVariable("id") final long id, final Authentication authentication) {
+        return matchingMapper.INSTANCE.matchingVOsToMatchingDTOs(matchingService.getSentMatches(id));
     }
 
     @PutMapping(value = "/v1/matches/users/{id}/accept-matches")
+    @PreAuthorize("isAuthenticated() and #id == authentication.getPrincipal()")
     @Operation(summary = "매칭 수락", description = "보낸 매칭에 대한 수락, 코인 지불")
-    public MatchingDTO acceptMatch(@PathVariable("id") final long userId, @RequestHeader("Authorization") String authentication, @RequestBody final MatchingDTO dto) {
-        return matchingMapper.INSTANCE.matchingVOToMatchingDTO(matchingService.acceptMatching(userId, authentication, matchingMapper.INSTANCE.matchingDTOToMatchingVO(dto)));
+    public MatchingDTO acceptMatch(@PathVariable("id") final long id, @RequestHeader("Authorization") String authentication, @RequestBody final MatchingDTO dto) {
+        return matchingMapper.INSTANCE.matchingVOToMatchingDTO(matchingService.acceptMatching(id, authentication, matchingMapper.INSTANCE.matchingDTOToMatchingVO(dto)));
     }
 
     @PutMapping(value = "/v1/matches/users/{id}/reject-matches")
     @Operation(summary = "매칭 거절", description = "보낸 매칭에 대한 거절, 요청자 코인 환불")
-    public MatchingDTO rejectMatch(@PathVariable("id") final long userId, @RequestHeader("Authorization") String authentication, @RequestBody final MatchingDTO dto) {
-        return matchingMapper.INSTANCE.matchingVOToMatchingDTO(matchingService.rejectMatching(userId, authentication, matchingMapper.INSTANCE.matchingDTOToMatchingVO(dto)));
+    public MatchingDTO rejectMatch(@PathVariable("id") final long id, @RequestHeader("Authorization") String authentication, @RequestBody final MatchingDTO dto) {
+        return matchingMapper.INSTANCE.matchingVOToMatchingDTO(matchingService.rejectMatching(id, authentication, matchingMapper.INSTANCE.matchingDTOToMatchingVO(dto)));
     }
 
 }

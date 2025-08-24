@@ -28,7 +28,6 @@ public class SecurityConfig {
         return http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/", "/v1/users/login", "/v1/users/register", "/v1/users/{id}/refresh").permitAll()
                         .requestMatchers("/v1/matches/**").authenticated()
                         .anyRequest().authenticated()
                 )
@@ -38,10 +37,8 @@ public class SecurityConfig {
                         .authenticationEntryPoint(authenticationEntryPoint)  // 401 핸들링
                         .accessDeniedHandler(accessDeniedHandler)            // 403 핸들링
                 )
-
                 .logout((logout) -> logout.permitAll()).build();
 
-        //return http.build();
     }
 
 }
