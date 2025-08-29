@@ -1,7 +1,10 @@
 package com.local_dating.user_service.application;
 
 import com.local_dating.user_service.infrastructure.repository.UserRepository;
+import com.local_dating.user_service.util.MessageCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -20,18 +23,17 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(final String username) throws UsernameNotFoundException {
 
         return userRepository.findByLoginId(username)
-                .map(s -> {
-                    final List<String> roles = new ArrayList<>();
-                    roles.add("USER");
-                    return new CustomUserDetails(s.getNo(), s.getLoginId(), s.getPwd());
-                    /*return org.springframework.security.core.userdetails.User.builder()
-                            //.username(String.valueOf(s.getId()))
-                            .username(s.getLoginId())
-                            .password(s.getPwd())
-                            .roles(roles.toArray(new String[0]))
-                            .build();*/
+                .map(el -> {
+                    //final List<String> roles = new ArrayList<>();
+                    //roles.add("USER");
+
+                    List<GrantedAuthority> authorities = new ArrayList<>();
+                    authorities.add(new SimpleGrantedAuthority(el.getRole().name()));
+
+                    return new CustomUserDetails(el.getNo(), el.getLoginId(), el.getPwd(), authorities);
                 })
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+                .orElseThrow(() -> new UsernameNotFoundException(MessageCode.USER_NOT_FOUND.getMessage()));
+                //.orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
     }
 
 }

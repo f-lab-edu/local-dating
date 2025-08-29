@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -27,7 +28,16 @@ public class UserExceptionHandler {
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity handleException(AccessDeniedException e) {
+    public ResponseEntity AccessDeniedException(AccessDeniedException e) {
+        logger.error(e.getClass().getName());
+        logger.error(e.getMessage());
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
+    }
+
+
+
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    public ResponseEntity AuthorizationDeniedException(AuthorizationDeniedException e) { // 로그인 후 권한없음
         logger.error(e.getClass().getName());
         logger.error(e.getMessage());
         return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
@@ -55,10 +65,10 @@ public class UserExceptionHandler {
     }
 
     @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity BadCredentialsException(BadCredentialsException e) {
+    public ResponseEntity BadCredentialsException(BadCredentialsException e) { // 로그인 실패
         logger.error(e.getClass().getName() + MessageCode.BAD_CREDENTIAL_EXCEPTION.getMessage());
         logger.error(e.getMessage());
-        return new ResponseEntity<>(MessageCode.BAD_CREDENTIAL_EXCEPTION.getMessage(), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(MessageCode.BAD_CREDENTIAL_EXCEPTION.getMessage(), HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(DataNotFoundException.class)

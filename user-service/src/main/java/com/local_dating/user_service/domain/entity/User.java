@@ -1,5 +1,6 @@
 package com.local_dating.user_service.domain.entity;
 
+import com.local_dating.user_service.domain.type.RoleType;
 import com.local_dating.user_service.domain.vo.UserVO;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -80,6 +81,9 @@ public class User {
 
     @Column(name = "post_no", length = 5)
     private String postNo;
+
+    @Enumerated(EnumType.STRING)
+    private RoleType role;
 
     @Column(name = "status_cd")
     private String statusCd;
