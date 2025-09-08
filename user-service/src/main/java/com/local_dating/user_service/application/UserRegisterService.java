@@ -2,6 +2,7 @@ package com.local_dating.user_service.application;
 
 import com.local_dating.user_service.domain.entity.User;
 import com.local_dating.user_service.domain.mapper.UserMapper;
+import com.local_dating.user_service.domain.type.RoleType;
 import com.local_dating.user_service.infrastructure.repository.UserRepository;
 import com.local_dating.user_service.presentation.dto.UserDTO;
 import com.local_dating.user_service.util.MessageCode;
@@ -26,7 +27,9 @@ public class UserRegisterService {
         userRepository.findByLoginId(userMapper.INSTANCE.toUserVO(dto).loginId()).ifPresentOrElse(el -> {
             throw new UserAlreadyExistsException(MessageCode.USER_ALREADY_EXISTS_EXCEPTION.getMessage() + ": " + dto.loginId());
         }, () -> {
-            userRepository.save(new User(userMapper.INSTANCE.toUserVO(dto), passwordEncoder.encode(dto.pwd())));
+            User user = new User(userMapper.INSTANCE.toUserVO(dto), passwordEncoder.encode(dto.pwd()));
+            user.setRole(RoleType.USER);
+            userRepository.save(user);
         });
 
     }
