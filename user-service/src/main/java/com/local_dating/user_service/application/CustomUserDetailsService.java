@@ -28,7 +28,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                     //roles.add("USER");
 
                     List<GrantedAuthority> authorities = new ArrayList<>();
-                    authorities.add(new SimpleGrantedAuthority(el.getRole().name()));
+                    authorities.add(new SimpleGrantedAuthority(el.getRole().getCode()));
 
                     return new CustomUserDetails(el.getNo(), el.getLoginId(), el.getPwd(), authorities);
                 })

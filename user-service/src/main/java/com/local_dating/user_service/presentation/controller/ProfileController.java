@@ -2,8 +2,9 @@ package com.local_dating.user_service.presentation.controller;
 
 import com.local_dating.user_service.application.UserProfileService;
 import com.local_dating.user_service.domain.mapper.UserProfileMapper;
-import com.local_dating.user_service.presentation.dto.UserProfileDTO;
+import com.local_dating.user_service.presentation.dto.UserProfileListDTO;
 import com.local_dating.user_service.util.exception.DataNotFoundException;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.annotation.Secured;
@@ -23,25 +24,24 @@ public class ProfileController {
     private final UserProfileService userProfileService;
     private final UserProfileMapper userProfileMapper;
 
-    @Secured("ROLE_ADMIN")
+    @Secured("ROLE_USER")
     //@PreAuthorize("isAuthenticated() and #id == authentication.getPrincipal()")
     @PostMapping(value = "/v1/users/{id}/profile")
     @ResponseStatus(HttpStatus.CREATED)
-    public void saveProfile(final @PathVariable("id") long id, final Authentication authentication, @RequestBody final List<UserProfileDTO> userProfileDTO) {
+    public void saveProfile(final @PathVariable("id") long id, final Authentication authentication, @RequestBody @Valid final UserProfileListDTO userProfileDTOList) {
 
         String userId = authentication.getPrincipal().toString();
-        userProfileService.saveProfile(userId, userProfileMapper.INSTANCE.toUserProfileVOList(userProfileDTO));
+        userProfileService.saveProfile(userId, userProfileMapper.INSTANCE.toUserProfileVOList(userProfileDTOList.getUserProfiles()));
     }
 
     @PreAuthorize("hasRole('USER') and isAuthenticated() and #id == authentication.getPrincipal()")
-    //@PreAuthorize("hasRole('ROLE_USER') and isAuthenticated() and #id == authentication.getPrincipal()")
     @PatchMapping(value = "/v1/users/{id}/profile")
-    public void updateProfile(final @PathVariable("id") long id, final Authentication authentication, @RequestBody final List<UserProfileDTO> userProfileDTOList) {
+    public void updateProfile(final @PathVariable("id") long id, final Authentication authentication, @RequestBody @Valid final UserProfileListDTO userProfileDTOList) {
         String userId = authentication.getPrincipal().toString();
-        userProfileService.updateProfile(userId, userProfileMapper.INSTANCE.toUserProfileVOList(userProfileDTOList));
+        userProfileService.updateProfile(userId, userProfileMapper.INSTANCE.toUserProfileVOList(userProfileDTOList.getUserProfiles()));
     }
 
-    @Secured("USER")
+    @Secured("ROLE_USER")
     //@PreAuthorize("isAuthenticated() and #id == authentication.getPrincipal()")
     @GetMapping(value = "/v1/users/{id}/profile")
     public List viewProfile(final @PathVariable("id") long id, final Authentication authentication) {

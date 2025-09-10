@@ -1,5 +1,8 @@
 package com.local_dating.user_service.domain.type;
 
+import lombok.Getter;
+
+@Getter
 public enum RoleType {
 
     USER("ROLE_USER", "일반 사용자")
