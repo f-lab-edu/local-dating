@@ -25,7 +25,8 @@ public class JsonUsernamePasswordAuthenticationFilter extends UsernamePasswordAu
                                                     AuthenticationSuccessHandler successHandler,
                                                     AuthenticationFailureHandler failureHandler) {
         this.objectMapper = objectMapper;
-        setFilterProcessesUrl("/v1/users/login"); // 로그인 URL 지정
+        setFilterProcessesUrl("/v1/auth/login"); // 로그인 URL 지정 (스프링 시큐리티 기반 로그인)
+        //setFilterProcessesUrl("/v1/users/login"); // 로그인 URL 지정
         setAuthenticationSuccessHandler(successHandler);
         setAuthenticationFailureHandler(failureHandler);
     }

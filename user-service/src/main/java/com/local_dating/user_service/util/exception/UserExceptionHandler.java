@@ -34,8 +34,6 @@ public class UserExceptionHandler {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
     }
 
-
-
     @ExceptionHandler(AuthorizationDeniedException.class)
     public ResponseEntity AuthorizationDeniedException(AuthorizationDeniedException e) { // 로그인 후 권한없음
         logger.error(e.getClass().getName());
@@ -76,6 +74,13 @@ public class UserExceptionHandler {
         logger.error(e.getClass().getName() + MessageCode.DATA_NOT_FOUND_EXCEPTION.getMessage());
         logger.error(e.getMessage());
         return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(DataAlreadyExistsException.class)
+    public ResponseEntity DataAlreadyExistsException(DataAlreadyExistsException e) {
+        logger.error(e.getClass().getName() + MessageCode.DATA_ALREADY_EXISTS_EXCEPTION.getMessage());
+        logger.error(e.getMessage());
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
     }
 
     /*@ExceptionHandler(ApplicationException.class)
