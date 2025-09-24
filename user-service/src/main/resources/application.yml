@@ -63,7 +63,8 @@ logging:
     org.springframework.data.redis: DEBUG
     #org.hibernate: DEBUG
     #org: INFO
-    org.hibernate.orm.jdbc.bind: trace
+    org.hibernate.orm.jdbc.bind: TRACE
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
 
 cache:
   keys:
@@ -71,3 +72,8 @@ cache:
   ttl:
     refreshToken: 30
     product: 600
+
+jwt:
+  secret-key: thisisaverysecretkeyandsecure123
+  access-token-validity-seconds: 3600000 # 1시간
+  refresh-token-validity-seconds: 86400000 # 24시간

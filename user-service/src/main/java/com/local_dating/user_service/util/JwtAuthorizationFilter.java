@@ -3,7 +3,6 @@ package com.local_dating.user_service.util;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.local_dating.user_service.application.CustomUserDetails;
 import com.local_dating.user_service.application.CustomUserDetailsService;
-import com.local_dating.user_service.util.exception.BusinessException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -14,6 +13,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -77,13 +78,11 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         } catch (ExpiredJwtException ex) {
             // ① “토큰 만료” 예외를 던져서 AuthenticationEntryPoint 로 위임
             logger.info(ex.getMessage(), ex);
-            throw new BusinessException(MessageCode.INSUFFICIENT_AUTHENTICATION);
-            //throw new InsufficientAuthenticationException("Access token expired", ex);
+            throw new InsufficientAuthenticationException(MessageCode.INSUFFICIENT_AUTHENTICATION.getMessage(), ex);
         } catch (JwtException | IllegalArgumentException ex) {
             // ② 시그니처 불일치 등은 BadCredentialsException 으로 던져서 401 처리
             logger.info(ex.getMessage(), ex);
-            throw new BusinessException(MessageCode.BAD_CREDENTIAL_EXCEPTION);
-            //throw new BadCredentialsException("Invalid access token", ex);
+            throw new BadCredentialsException(MessageCode.BAD_CREDENTIAL_EXCEPTION.getMessage(), ex);
         } catch (Exception e) {
             errorDetails.put("message", "Authentication Error");
             errorDetails.put("details", e.getMessage());
@@ -91,7 +90,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
             mapper.writeValue(response.getWriter(), errorDetails);
-
+            return;
         }
         filterChain.doFilter(request, response);
     }
