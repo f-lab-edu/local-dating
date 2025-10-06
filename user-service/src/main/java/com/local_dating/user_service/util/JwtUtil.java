@@ -4,7 +4,9 @@ import com.local_dating.user_service.domain.vo.UserVO;
 import com.local_dating.user_service.util.exception.InvalidateClaimsException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -21,67 +23,59 @@ import static java.util.Objects.isNull;
 @Component
 public class JwtUtil {
 
-    private final SecretKey secret_key = Keys.hmacShaKeyFor("thisisaverysecretkeyandsecure123".getBytes(StandardCharsets.UTF_8));
-    //private final String secret_key = "mysecretkey";
-    //private long accessTokenValidity = 60*60*1000;
-    private long accessTokenValidity = 60 * 60 * 1000;
-    private long refreshTokenValidity = 24 * 60 * 60 * 1000;
+    @Value("${jwt.secret-key}")
+    private String secretString;
 
-    private final JwtParser jwtParser;
+    @Value("${jwt.access-token-validity-seconds}")
+    private long accessTokenValidity;
+
+    @Value("${jwt.refresh-token-validity-seconds}")
+    private long refreshTokenValidity;
+
+    private SecretKey secretKey;
+    private JwtParser jwtParser;
 
     private final String TOKEN_HEADER = "Authorization";
     private final String REFRESH_HEADER = "Refresh-Token";
     private final String TOKEN_PREFIX = "Bearer ";
 
-    public JwtUtil() {
-        this.jwtParser = Jwts.parser().setSigningKey(secret_key).build();
+    @PostConstruct
+    public void init() {
+        this.secretKey = Keys.hmacShaKeyFor(secretString.getBytes(StandardCharsets.UTF_8));
+        this.jwtParser = Jwts.parser().setSigningKey(secretKey).build();
     }
 
     public String createAccessToken(final UserVO user) {
-        /*Claims claims = (Claims) Jwts.claims().setSubject(user.userId());
-        claims.put("pwd",user.pwd());
-        claims.put("name",user.name());
-        Date tokenCreateTime = new Date();
-        Date tokenValidity = new Date(tokenCreateTime.getTime() + TimeUnit.MINUTES.toMillis(accessTokenValidity));
-        return Jwts.builder()
-                .setClaims(claims)
-                .setExpiration(tokenValidity)
-                .signWith(SignatureAlgorithm.HS256, secret_key)
-                .compact();*/
-
         Date tokenCreateTime = new Date();
         Date tokenValidity = new Date(tokenCreateTime.getTime() + accessTokenValidity);
-        //Date tokenValidity = new Date(tokenCreateTime.getTime() + TimeUnit.MINUTES.toMillis(accessTokenValidity));
+
         return Jwts.builder()
                 .setSubject(user.loginId())
                 .claim("no", user.no()) // user테이블 id
-                //.claim("pwd",user.pwd())
                 .claim("name",user.name())
                 .claim("role", "USER")
-                //.claim("role", "ROLE_USER")
+                .setIssuedAt(tokenCreateTime)
                 .setExpiration(tokenValidity)
-                .signWith(SignatureAlgorithm.HS256, secret_key)
+                .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
     }
 
     public String createRefreshToken(final UserVO user) {
-
         Date tokenCreateTime = new Date();
         Date tokenValidity = new Date(tokenCreateTime.getTime() + refreshTokenValidity);
-        //Date tokenValidity = new Date(tokenCreateTime.getTime() + TimeUnit.MINUTES.toMillis(accessTokenValidity));
+
         return Jwts.builder()
                 .setSubject(user.loginId())
                 .claim("no", user.no()) // user테이블 id
                 .claim("name",user.name())
                 .claim("role", "USER")
-
+                .setIssuedAt(tokenCreateTime)
                 .setExpiration(tokenValidity)
-                .signWith(SignatureAlgorithm.HS256, secret_key)
+                .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
     }
 
     public Claims parseJwtClaims(final String token) {
-    //private Claims parseJwtClaims(final String token) {
         return jwtParser.parseClaimsJws(token).getBody();
     }
 
@@ -111,7 +105,6 @@ public class JwtUtil {
     }
 
     public String resolveRefreshToken(String authentication) {
-    //public String resolveRefreshToken(HttpServletRequest request) {
         if (authentication != null && authentication.startsWith(TOKEN_PREFIX)) {
             return authentication.substring(TOKEN_PREFIX.length());
         }
@@ -119,11 +112,10 @@ public class JwtUtil {
     }
 
     public boolean validateClaims(Claims claims) throws AuthenticationException {
-        //claims = null; //테스트
-        if (!isNull(claims)) {
-            return claims.getExpiration().after(new Date());
+        if (isNull(claims)) {
+            throw new InvalidateClaimsException(MessageCode.INVALIDATE_CLAIMS_EXCEPTION.getMessage());
         }
-        throw new InvalidateClaimsException(MessageCode.INVALIDATE_CLAIMS_EXCEPTION.getMessage());
+        return claims.getExpiration().after(new Date());
     }
 
     public String getUserId(Claims claims) {
