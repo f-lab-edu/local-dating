@@ -20,7 +20,7 @@ public class UserRecomCardRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
 
-    public List<UserRecomCard> findValidCard(String userId) {
+    public List<UserRecomCard> findValidCard(Long userId) {
 
         QUserRecomCard userRecomCard = QUserRecomCard.userRecomCard;
 
@@ -41,7 +41,7 @@ public class UserRecomCardRepositoryCustom {
                 .fetch();
     }
 
-    public List<UserPreference> findMinorPrior(String userId) {
+    public List<UserPreference> findMinorPrior(Long userId) {
         QUserPreference userPreference = QUserPreference.userPreference;
 
         return queryFactory

@@ -29,15 +29,16 @@ public class ProfileController {
     @PostMapping(value = "/v1/users/{id}/profile")
     @ResponseStatus(HttpStatus.CREATED)
     public void saveProfile(final @PathVariable("id") long id, final Authentication authentication, @RequestBody @Valid final UserProfileListDTO userProfileDTOList) {
+    //public void saveProfile(final @PathVariable("id") long id, final Authentication authentication, @RequestBody @Valid final UserProfileListDTO userProfileDTOList) {
 
-        String userId = authentication.getPrincipal().toString();
+        Long userId = (Long) authentication.getPrincipal();
         userProfileService.saveProfile(userId, userProfileMapper.INSTANCE.toUserProfileVOList(userProfileDTOList.getUserProfiles()));
     }
 
     @PreAuthorize("hasRole('USER') and isAuthenticated() and #id == authentication.getPrincipal()")
     @PatchMapping(value = "/v1/users/{id}/profile")
     public void updateProfile(final @PathVariable("id") long id, final Authentication authentication, @RequestBody @Valid final UserProfileListDTO userProfileDTOList) {
-        String userId = authentication.getPrincipal().toString();
+        Long userId = (Long) authentication.getPrincipal();
         userProfileService.updateProfile(userId, userProfileMapper.INSTANCE.toUserProfileVOList(userProfileDTOList.getUserProfiles()));
     }
 
@@ -46,7 +47,7 @@ public class ProfileController {
     @GetMapping(value = "/v1/users/{id}/profile")
     public List viewProfile(final @PathVariable("id") long id, final Authentication authentication) {
 
-        return Optional.of(userProfileService.viewProfile(authentication.getPrincipal().toString()))
+        return Optional.of(userProfileService.viewProfile((Long) authentication.getPrincipal()))
                 .map(list -> UserProfileMapper.INSTANCE.toUserProfileDTOList(list))
                 .orElseThrow(() -> new DataNotFoundException(DATA_NOT_FOUND_EXCEPTION.getMessage()));
     }

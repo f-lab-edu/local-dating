@@ -27,7 +27,7 @@ public class UserPreference {
         this.modUser = vo.userId();
     }
 
-    public UserPreference(final String userId, final UserPreferenceVO userPreferenceVO) {
+    public UserPreference(final Long userId, final UserPreferenceVO userPreferenceVO) {
         this.userId = userId;
         this.prefCd = userPreferenceVO.prefCd();
         this.prefVal = userPreferenceVO.prefVal();
@@ -42,7 +42,7 @@ public class UserPreference {
     private Long id;
 
     @Column(name = "user_id")
-    private String userId;
+    private Long userId;
 
     @Column(name = "prefCd")
     private String prefCd;
@@ -58,12 +58,12 @@ public class UserPreference {
     private LocalDateTime inDate;
 
     @Column(name = "in_user")
-    private String inUser;
+    private Long inUser;
 
     @Column(name = "mod_date")
     @UpdateTimestamp
     private LocalDateTime modDate;
 
     @Column(name = "mod_user")
-    private String modUser;
+    private Long modUser;
 }

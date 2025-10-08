@@ -30,7 +30,7 @@ public class UserProfileService {
     }*/
 
     @Cacheable(value = "profile", key = "#userId")
-    public List<UserProfileVO> viewProfile(final String userId) {
+    public List<UserProfileVO> viewProfile(final Long userId) {
     //public Optional<List<UserProfileVO>> viewProfile(final String userId) throws Exception {
     //public Optional<UserProfileVO> viewProfile(final String userId) throws Exception {
 
@@ -52,7 +52,7 @@ public class UserProfileService {
 
     @Transactional
     @CacheEvict(value = "profile", key = "#userId")
-    public int saveProfile(final String userId, final List<UserProfileVO> userProfileVOS) {
+    public int saveProfile(final Long userId, final List<UserProfileVO> userProfileVOS) {
     //public int saveProfile(final String userId, final List<UserProfileDTO> userProfileDTO) throws Exception {
     //public int saveProfile(String UserId, UserProfileDTO userProfileDTO) {
 
@@ -84,7 +84,7 @@ public class UserProfileService {
 
     @Transactional
     @CacheEvict(value = "profile", key = "#userId")
-    public void updateProfile(final String userId, final List<UserProfileVO> userProfileVOS) {
+    public void updateProfile(final Long userId, final List<UserProfileVO> userProfileVOS) {
     //public void updateProfile(final String userId, final List<UserProfileDTO> userProfileDTO) throws Exception {
     //public int updateProfile(final String userId, final List<UserProfileDTO> userProfileDTO) {
 

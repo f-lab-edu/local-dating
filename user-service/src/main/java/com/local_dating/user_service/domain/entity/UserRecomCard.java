@@ -31,7 +31,7 @@ public class UserRecomCard {
     private long id;
 
     @Column(name = "user_id")
-    private String userId;
+    private Long userId;
 
     @Column(name = "card_id")
     private String cardId;
@@ -45,7 +45,7 @@ public class UserRecomCard {
     private LocalDateTime inDate;
 
     @Column(name = "in_user")
-    private String inUser;
+    private Long inUser;
 
     @OneToMany(mappedBy = "userRecomCard", fetch = FetchType.LAZY)
     private List<UserProfile> userProfiles = new ArrayList<>();

@@ -17,7 +17,7 @@ public class UserPreferenceRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
 
-    public List<UserPreference> findMajorPrior(String userId) {
+    public List<UserPreference> findMajorPrior(Long userId) {
         QUserPreference userPreference = QUserPreference.userPreference;
 
         return queryFactory
@@ -27,7 +27,7 @@ public class UserPreferenceRepositoryCustom {
                 .fetch();
     }
 
-    public List<UserPreference> findMinorPrior(String userId) {
+    public List<UserPreference> findMinorPrior(Long userId) {
         QUserPreference userPreference = QUserPreference.userPreference;
 
         return queryFactory
@@ -36,7 +36,7 @@ public class UserPreferenceRepositoryCustom {
                 .fetch();
     }
 
-    public List<UserPreferenceCountVO2> findRecommendUser(String userId, List<UserPreference> userPreferenceList) {
+    public List<UserPreferenceCountVO2> findRecommendUser(Long userId, List<UserPreference> userPreferenceList) {
     //public List<UserPreference> findRecommendUser(String userId, List<UserPreference> userPreferenceList) {
         QUserPreference userPreference = QUserPreference.userPreference;
 
@@ -63,7 +63,7 @@ public class UserPreferenceRepositoryCustom {
                 .fetch();
     }
 
-    public List<UserPreferenceCountVO2> findRecommendUserAlter(String userId) {
+    public List<UserPreferenceCountVO2> findRecommendUserAlter(Long userId) {
         QUserPreference userPreference = QUserPreference.userPreference;
 
         return queryFactory

@@ -34,7 +34,7 @@ public class UserPreferenceService {
 
     @Transactional
     @CacheEvict(value = "preference", key = "#userId")
-    public List<UserPreference> savePreferences(final String userId, final List<UserPreferenceVO> userPreferenceVOList) {
+    public List<UserPreference> savePreferences(final Long userId, final List<UserPreferenceVO> userPreferenceVOList) {
         //public void savePreferences(String user_id, List<UserPreferenceVO> userPreferenceVOList) {
 
         /*return userPreferenceVOList.stream()
@@ -58,7 +58,7 @@ public class UserPreferenceService {
 
     @Transactional
     @CacheEvict(value = "preference", key = "#userId")
-    public void updatePreferences(final String userId, final List<UserPreferenceVO> userPreferenceVOList) {
+    public void updatePreferences(final Long userId, final List<UserPreferenceVO> userPreferenceVOList) {
         userPreferenceVOList.stream().map(el -> userPreferenceRepository.findByUserIdAndPrefCd(userId, el.prefCd())
                 .map(el2 -> {
                     el2.setPrefCd(el.prefCd());
@@ -78,7 +78,7 @@ public class UserPreferenceService {
 
     @Transactional
     @CacheEvict(value = "preference", key = "#userId")
-    public void updatePreferencesPriority(final String userId, final List<UserPreferenceVO> userPreferenceVOList) {
+    public void updatePreferencesPriority(final Long userId, final List<UserPreferenceVO> userPreferenceVOList) {
         userPreferenceVOList.stream().map(el -> userPreferenceRepository.findByUserIdAndPrefCd(userId, el.prefCd())
                 .map(el2 -> {
                     el2.setPrefCd(el.prefCd());
@@ -93,7 +93,7 @@ public class UserPreferenceService {
     }
 
     @Cacheable(value = "preference", key = "#userId", cacheManager = "jsonCacheManager")
-    public String viewPreference(final String userId) {
+    public String viewPreference(final Long userId) {
     /*@Cacheable(value = "preference", key = "#userId")
     public List<UserPreferenceVO> viewPreference(final String userId) {*/
     //public List<UserPreferenceVO> viewPreference(final String userId) throws Exception {
