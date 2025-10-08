@@ -23,6 +23,11 @@ public class VerificationController {
         //return userVerificationService.getVerificationCode(userValidationDTO);
     }
 
+    @PostMapping("/v1/auth/check-code")
+    public String checkVerificationCode(@RequestBody @Valid final UserValidationDTO userValidationDTO) {
+        return userVerificationService.checkVerificationCode(userMapper.UserValidationDTOToUserValidationVO(userValidationDTO));
+    }
+
     @GetMapping("/v1/auth/send-code/{code}/id/{id}")
     public String sendVerificationCode(@PathVariable("code") final String code, @PathVariable("id") final Long id) {
         return userVerificationService.sendVerificationCode(code, id);

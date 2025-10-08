@@ -90,7 +90,9 @@ public class SecurityConfig {
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> web.ignoring()
-                .requestMatchers("/resources/", "/static/", "/css/", "/js/", "/images/**", "/v1/interceptor/**");
+                .requestMatchers("/resources/", "/static/", "/css/", "/js/", "/images/**"
+                        , "/v1/interceptor/**"
+                        , "/v1/auth/get-code", "/v1/auth/send-code/{code}/id/{id}", "/v1/auth/check-code"); //필요한가?
         //, "/", "/v1/users/login", "/v1/users/register", "/v1/users/{id}/refresh");
         //.requestMatchers("/v2/api-docs", "/configuration/ui", "/swagger-resources/**", "/configuration/security", "/swagger-ui.html", "/webjars/**");
     }
