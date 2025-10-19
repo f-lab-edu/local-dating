@@ -48,7 +48,8 @@ public class UserVerificationService {
 
         User user = this.verifyUserByPhone(UserValidationVO.phone());
         String code = this.createVerificationCode();
-        redisTemplate.opsForValue().set("userValidationCode:" + user.getNo(), code, 180, TimeUnit.SECONDS);
+        redisTemplate.opsForValue().set("userValidationCode:" + user.getPhone(), code, 180, TimeUnit.SECONDS);
+        //redisTemplate.opsForValue().set("userValidationCode:" + user.getNo(), code, 180, TimeUnit.SECONDS);
         redisTemplateLong.delete("userValidationCodeFailCnt:" + user.getNo());
 
         log.info("getVerificationCode 시간: " + LocalDateTime.now());
@@ -74,6 +75,29 @@ public class UserVerificationService {
     public User verifyUserByPhone(final String phone) {
         return userRepository.findByPhone(phone)
                 .orElseThrow(() -> new BusinessException(MessageCode.DATA_NOT_FOUND_EXCEPTION));
+    }
+
+    public void checkVerificationCode(final String code, final String phone) {
+        String redisCode = redisTemplate.opsForValue().get("userValidationCode:" + phone);
+        Long failCnt = redisTemplateLong.opsForValue().get("userValidationCodeFailCnt:" + phone);
+
+        if (failCnt != null && failCnt >= 5) {
+            throw new BusinessException(MessageCode.EXCEEDED_MAX_ATTEMPTS);
+        }
+
+        if (!code.equals(redisCode)) {
+            if (failCnt == null) {
+                redisTemplateLong.opsForValue().set("userValidationCodeFailCnt:" + phone, 1L);
+                throw new BusinessException(MessageCode.INVALID_VERIFICATION_CODE);
+            }
+            redisTemplateLong.opsForValue().increment("userValidationCodeFailCnt:" + phone);
+
+            throw new BusinessException(MessageCode.INVALID_VERIFICATION_CODE);
+
+        } else {
+            redisTemplate.delete("userValidationCode:" + phone);
+            redisTemplateLong.delete("userValidationCodeFailCnt:" + phone);
+        }
     }
 
     public void checkVerificationCode(final String code, final Long id) {
@@ -115,14 +139,43 @@ public class UserVerificationService {
     }*/
 
     @Async
+    public CompletableFuture<User> verifyUserByPhoneAsync(final String phone) {
+        return CompletableFuture.completedFuture(verifyUserByPhone(phone));
+    }
+
+    @Async
     public CompletableFuture<User> verifyUserByIdAsync(final Long id) {
         return CompletableFuture.completedFuture(verifyUserById(id));
+    }
+
+    @Async
+    public CompletableFuture<Void> checkVerificationCodeAsync(final String code, final String phone) {
+        checkVerificationCode(code, phone);
+        return CompletableFuture.completedFuture(null);
     }
 
     @Async
     public CompletableFuture<Void> checkVerificationCodeAsync(final String code, final Long id) {
         checkVerificationCode(code, id);
         return CompletableFuture.completedFuture(null);
+    }
+
+    public String checkVerificationCode(final UserValidationVO userValidationVO) {
+        CompletableFuture<User> userF = verifyUserByPhoneAsync(userValidationVO.phone());
+        CompletableFuture<Void> checkF = checkVerificationCodeAsync(userValidationVO.code(), userValidationVO.phone());
+
+        // 두 Future가 모두 완료될 때까지 기다리고, 예외 언래핑
+        try {
+            CompletableFuture.allOf(userF, checkF).join();
+        } catch (CompletionException ex) {
+            Throwable cause = ex.getCause();
+            if (cause instanceof BusinessException) {
+                throw (BusinessException) cause;
+            }
+            throw ex;
+        }
+
+        return userF.join().getLoginId();
     }
 
     public String sendVerificationCode(final String code, final Long id) {

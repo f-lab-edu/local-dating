@@ -26,7 +26,7 @@ public class PreferenceController {
     @PreAuthorize("isAuthenticated() and #id == authentication.getPrincipal()")
     @PostMapping(value = "/v1/users/{id}/preference")
     public List savePreference(final @PathVariable("id") long id, final Authentication authentication, @RequestBody @Valid final UserPreferenceListDTO userPreferenceDTOList) {
-        List<UserPreference> userPreferenceList = userPreferenceService.savePreferences(authentication.getPrincipal().toString(), UserPreferenceMapper.INSTANCE.toUserPreferenceVOList(userPreferenceDTOList.getUserPreferences()));
+        List<UserPreference> userPreferenceList = userPreferenceService.savePreferences((Long) authentication.getPrincipal(), UserPreferenceMapper.INSTANCE.toUserPreferenceVOList(userPreferenceDTOList.getUserPreferences()));
         //List<UserPreference> userPreferenceList = userPreferenceService.savePreferences(authentication.getPrincipal().toString(), UserPreferenceMapper.INSTANCE.toUserPreferenceVOList(userPreferenceDTOList));
         return userPreferenceList;
     }
@@ -35,14 +35,14 @@ public class PreferenceController {
     @PutMapping(value = "/v1/users/{id}/preference")
     public void updatePreference(final @PathVariable("id") long id, final Authentication authentication, @RequestBody @Valid final UserPreferenceListDTO userPreferenceDTOList) {
     //public void updatePreference(final @PathVariable("id") long id, final Authentication authentication, @RequestBody final List<UserPreferenceDTO> userPreferenceDTOList) {
-        userPreferenceService.updatePreferences(authentication.getPrincipal().toString(), userPreferenceMapper.INSTANCE.toUserPreferenceVOList(userPreferenceDTOList.getUserPreferences()));
+        userPreferenceService.updatePreferences((Long) authentication.getPrincipal(), userPreferenceMapper.INSTANCE.toUserPreferenceVOList(userPreferenceDTOList.getUserPreferences()));
     }
 
     @PreAuthorize("isAuthenticated() and #id == authentication.getPrincipal()")
     @GetMapping(value = "/v1/users/{id}/preference")
     public String viewPreference(final @PathVariable("id") long id, final Authentication authentication) {
 
-        String result = userPreferenceService.viewPreference(authentication.getPrincipal().toString());
+        String result = userPreferenceService.viewPreference((Long) authentication.getPrincipal());
         if (result.isEmpty()) {
             throw new DataNotFoundException(DATA_NOT_FOUND_EXCEPTION.getMessage());
         }
@@ -52,6 +52,6 @@ public class PreferenceController {
     @PreAuthorize("isAuthenticated() and #id == authentication.getPrincipal()")
     @PatchMapping(value = "/v1/users/{id}/preference/prior")
     public void updatePreferencePriority(final @PathVariable("id") long id, final Authentication authentication, @RequestBody final List<UserPreferenceDTO> userPreferenceDTOList) {
-        userPreferenceService.updatePreferencesPriority(authentication.getPrincipal().toString(), userPreferenceMapper.INSTANCE.toUserPreferenceVOList(userPreferenceDTOList));
+        userPreferenceService.updatePreferencesPriority((Long) authentication.getPrincipal(), userPreferenceMapper.INSTANCE.toUserPreferenceVOList(userPreferenceDTOList));
     }
 }

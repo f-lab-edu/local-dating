@@ -12,9 +12,9 @@ public interface UserProfileRepository extends JpaRepository<UserProfile,Long> {
 
     //UserProfile findByInfoCd(String userId);
     //List<UserProfile> findByUserId(String userId);
-    List<UserProfile> findByUserId(String userId); //Optional<List<UserProfile>> findByUserId(String userId);
+    List<UserProfile> findByUserId(Long userId); //Optional<List<UserProfile>> findByUserId(String userId);
     //Optional<UserProfile> findByUserId(String userId);
-    Optional<UserProfile> findByUserIdAndInfoCd(String userId, String infoCd);
+    Optional<UserProfile> findByUserIdAndInfoCd(Long userId, String infoCd);
     //Optional<UserProfile> findByUserIdAndInfoCdIn(String userId, List<UserProfile> infoCd);
 
     //UserProfile save(UserProfile userProfile);

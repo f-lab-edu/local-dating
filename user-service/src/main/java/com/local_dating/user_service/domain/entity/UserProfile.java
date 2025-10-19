@@ -24,7 +24,7 @@ public class UserProfile {
         this.infoVal = vo.infoVal();
     }
 
-    public UserProfile(final String userId, final UserProfileVO vo) {
+    public UserProfile(final Long userId, final UserProfileVO vo) {
         this.userId = userId;
         this.infoCd = vo.infoCd();
         this.infoVal = vo.infoVal();
@@ -38,7 +38,8 @@ public class UserProfile {
     private Long id;
 
     @Column(name = "user_id")
-    private String userId;
+    private Long userId;
+    //private String userId;
 
     @Column(name = "info_cd")
     private String infoCd;
@@ -51,17 +52,21 @@ public class UserProfile {
     private LocalDateTime inDate;
 
     @Column(name = "in_user")
-    private String inUser;
+    private Long inUser;
 
     @Column(name = "mod_date")
     @UpdateTimestamp
     private LocalDateTime modDate;
 
     @Column(name = "mod_user")
-    private String modUser;
+    private Long modUser;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "card_id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT), insertable = false, updatable = false)
     @JsonIgnore
     private UserRecomCard userRecomCard;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", referencedColumnName = "user_id", insertable = false, updatable = false)
+    private UserProfileCore userProfileCore;
 }
