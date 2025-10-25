@@ -22,7 +22,7 @@ public class UserProfileServiceImpl implements UserProfileService_ {
 
     @Override
     @Transactional
-    public int saveProfile(final String userId, final List<UserProfileDTO> userProfileDTO) {
+    public int saveProfile(final Long userId, final List<UserProfileDTO> userProfileDTO) {
     //public int saveProfile(String UserId, UserProfileDTO userProfileDTO) {
 
         userProfileDTO.stream().forEach(el->userProfileRepository.save(new UserProfile(userId, userProfileMapper.INSTANCE.toUserProfileVO(el))));

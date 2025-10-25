@@ -16,7 +16,7 @@ public class ProfileCoreController {
     private final UserProfileCoreService saveProfileCoreService;
     private final UserProfileCoreMapper userProfileMapper;
 
-    @PostMapping(value = "/api/users/{id}/profile_core")
+    @PostMapping(value = "/api/users/{id}/profile-core")
     @PreAuthorize("hasRole('USER') and isAuthenticated() and #id == authentication.getPrincipal()")
     @ResponseStatus(HttpStatus.CREATED)
     public void saveProfile(final @PathVariable("id") long id, final Authentication authentication , @RequestBody final UserProfileCoreDTO userProfileCoreDTO) {
