@@ -31,7 +31,7 @@ public class CardController {
 
     @PreAuthorize("isAuthenticated() and #id == authentication.getPrincipal()")
     @GetMapping(value = "/v1/users/{id}/cards/detail/{targetId}")
-    public List viewRecomcardDetail(final @PathVariable("id") long id, final Authentication authentication, @PathVariable String targetId) {
+    public List viewRecomcardDetail(final @PathVariable("id") long id, final Authentication authentication, @PathVariable Long targetId) {
         return userCardService.getCardDetail((Long) authentication.getPrincipal(), targetId);
     }
 }

@@ -1,15 +1,13 @@
 package com.local_dating.user_service.application;
 
+import com.local_dating.user_service.application.async.UserVerificationAsyncTask;
 import com.local_dating.user_service.domain.entity.User;
 import com.local_dating.user_service.domain.mapper.UserMapper;
 import com.local_dating.user_service.domain.vo.UserValidationVO;
-import com.local_dating.user_service.infrastructure.repository.UserRepository;
-import com.local_dating.user_service.util.MessageCode;
 import com.local_dating.user_service.util.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
@@ -18,35 +16,34 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.TimeUnit;
 
-//@RequiredArgsConstructor
 @Slf4j
 @Service
 public class UserVerificationService {
 
-    private final UserRepository userRepository;
-
+    @Qualifier("stringRedisTemplate")
     private final RedisTemplate<String, String> redisTemplate;
-
+    @Qualifier("redisStringLongTemplate")
     private final RedisTemplate<String, Long> redisTemplateLong;
-    
     private final UserMapper userMapper;
-
     private final MessageService messageService;
+    private final UserVerificationCommonService userVerificationCommonService;
+    private final UserVerificationAsyncTask userVerificationAsyncTask;
 
-    public UserVerificationService(UserRepository userRepository, @Qualifier("stringRedisTemplate") RedisTemplate<String, String> redisTemplate, @Qualifier("redisStringLongTemplate") RedisTemplate<String, Long> redisTemplateLong
-            , UserMapper userMapper, MessageService messageService) {
-        this.userRepository = userRepository;
+    public UserVerificationService(@Qualifier("stringRedisTemplate") RedisTemplate<String, String> redisTemplate
+            , @Qualifier("redisStringLongTemplate") RedisTemplate<String, Long> redisTemplateLong
+            , UserMapper userMapper, MessageService messageService, UserVerificationCommonService userVerificationCommonService
+            , UserVerificationAsyncTask userVerificationAsyncTask) {
         this.redisTemplate = redisTemplate;
         this.redisTemplateLong = redisTemplateLong;
         this.userMapper = userMapper;
         this.messageService = messageService;
+        this.userVerificationCommonService = userVerificationCommonService;
+        this.userVerificationAsyncTask = userVerificationAsyncTask;
     }
 
     public UserValidationVO getVerificationCode(final UserValidationVO UserValidationVO) {
-    //public String getVerificationCode(final UserValidationDTO userValidationDTO) {
-    //public String getVerificationCode(final UserValidationDTO userValidationDTO) {
 
-        User user = this.verifyUserByPhone(UserValidationVO.phone());
+        User user = userVerificationCommonService.verifyUserByPhone(UserValidationVO.phone());
         String code = this.createVerificationCode();
         redisTemplate.opsForValue().set("userValidationCode:" + user.getPhone(), code, 180, TimeUnit.SECONDS);
         //redisTemplate.opsForValue().set("userValidationCode:" + user.getNo(), code, 180, TimeUnit.SECONDS);
@@ -67,63 +64,6 @@ public class UserVerificationService {
         //return "인증번호는 " + code + "입니다";
     }
 
-    public User verifyUserById(final Long id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new BusinessException(MessageCode.DATA_NOT_FOUND_EXCEPTION));
-    }
-
-    public User verifyUserByPhone(final String phone) {
-        return userRepository.findByPhone(phone)
-                .orElseThrow(() -> new BusinessException(MessageCode.DATA_NOT_FOUND_EXCEPTION));
-    }
-
-    public void checkVerificationCode(final String code, final String phone) {
-        String redisCode = redisTemplate.opsForValue().get("userValidationCode:" + phone);
-        Long failCnt = redisTemplateLong.opsForValue().get("userValidationCodeFailCnt:" + phone);
-
-        if (failCnt != null && failCnt >= 5) {
-            throw new BusinessException(MessageCode.EXCEEDED_MAX_ATTEMPTS);
-        }
-
-        if (!code.equals(redisCode)) {
-            if (failCnt == null) {
-                redisTemplateLong.opsForValue().set("userValidationCodeFailCnt:" + phone, 1L);
-                throw new BusinessException(MessageCode.INVALID_VERIFICATION_CODE);
-            }
-            redisTemplateLong.opsForValue().increment("userValidationCodeFailCnt:" + phone);
-
-            throw new BusinessException(MessageCode.INVALID_VERIFICATION_CODE);
-
-        } else {
-            redisTemplate.delete("userValidationCode:" + phone);
-            redisTemplateLong.delete("userValidationCodeFailCnt:" + phone);
-        }
-    }
-
-    public void checkVerificationCode(final String code, final Long id) {
-        String redisCode = redisTemplate.opsForValue().get("userValidationCode:" + id);
-        Long failCnt = redisTemplateLong.opsForValue().get("userValidationCodeFailCnt:" + id);
-
-        if (failCnt != null && failCnt >= 5) {
-            throw new BusinessException(MessageCode.EXCEEDED_MAX_ATTEMPTS);
-        }
-
-        if (!code.equals(redisCode)) {
-            if (failCnt == null) {
-                redisTemplateLong.opsForValue().set("userValidationCodeFailCnt:" + id, 1L);
-                throw new BusinessException(MessageCode.INVALID_VERIFICATION_CODE);
-            }
-            redisTemplateLong.opsForValue().increment("userValidationCodeFailCnt:" + id);
-
-
-            throw new BusinessException(MessageCode.INVALID_VERIFICATION_CODE);
-
-        } else {
-            redisTemplate.delete("userValidationCode:" + id);
-            redisTemplateLong.delete("userValidationCodeFailCnt:" + id);
-        }
-    }
-
     public String createVerificationCode() {
         SecureRandom random = new SecureRandom();
         int code = random.nextInt(900000) + 100000; // 100000~999999 사이 6자리 숫자
@@ -138,31 +78,10 @@ public class UserVerificationService {
         return user.getLoginId();
     }*/
 
-    @Async
-    public CompletableFuture<User> verifyUserByPhoneAsync(final String phone) {
-        return CompletableFuture.completedFuture(verifyUserByPhone(phone));
-    }
-
-    @Async
-    public CompletableFuture<User> verifyUserByIdAsync(final Long id) {
-        return CompletableFuture.completedFuture(verifyUserById(id));
-    }
-
-    @Async
-    public CompletableFuture<Void> checkVerificationCodeAsync(final String code, final String phone) {
-        checkVerificationCode(code, phone);
-        return CompletableFuture.completedFuture(null);
-    }
-
-    @Async
-    public CompletableFuture<Void> checkVerificationCodeAsync(final String code, final Long id) {
-        checkVerificationCode(code, id);
-        return CompletableFuture.completedFuture(null);
-    }
 
     public String checkVerificationCode(final UserValidationVO userValidationVO) {
-        CompletableFuture<User> userF = verifyUserByPhoneAsync(userValidationVO.phone());
-        CompletableFuture<Void> checkF = checkVerificationCodeAsync(userValidationVO.code(), userValidationVO.phone());
+        CompletableFuture<User> userF = userVerificationAsyncTask.verifyUserByPhoneAsync(userValidationVO.phone());
+        CompletableFuture<Void> checkF = userVerificationAsyncTask.checkVerificationCodeAsync(userValidationVO.code(), userValidationVO.phone());
 
         // 두 Future가 모두 완료될 때까지 기다리고, 예외 언래핑
         try {
@@ -179,8 +98,8 @@ public class UserVerificationService {
     }
 
     public String sendVerificationCode(final String code, final Long id) {
-        CompletableFuture<User> userF = verifyUserByIdAsync(id);
-        CompletableFuture<Void> checkF = checkVerificationCodeAsync(code, id);
+        CompletableFuture<User> userF = userVerificationAsyncTask.verifyUserByIdAsync(id);
+        CompletableFuture<Void> checkF = userVerificationAsyncTask.checkVerificationCodeAsync(code, id);
 
         // 두 Future가 모두 완료될 때까지 기다리고, 예외 언래핑
         try {
