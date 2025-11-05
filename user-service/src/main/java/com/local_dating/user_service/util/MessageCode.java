@@ -31,4 +31,24 @@ public enum MessageCode {
         this.message = message;
         this.status = status;
     }
+
+    public static String getExceptionMessage(final String code) {
+
+        for (MessageCode messageCode : MessageCode.values()) {
+            if (messageCode.getCode().equals(code)) {
+                return messageCode.getMessage();
+            }
+        }
+        return null;
+    }
+
+    public static HttpStatus getExceptionHttpStatus(final String code) {
+
+        for (MessageCode messageCode : MessageCode.values()) {
+            if (messageCode.getCode().equals(code)) {
+                return messageCode.getStatus();
+            }
+        }
+        return null;
+    }
 }

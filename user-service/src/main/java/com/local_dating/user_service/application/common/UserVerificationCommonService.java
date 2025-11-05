@@ -1,4 +1,4 @@
-package com.local_dating.user_service.application;
+package com.local_dating.user_service.application.common;
 
 import com.local_dating.user_service.domain.entity.User;
 import com.local_dating.user_service.infrastructure.repository.UserRepository;
@@ -50,10 +50,9 @@ public class UserVerificationCommonService {
 
             throw new BusinessException(MessageCode.INVALID_VERIFICATION_CODE);
 
-        } else {
-            redisTemplate.delete("userValidationCode:" + phone);
-            redisTemplateLong.delete("userValidationCodeFailCnt:" + phone);
         }
+        redisTemplate.delete("userValidationCode:" + phone);
+        redisTemplateLong.delete("userValidationCodeFailCnt:" + phone);
     }
 
     public void checkVerificationCode(final String code, final Long id) {
@@ -74,9 +73,8 @@ public class UserVerificationCommonService {
 
             throw new BusinessException(MessageCode.INVALID_VERIFICATION_CODE);
 
-        } else {
-            redisTemplate.delete("userValidationCode:" + id);
-            redisTemplateLong.delete("userValidationCodeFailCnt:" + id);
         }
+        redisTemplate.delete("userValidationCode:" + id);
+        redisTemplateLong.delete("userValidationCodeFailCnt:" + id);
     }
 }

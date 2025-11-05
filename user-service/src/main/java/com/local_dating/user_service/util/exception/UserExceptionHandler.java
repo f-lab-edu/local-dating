@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -19,13 +20,37 @@ public class UserExceptionHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(UserExceptionHandler.class);
 
-    @ExceptionHandler(Exception.class) // 별도 핸들러에 지정되지 않은 모든 예외가 잡힘
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<String> handleException(Exception e) {
+        logger.error("코드: " + e.getMessage());
+        logger.error("오류", e);
+        //String message = e.getMessage() != null ? e.getMessage() : "알 수 없는 오류가 발생했습니다";
+
+        String message;
+        HttpStatus status;
+        if (e.getMessage() != null) {
+            message = MessageCode.getExceptionMessage(e.getMessage());
+            status = MessageCode.getExceptionHttpStatus(e.getMessage());
+            if (message == null) message = "알 수 없는 오류가 발생했습니다";
+            if (status == null) status = HttpStatus.INTERNAL_SERVER_ERROR;
+        } else {
+            message = "알 수 없는 오류가 발생했습니다";
+            status = HttpStatus.INTERNAL_SERVER_ERROR;
+        }
+
+        return ResponseEntity
+                .status(status)
+                .contentType(MediaType.TEXT_PLAIN)
+                .body(message);
+    }
+
+    /*@ExceptionHandler(Exception.class) // 별도 핸들러에 지정되지 않은 모든 예외가 잡힘
     public ResponseEntity handleException(Exception e) {
         logger.error(e.getClass().getName());
         logger.error(e.getMessage());
         return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         //return new ResponseEntity<>("registerFail", HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+    }*/
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity AccessDeniedException(AccessDeniedException e) {
