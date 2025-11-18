@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
-//@RestControllerAdvice(assignableTypes = {UserController.class})
 public class UserExceptionHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(UserExceptionHandler.class);
@@ -24,33 +23,28 @@ public class UserExceptionHandler {
     public ResponseEntity<String> handleException(Exception e) {
         logger.error("코드: " + e.getMessage());
         logger.error("오류", e);
-        //String message = e.getMessage() != null ? e.getMessage() : "알 수 없는 오류가 발생했습니다";
-
-        String message;
-        HttpStatus status;
-        if (e.getMessage() != null) {
-            message = MessageCode.getExceptionMessage(e.getMessage());
-            status = MessageCode.getExceptionHttpStatus(e.getMessage());
-            if (message == null) message = "알 수 없는 오류가 발생했습니다";
-            if (status == null) status = HttpStatus.INTERNAL_SERVER_ERROR;
-        } else {
-            message = "알 수 없는 오류가 발생했습니다";
-            status = HttpStatus.INTERNAL_SERVER_ERROR;
-        }
 
         return ResponseEntity
-                .status(status)
+                .status(MessageCode.UNKNOWN_EXCEPTION.getStatus())
+                .contentType(MediaType.TEXT_PLAIN)
+                .body(MessageCode.UNKNOWN_EXCEPTION.getMessage());
+    }
+
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<String> handleBusinessException(BusinessException e) {
+        MessageCode code = e.getMessageCode();
+        String message = code.getMessage();
+        HttpStatus status = code.getStatus();
+        String errorValue = e.getErrorValue();
+
+        if (message == null) message = MessageCode.UNKNOWN_EXCEPTION.getMessage();
+        if (status == null) status = HttpStatus.BAD_REQUEST;
+        if (errorValue != null) message += " (" + errorValue + ")";
+
+        return ResponseEntity.status(status)
                 .contentType(MediaType.TEXT_PLAIN)
                 .body(message);
     }
-
-    /*@ExceptionHandler(Exception.class) // 별도 핸들러에 지정되지 않은 모든 예외가 잡힘
-    public ResponseEntity handleException(Exception e) {
-        logger.error(e.getClass().getName());
-        logger.error(e.getMessage());
-        return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        //return new ResponseEntity<>("registerFail", HttpStatus.INTERNAL_SERVER_ERROR);
-    }*/
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity AccessDeniedException(AccessDeniedException e) {
