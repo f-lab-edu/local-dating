@@ -43,7 +43,7 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 
         UserVO user = new UserVO(
-                userDetails.getId(),
+                userDetails.getUserNo(),
                 userDetails.getUsername(),
                 userDetails.getPassword(),
                 null, null, null, null
@@ -56,7 +56,7 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
         response.addHeader("Refresh-Token", refreshToken);
 
         redisTemplate.opsForValue().set(
-                "userRefreshToken:" + userDetails.getId(),
+                "userRefreshToken:" + userDetails.getUserNo(),
                 refreshToken,
                 cacheTtlProperties.getRefreshTokenTTL(),
                 TimeUnit.DAYS
@@ -65,7 +65,7 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
         kafkaProducer.sendMessage(
                 loginLogTopic,
                 new UserLoginLogVO(
-                        userDetails.getId(),
+                        userDetails.getUserNo(),
                         HttpServletRequestUtil.getIpAddress(request),
                         "N",
                         LocalDateTime.now()
