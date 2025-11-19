@@ -50,8 +50,9 @@ public class JwtUtil {
         Date tokenValidity = new Date(tokenCreateTime.getTime() + accessTokenValidity);
 
         return Jwts.builder()
-                .setSubject(user.loginId())
-                .claim("no", user.no()) // user테이블 id
+                //.setSubject(user.loginId())
+                .setSubject(String.valueOf(user.no()))
+                //.claim("no", user.no()) // user테이블 id
                 .claim("name",user.name())
                 .claim("role", "USER")
                 .setIssuedAt(tokenCreateTime)
@@ -65,8 +66,8 @@ public class JwtUtil {
         Date tokenValidity = new Date(tokenCreateTime.getTime() + refreshTokenValidity);
 
         return Jwts.builder()
-                .setSubject(user.loginId())
-                .claim("no", user.no()) // user테이블 id
+                .setSubject(String.valueOf(user.no())) // user테이블 id
+                //.setSubject(user.loginId())
                 .claim("name",user.name())
                 .claim("role", "USER")
                 .setIssuedAt(tokenCreateTime)
@@ -130,8 +131,9 @@ public class JwtUtil {
     public Authentication getAuthenticationFromToken(String token) {
         try {
             Claims claims = parseJwtClaims(token.replace(TOKEN_PREFIX, "")); // Bearer 제거 후 파싱
-            String userId = claims.getSubject();
-            return new UsernamePasswordAuthenticationToken(userId, token, Collections.emptyList());
+            Long userNo = Long.parseLong(claims.getSubject());
+            //String userId = claims.getSubject();
+            return new UsernamePasswordAuthenticationToken(userNo, token, Collections.emptyList());
         } catch (Exception e) {
             throw new RuntimeException("Invalid JWT Token", e);
         }

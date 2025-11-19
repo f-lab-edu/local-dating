@@ -10,49 +10,86 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
-
-import java.util.Collections;
+import org.springframework.data.redis.serializer.GenericToStringSerializer;
+import org.springframework.data.redis.serializer.RedisSerializationContext;
+import org.springframework.data.redis.serializer.RedisSerializer;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
 @EnableCaching
 public class RedisConfig {
+
     @Bean
     @Primary
     public LettuceConnectionFactory redisConnectionFactory() {
-
         return new LettuceConnectionFactory(new RedisStandaloneConfiguration("aws-server", 6379));
     }
 
+    //값 직렬화기(단일 인스턴스 공유)
+    @Bean
+    public RedisSerializer<Object> redisValueSerializer() {
+        return RedisSerializer.json(); // GenericJackson2JsonRedisSerializer 기반
+    }
+
+    // 범용 RedisTemplate (키: String / 값: JSON)
     @Bean
     @Primary
-    RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
-    //RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
-
+    public RedisTemplate<String, Object> redisTemplate(
+            RedisConnectionFactory connectionFactory,
+            RedisSerializer<Object> redisValueSerializer
+    ) {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
-        template.setConnectionFactory(redisConnectionFactory);
-        //template.setConnectionFactory(connectionFactory);
+        template.setConnectionFactory(connectionFactory);
 
-        // 직렬화 설정
-        Jackson2JsonRedisSerializer<Object> serializer = new Jackson2JsonRedisSerializer<>(Object.class);
-        template.setDefaultSerializer(serializer);
-        template.setValueSerializer(serializer);
+        StringRedisSerializer keySerializer = new StringRedisSerializer();
+        template.setKeySerializer(keySerializer);
+        template.setHashKeySerializer(keySerializer);
+        template.setValueSerializer(redisValueSerializer);
+        template.setHashValueSerializer(redisValueSerializer);
+        template.setDefaultSerializer(redisValueSerializer);
 
+        template.afterPropertiesSet();
         return template;
     }
 
+    // 4) 범용 CacheManager (키: String / 값: JSON)
     @Bean
     @Primary
-    public RedisCacheManager cacheManager(RedisConnectionFactory redisConnectionFactory) {
-    //public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
-        return RedisCacheManager.builder(redisConnectionFactory)
-        //return RedisCacheManager.builder(connectionFactory)
-                .cacheDefaults(RedisCacheConfiguration.defaultCacheConfig())
-                .transactionAware()
-                .withInitialCacheConfigurations(Collections.singletonMap("predefined",
-                        RedisCacheConfiguration.defaultCacheConfig().disableCachingNullValues()))
+    public RedisCacheManager cacheManager(
+            RedisConnectionFactory connectionFactory,
+            RedisSerializer<Object> redisValueSerializer
+    ) {
+        RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
+                .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(redisValueSerializer))
+                .disableCachingNullValues();
+
+        return RedisCacheManager.builder(connectionFactory)
+                .cacheDefaults(config)
                 .build();
-        //return RedisCacheManager.create(connectionFactory);
     }
+
+    /*@Bean
+    public StringRedisTemplate stringRedisTemplate(RedisConnectionFactory cf) {
+        return new StringRedisTemplate(cf);
+    }*/
+
+    @Bean
+    public RedisTemplate<String, Long> redisStringLongTemplate(RedisConnectionFactory cf) {
+        RedisTemplate<String, Long> template = new RedisTemplate<>();
+        template.setConnectionFactory(cf);
+
+        StringRedisSerializer keySerializer = new StringRedisSerializer();
+        GenericToStringSerializer<Long> valueSerializer = new GenericToStringSerializer<>(Long.class);
+
+        template.setKeySerializer(keySerializer);
+        template.setHashKeySerializer(keySerializer);
+        template.setValueSerializer(valueSerializer);
+        template.setHashValueSerializer(valueSerializer);
+
+        template.afterPropertiesSet();
+        return template;
+    }
+
 
 }

@@ -5,7 +5,8 @@ import org.springframework.http.HttpStatus;
 
 @Getter
 public enum MessageCode {
-    REGISTER_SUCCESS("REGISTER_SUCCESS", "가입성공", HttpStatus.CREATED)
+    UNKNOWN_EXCEPTION("UNKNOWN_EXCEPTION", "알 수 없는 오류가 발생했습니다", HttpStatus.INTERNAL_SERVER_ERROR)
+    , REGISTER_SUCCESS("REGISTER_SUCCESS", "가입성공", HttpStatus.CREATED)
     , REGISTER_FAIL("REGISTER_FAIL", "가입실패", HttpStatus.INTERNAL_SERVER_ERROR)
     , USER_ALREADY_EXISTS_EXCEPTION("USER_ALREADY_EXISTS_EXCEPTION", "가입되어있음", HttpStatus.CONFLICT)
     , DATA_ALREADY_EXISTS_EXCEPTION("DATA_ALREADY_EXISTS_EXCEPTION", "데이터가있음", HttpStatus.CONFLICT)
@@ -30,5 +31,25 @@ public enum MessageCode {
         this.code = code;
         this.message = message;
         this.status = status;
+    }
+
+    public static String getExceptionMessage(final String code) {
+
+        for (MessageCode messageCode : MessageCode.values()) {
+            if (messageCode.getCode().equals(code)) {
+                return messageCode.getMessage();
+            }
+        }
+        return null;
+    }
+
+    public static HttpStatus getExceptionHttpStatus(final String code) {
+
+        for (MessageCode messageCode : MessageCode.values()) {
+            if (messageCode.getCode().equals(code)) {
+                return messageCode.getStatus();
+            }
+        }
+        return null;
     }
 }

@@ -1,5 +1,6 @@
 package com.local_dating.user_service.presentation.controller;
 
+import com.local_dating.user_service.application.CustomUserDetails;
 import com.local_dating.user_service.application.UserProfileService;
 import com.local_dating.user_service.domain.mapper.UserProfileMapper;
 import com.local_dating.user_service.presentation.dto.UserProfileListDTO;
@@ -45,9 +46,10 @@ public class ProfileController {
     @Secured("ROLE_USER")
     //@PreAuthorize("isAuthenticated() and #id == authentication.getPrincipal()")
     @GetMapping(value = "/v1/users/{id}/profile")
-    public List viewProfile(final @PathVariable("id") long id, final Authentication authentication) {
+    public List viewProfile(final @PathVariable("id") Long id, final Authentication authentication) {
 
-        return Optional.of(userProfileService.viewProfile((Long) authentication.getPrincipal()))
+        CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
+        return Optional.of(userProfileService.viewProfile(customUserDetails.getUserNo()))
                 .map(list -> UserProfileMapper.INSTANCE.toUserProfileDTOList(list))
                 .orElseThrow(() -> new DataNotFoundException(DATA_NOT_FOUND_EXCEPTION.getMessage()));
     }

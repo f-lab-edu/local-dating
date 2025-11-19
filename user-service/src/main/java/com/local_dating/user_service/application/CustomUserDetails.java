@@ -8,13 +8,13 @@ import java.util.List;
 
 public class CustomUserDetails implements UserDetails {
 
-    private final Long id;
+    private final Long userNo;
     private final String loginId;
     private final String pwd;
     private final Collection<? extends GrantedAuthority> authorities;
 
-    public CustomUserDetails(Long id, String loginId, String pwd, List<GrantedAuthority> authorities) {
-        this.id = id;
+    public CustomUserDetails(Long userNo, String loginId, String pwd, List<GrantedAuthority> authorities) {
+        this.userNo = userNo;
         this.loginId = loginId;
         this.pwd = pwd;
         this.authorities = authorities;
@@ -35,7 +35,7 @@ public class CustomUserDetails implements UserDetails {
         return loginId;
     }
 
-    public Long getId() {
-        return id;
+    public Long getUserNo() {
+        return userNo;
     }
 }

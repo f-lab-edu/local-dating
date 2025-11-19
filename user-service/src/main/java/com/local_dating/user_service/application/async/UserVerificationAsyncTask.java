@@ -1,13 +1,13 @@
 package com.local_dating.user_service.application.async;
 
-import com.local_dating.user_service.application.UserVerificationCommonService;
+import com.local_dating.user_service.application.common.UserVerificationCommonService;
 import com.local_dating.user_service.domain.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
 @Slf4j
 @Service
@@ -15,30 +15,36 @@ import java.util.concurrent.CompletableFuture;
 public class UserVerificationAsyncTask {
 
     private final UserVerificationCommonService userVerificationCommonService;
+    private final Executor threadPoolTaskExecutor;
 
-    @Async
     public CompletableFuture<User> verifyUserByPhoneAsync(final String phone) {
-        log.info("verifyUserByPhoneAsync thread={}", Thread.currentThread().getName());
-        return CompletableFuture.completedFuture(userVerificationCommonService.verifyUserByPhone(phone));
+        return CompletableFuture.supplyAsync(() -> {
+            log.info("verifyUserByPhoneAsync thread={}", Thread.currentThread().getName());
+            return userVerificationCommonService.verifyUserByPhone(phone);
+        }, threadPoolTaskExecutor);
     }
 
-    @Async
     public CompletableFuture<User> verifyUserByIdAsync(final Long id) {
-        log.info("verifyUserByIdAsync thread={}", Thread.currentThread().getName());
-        return CompletableFuture.completedFuture(userVerificationCommonService.verifyUserById(id));
+        return CompletableFuture.supplyAsync(() -> {
+            log.info("verifyUserByIdAsync thread={}", Thread.currentThread().getName());
+            return userVerificationCommonService.verifyUserById(id);
+        }, threadPoolTaskExecutor);
     }
 
-    @Async
     public CompletableFuture<Void> checkVerificationCodeAsync(final String code, final String phone) {
-        log.info("checkVerificationCodeByPhoneAsync thread={}", Thread.currentThread().getName());
-        userVerificationCommonService.checkVerificationCode(code, phone);
-        return CompletableFuture.completedFuture(null);
+        return CompletableFuture.supplyAsync(() -> {
+            log.info("checkVerificationCodeByPhoneAsync thread={}", Thread.currentThread().getName());
+            userVerificationCommonService.checkVerificationCode(code, phone);
+            return null;
+        });
     }
 
-    @Async
     public CompletableFuture<Void> checkVerificationCodeAsync(final String code, final Long id) {
-        log.info("checkVerificationCodeByIdAsync thread={}", Thread.currentThread().getName());
-        userVerificationCommonService.checkVerificationCode(code, id);
-        return CompletableFuture.completedFuture(null);
+        return CompletableFuture.supplyAsync(() -> {
+            log.info("checkVerificationCodeByIdAsync thread={}", Thread.currentThread().getName());
+            userVerificationCommonService.checkVerificationCode(code, id);
+            return null;
+        });
     }
+
 }
