@@ -2,6 +2,7 @@ package com.local_dating.user_service.application;
 
 import com.local_dating.user_service.infrastructure.repository.UserRepository;
 import com.local_dating.user_service.util.MessageCode;
+import com.local_dating.user_service.util.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -20,9 +21,9 @@ public class CustomUserDetailsService implements UserDetailsService {
     private final UserRepository userRepository;
 
     @Override
-    public UserDetails loadUserByUsername(final String username) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(final String loginId) throws UsernameNotFoundException {
 
-        return userRepository.findByLoginId(username)
+        return userRepository.findByLoginId(loginId)
                 .map(el -> {
                     //final List<String> roles = new ArrayList<>();
                     //roles.add("USER");
@@ -32,8 +33,22 @@ public class CustomUserDetailsService implements UserDetailsService {
 
                     return new CustomUserDetails(el.getNo(), el.getLoginId(), el.getPwd(), authorities);
                 })
-                .orElseThrow(() -> new UsernameNotFoundException(MessageCode.USER_NOT_FOUND.getMessage()));
-                //.orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+                .orElseThrow(() -> new BusinessException(MessageCode.USER_NOT_FOUND));
+    }
+
+    public UserDetails loadUserByUserNo(final Long userNo) throws UsernameNotFoundException {
+
+        return userRepository.findById(userNo)
+                .map(el -> {
+                    List<GrantedAuthority> authorities = new ArrayList<>();
+
+                    String raw = el.getRole().getCode();
+                    String springRole = raw != null && raw.startsWith("ROLE_") ? raw : "ROLE_" + raw; // 접두어 달기
+                    authorities.add(new SimpleGrantedAuthority(springRole));
+                    //authorities.add(new SimpleGrantedAuthority(el.getRole().getCode()));
+                    return new CustomUserDetails(el.getNo(), el.getLoginId(), el.getPwd(), authorities);
+                })
+                .orElseThrow(() -> new BusinessException(MessageCode.USER_NOT_FOUND));
     }
 
 }

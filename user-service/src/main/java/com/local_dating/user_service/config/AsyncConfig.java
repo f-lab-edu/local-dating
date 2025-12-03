@@ -18,6 +18,7 @@ public class AsyncConfig {
         taskExecutor.setMaxPoolSize(30); // 최대 스레드 수
         taskExecutor.setQueueCapacity(100); // Queue 사이즈
         taskExecutor.setThreadNamePrefix("Executor-");
+        taskExecutor.initialize(); // 없어도 빈등록 시 호출
         return taskExecutor;
     }
 

@@ -18,7 +18,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -28,7 +27,8 @@ import java.util.concurrent.TimeUnit;
 public class UserLoginService {
 
     private final JwtUtil jwtUtil;
-    private final UserDetailsService userDetailsService;
+    private final CustomUserDetailsService customUserDetailsService;
+    //private final UserDetailsService userDetailsService;
     private final RedisTemplate<String, String> redisTemplate;
     private final CacheTtlProperties cacheTtlProperties;
     private final AuthenticationManager authenticationManager;
@@ -40,13 +40,13 @@ public class UserLoginService {
     private static final Logger logger = LoggerFactory.getLogger(UserLoginService.class);
 
     public UserLoginService(final JwtUtil jwtUtil,
-                            final UserDetailsService userDetailsService,
+                            final CustomUserDetailsService customUserDetailsService,
                             @Qualifier("stringRedisTemplate") final RedisTemplate<String, String> redisTemplate,
                             final CacheTtlProperties cacheTtlProperties,
                             final KafkaProducer kafkaProducer,
                             final AuthenticationManager authenticationManager) {
         this.jwtUtil = jwtUtil;
-        this.userDetailsService = userDetailsService;
+        this.customUserDetailsService = customUserDetailsService;
         this.redisTemplate = redisTemplate;
         this.cacheTtlProperties = cacheTtlProperties;
         this.kafkaProducer = kafkaProducer;
@@ -56,18 +56,17 @@ public class UserLoginService {
     public LoginRes login(final UserVO userVO, HttpServletRequest request) { // 컨트롤러 기반 로그인
         //public LoginRes login(final UserDTO userDTO, HttpServletRequest request) {
 
-        final Authentication authentication =
-                authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userVO.loginId(), userVO.pwd()));
+        final Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userVO.loginId(), userVO.pwd()));
         final String userId = authentication.getName();logger.info("getname: " + userId);
         final CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-        final UserVO user = new UserVO(userDetails.getId(), userId, userVO.pwd(), userVO.name(), userVO.nickname(), userVO.birth(), userVO.phone());
+        final UserVO user = new UserVO(userDetails.getUserNo(), userId, userVO.pwd(), userVO.name(), userVO.nickname(), userVO.birth(), userVO.phone());
         final String accessToken = jwtUtil.createAccessToken(user);
         final String refreshToken = jwtUtil.createRefreshToken(user);
         final LoginRes loginRes = new LoginRes(userId, accessToken, refreshToken);
 
-        redisTemplate.opsForValue().set("userRefreshToken:" + userDetails.getId(), refreshToken, cacheTtlProperties.getRefreshTokenTTL(), TimeUnit.DAYS);
+        redisTemplate.opsForValue().set("userRefreshToken:" + userDetails.getUserNo(), refreshToken, cacheTtlProperties.getRefreshTokenTTL(), TimeUnit.DAYS);
         //redisTemplate.opsForValue().set("userRefreshToken:" + userDetails.getId(), refreshToken, 30, TimeUnit.DAYS);
-        kafkaProducer.sendMessage("login-log-topic", new UserLoginLogVO(userDetails.getId(), HttpServletRequestUtil.getIpAddress(request), "N", LocalDateTime.now()), false);
+        kafkaProducer.sendMessage("login-log-topic", new UserLoginLogVO(userDetails.getUserNo(), HttpServletRequestUtil.getIpAddress(request), "N", LocalDateTime.now()), false);
 
         return loginRes;
     }
@@ -87,12 +86,12 @@ public class UserLoginService {
             throw new BusinessException(MessageCode.INVALIDATE_REFRESH_TOKEN);
         }
 
-        String loginId = claims.getSubject();
-        CustomUserDetails userDetails =
-                (CustomUserDetails) userDetailsService.loadUserByUsername(loginId);
+        String userNo = claims.getSubject();
+        CustomUserDetails userDetails = (CustomUserDetails) customUserDetailsService.loadUserByUserNo(Long.parseLong(userNo));
+        //CustomUserDetails userDetails = (CustomUserDetails) userDetailsService.loadUserByUsername(loginId);
 
         UserVO user = new UserVO(
-                userDetails.getId(),
+                userDetails.getUserNo(),
                 userDetails.getUsername(),
                 userDetails.getPassword(), null, null, null, null
         );
@@ -101,7 +100,7 @@ public class UserLoginService {
 
         redisTemplate.opsForValue().set("userRefreshToken:" + id, newRefreshToken, cacheTtlProperties.getRefreshTokenTTL(), TimeUnit.DAYS);
 
-        return new LoginRes(loginId, newAccessToken, newRefreshToken);
+        return new LoginRes(userNo, newAccessToken, newRefreshToken);
     }
 
 }

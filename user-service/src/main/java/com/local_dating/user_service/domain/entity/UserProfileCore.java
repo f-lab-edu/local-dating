@@ -48,7 +48,7 @@ public class UserProfileCore {
     private String education;
 
     @Column(name = "salary")
-    private Short salary;
+    private Long salary;
 
     @Column(name = "region")
     private String region;

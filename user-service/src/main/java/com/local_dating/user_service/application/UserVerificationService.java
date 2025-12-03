@@ -1,6 +1,7 @@
 package com.local_dating.user_service.application;
 
 import com.local_dating.user_service.application.async.UserVerificationAsyncTask;
+import com.local_dating.user_service.application.common.UserVerificationCommonService;
 import com.local_dating.user_service.domain.entity.User;
 import com.local_dating.user_service.domain.mapper.UserMapper;
 import com.local_dating.user_service.domain.vo.UserValidationVO;
@@ -47,7 +48,7 @@ public class UserVerificationService {
         String code = this.createVerificationCode();
         redisTemplate.opsForValue().set("userValidationCode:" + user.getPhone(), code, 180, TimeUnit.SECONDS);
         //redisTemplate.opsForValue().set("userValidationCode:" + user.getNo(), code, 180, TimeUnit.SECONDS);
-        redisTemplateLong.delete("userValidationCodeFailCnt:" + user.getNo());
+        redisTemplateLong.delete("userValidationCodeFailCnt:" + user.getPhone());
 
         log.info("getVerificationCode 시간: " + LocalDateTime.now());
 

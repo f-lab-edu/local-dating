@@ -1,6 +1,7 @@
 package com.local_dating.user_service.application;
 
 import com.local_dating.user_service.domain.entity.UserProfileCore;
+import com.local_dating.user_service.domain.mapper.UserProfileCoreMapper;
 import com.local_dating.user_service.domain.vo.UserProfileCoreVO;
 import com.local_dating.user_service.infrastructure.repository.UserProfileCoreRepository;
 import com.local_dating.user_service.infrastructure.repository.UserRepository;
@@ -16,6 +17,14 @@ public class UserProfileCoreService {
 
     private final UserRepository userRepository;
     private final UserProfileCoreRepository userProfileCoreRepository;
+    private final UserProfileCoreMapper userProfileCoreMapper;
+
+    public UserProfileCoreVO viewProfileCore(final Long userId) {
+        return userProfileCoreRepository.findByUserId(userId).map(userProfileCoreMapper::userProfileCoreToUserProfileCoreVo)
+                .orElseThrow(() -> {
+                    throw new BusinessException(MessageCode.DATA_NOT_FOUND_EXCEPTION);
+                });
+    }
 
     @Transactional
     public void saveProfileCore(final UserProfileCoreVO userProfileCoreVO) {
@@ -24,7 +33,7 @@ public class UserProfileCoreService {
             throw new BusinessException(MessageCode.USER_NOT_FOUND);
         });
 
-        userProfileCoreRepository.findById(userProfileCoreVO.userId()).map(el -> {
+        userProfileCoreRepository.findByUserId(userProfileCoreVO.userId()).map(el -> {
                     el.setGender(userProfileCoreVO.gender());
                     el.setBirth(userProfileCoreVO.birth());
                     el.setHeight(userProfileCoreVO.height());

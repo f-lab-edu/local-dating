@@ -1,7 +1,7 @@
 package com.local_dating.user_service.presentation.controller;
 
+import com.local_dating.user_service.application.CustomUserDetails;
 import com.local_dating.user_service.application.UserPreferenceService;
-import com.local_dating.user_service.domain.entity.UserPreference;
 import com.local_dating.user_service.domain.mapper.UserPreferenceMapper;
 import com.local_dating.user_service.presentation.dto.UserPreferenceDTO;
 import com.local_dating.user_service.presentation.dto.UserPreferenceListDTO;
@@ -23,35 +23,35 @@ public class PreferenceController {
     private final UserPreferenceMapper userPreferenceMapper;
     private final UserPreferenceService userPreferenceService;
 
-    @PreAuthorize("isAuthenticated() and #id == authentication.getPrincipal()")
+    @PreAuthorize("isAuthenticated() and #id == principal.userNo")
     @PostMapping(value = "/v1/users/{id}/preference")
-    public List savePreference(final @PathVariable("id") long id, final Authentication authentication, @RequestBody @Valid final UserPreferenceListDTO userPreferenceDTOList) {
-        List<UserPreference> userPreferenceList = userPreferenceService.savePreferences((Long) authentication.getPrincipal(), UserPreferenceMapper.INSTANCE.toUserPreferenceVOList(userPreferenceDTOList.getUserPreferences()));
-        //List<UserPreference> userPreferenceList = userPreferenceService.savePreferences(authentication.getPrincipal().toString(), UserPreferenceMapper.INSTANCE.toUserPreferenceVOList(userPreferenceDTOList));
-        return userPreferenceList;
+    public void savePreference(final @PathVariable("id") long id, final Authentication authentication, @RequestBody @Valid final UserPreferenceListDTO userPreferenceDTOList) {
+        CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
+        userPreferenceService.savePreferences(customUserDetails.getUserNo(), UserPreferenceMapper.INSTANCE.toUserPreferenceVOList(userPreferenceDTOList.getUserPreferences()));
     }
 
-    @PreAuthorize("isAuthenticated() and #id == authentication.getPrincipal()")
+    @PreAuthorize("isAuthenticated() and #id == principal.userNo")
     @PutMapping(value = "/v1/users/{id}/preference")
     public void updatePreference(final @PathVariable("id") long id, final Authentication authentication, @RequestBody @Valid final UserPreferenceListDTO userPreferenceDTOList) {
-    //public void updatePreference(final @PathVariable("id") long id, final Authentication authentication, @RequestBody final List<UserPreferenceDTO> userPreferenceDTOList) {
-        userPreferenceService.updatePreferences((Long) authentication.getPrincipal(), userPreferenceMapper.INSTANCE.toUserPreferenceVOList(userPreferenceDTOList.getUserPreferences()));
+        CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
+        userPreferenceService.updatePreferences(customUserDetails.getUserNo(), userPreferenceMapper.INSTANCE.toUserPreferenceVOList(userPreferenceDTOList.getUserPreferences()));
     }
 
-    @PreAuthorize("isAuthenticated() and #id == authentication.getPrincipal()")
+    @PreAuthorize("isAuthenticated() and #id == principal.userNo")
     @GetMapping(value = "/v1/users/{id}/preference")
     public String viewPreference(final @PathVariable("id") long id, final Authentication authentication) {
-
-        String result = userPreferenceService.viewPreference((Long) authentication.getPrincipal());
+        CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
+        String result = userPreferenceService.viewPreference(customUserDetails.getUserNo());
         if (result.isEmpty()) {
             throw new DataNotFoundException(DATA_NOT_FOUND_EXCEPTION.getMessage());
         }
         return result;
     }
 
-    @PreAuthorize("isAuthenticated() and #id == authentication.getPrincipal()")
+    @PreAuthorize("isAuthenticated() and #id == principal.userNo")
     @PatchMapping(value = "/v1/users/{id}/preference/prior")
     public void updatePreferencePriority(final @PathVariable("id") long id, final Authentication authentication, @RequestBody final List<UserPreferenceDTO> userPreferenceDTOList) {
-        userPreferenceService.updatePreferencesPriority((Long) authentication.getPrincipal(), userPreferenceMapper.INSTANCE.toUserPreferenceVOList(userPreferenceDTOList));
+        CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
+        userPreferenceService.updatePreferencesPriority(customUserDetails.getUserNo(), userPreferenceMapper.INSTANCE.toUserPreferenceVOList(userPreferenceDTOList));
     }
 }

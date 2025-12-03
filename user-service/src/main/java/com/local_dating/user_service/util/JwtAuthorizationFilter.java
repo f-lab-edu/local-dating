@@ -62,15 +62,16 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
             if (jwtUtil.validateClaims(claims)) {
             //if (claims != null & jwtUtil.validateClaims(claims)) {
-                final String userId = claims.getSubject();
-                logger.debug("userId: " + userId);
+                final String userNo = claims.getSubject();
+                logger.debug("userNo: " + userNo);
                 //String email = claims.getSubject();
                 //System.out.println("email : "+email);
 
-                final CustomUserDetails userDetails = (CustomUserDetails) customUserDetailsService.loadUserByUsername(userId);
+                final CustomUserDetails userDetails = (CustomUserDetails) customUserDetailsService.loadUserByUserNo(Long.parseLong(userNo));
+                //final CustomUserDetails userDetails = (CustomUserDetails) customUserDetailsService.loadUserByUsername(loginId);
                 final Authentication authentication =
-                        new UsernamePasswordAuthenticationToken(claims.get("no"), "", userDetails.getAuthorities());
-                        //new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+                        //new UsernamePasswordAuthenticationToken(claims.get("no"), "", userDetails.getAuthorities());
+                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                         //new UsernamePasswordAuthenticationToken(userId, "", new ArrayList<>());
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }

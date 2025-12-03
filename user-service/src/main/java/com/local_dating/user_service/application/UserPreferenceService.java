@@ -92,7 +92,8 @@ public class UserPreferenceService {
                 })).collect(Collectors.toUnmodifiableList());
     }
 
-    @Cacheable(value = "preference", key = "#userId", cacheManager = "jsonCacheManager")
+    @Cacheable(value = "preference", key = "#userId")
+    //@Cacheable(value = "preference", key = "#userId", cacheManager = "jsonCacheManager")
     public String viewPreference(final Long userId) {
     /*@Cacheable(value = "preference", key = "#userId")
     public List<UserPreferenceVO> viewPreference(final String userId) {*/
