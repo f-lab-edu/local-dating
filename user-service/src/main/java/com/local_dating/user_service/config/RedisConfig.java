@@ -33,7 +33,7 @@ public class RedisConfig {
 
     // 범용 RedisTemplate (키: String / 값: JSON)
     @Bean
-    @Primary
+    //@Primary
     public RedisTemplate<String, Object> redisTemplate(
             RedisConnectionFactory connectionFactory,
             RedisSerializer<Object> redisValueSerializer
@@ -54,7 +54,7 @@ public class RedisConfig {
 
     // 4) 범용 CacheManager (키: String / 값: JSON)
     @Bean
-    @Primary
+    //@Primary
     public RedisCacheManager cacheManager(
             RedisConnectionFactory connectionFactory,
             RedisSerializer<Object> redisValueSerializer

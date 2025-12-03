@@ -41,7 +41,11 @@ public class CustomUserDetailsService implements UserDetailsService {
         return userRepository.findById(userNo)
                 .map(el -> {
                     List<GrantedAuthority> authorities = new ArrayList<>();
-                    authorities.add(new SimpleGrantedAuthority(el.getRole().getCode()));
+
+                    String raw = el.getRole().getCode();
+                    String springRole = raw != null && raw.startsWith("ROLE_") ? raw : "ROLE_" + raw; // 접두어 달기
+                    authorities.add(new SimpleGrantedAuthority(springRole));
+                    //authorities.add(new SimpleGrantedAuthority(el.getRole().getCode()));
                     return new CustomUserDetails(el.getNo(), el.getLoginId(), el.getPwd(), authorities);
                 })
                 .orElseThrow(() -> new BusinessException(MessageCode.USER_NOT_FOUND));

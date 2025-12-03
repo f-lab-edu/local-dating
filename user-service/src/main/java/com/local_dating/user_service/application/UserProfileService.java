@@ -19,22 +19,16 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class UserProfileService {
-//public class UserProfileService implements UserProfileService_ {
 
     private final UserProfileRepository userProfileRepository;
     private final UserProfileMapper userProfileMapper;
 
-    /*public UserProfileService(UserProfileRepository userProfileRepository, UserProfileMapper userProfileMapper) {
-        this.userProfileRepository = userProfileRepository;
-        this.userProfileMapper = userProfileMapper;
-    }*/
-
     @Cacheable(value = "profile", key = "#userId")
-    public List<UserProfileVO> viewProfile(final Long userId) {
-    //public Optional<List<UserProfileVO>> viewProfile(final String userId) throws Exception {
-    //public Optional<UserProfileVO> viewProfile(final String userId) throws Exception {
+    public List<UserProfileVO>  viewProfile(final Long userId) {
 
-        return userProfileRepository.findByUserId(userId).stream().map(userProfileMapper.INSTANCE::toUserProfileVO).collect(Collectors.toUnmodifiableList());
+        return userProfileRepository.findByUserId(userId).stream().map(userProfileMapper.INSTANCE::toUserProfileVO)
+                .collect(Collectors.toList()); // jackson 에서 불변리스트 사용불가
+        //.collect(Collectors.toUnmodifiableList());
 
         /*userProfileRepository.findByUserId(userId).ifPresentOrElse(el -> el.stream().forEach(el2 -> {
                     userProfileVOS.add(userProfileMapper.INSTANCE.toUserProfileVO(el2));
@@ -97,24 +91,5 @@ public class UserProfileService {
                 //userProfileRepository.save(new UserProfile(userId, userProfileMapper.INSTANCE.toUserProfileVO(el))); // 데이터 없으면 저장
             });
         });
-
-
-        /*
-        List<UserProfile> userProfileList = new ArrayList<>();
-        userProfileDTO.stream().forEach(el -> {
-            userProfileList.add(new UserProfile(userId, userProfileMapper.INSTANCE.toUserProfileVO(el)));
-        });
-        Optional<UserProfile> userProfileListUpdate = userProfileRepository.findByUserIdAndInfoCdIn(userId, userProfileList);//.stream().forEach(el);
-
-        for (Optional<UserProfile> userProfile : userProfileListUpdate) {
-            userProfile.setId(userProfileListUpdate.get().getId());
-            //userProfile.setId(userProfileListUpdate.get().getId());
-        }
-        */
-
-        //userProfileDTO.stream().forEach(el->userProfileRepository.save(new UserProfile(userId, userProfileMapper.INSTANCE.toUserProfileVO(el))));
-        //userProfileRepository.save(new UserProfile(userProfileMapper.INSTANCE.toUserProfileVO(userProfileDTO)));
-
-        //return 100;
     }
 }

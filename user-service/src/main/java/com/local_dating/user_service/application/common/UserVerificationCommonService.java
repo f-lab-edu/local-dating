@@ -38,8 +38,13 @@ public class UserVerificationCommonService {
 
     public void checkVerificationCode(final String code, final String phone) {
         String redisCode = redisTemplate.opsForValue().get("userValidationCode:" + phone);
-        Long failCnt = Long.parseLong(redisTemplate.opsForValue().get("userValidationCodeFailCnt:" + phone));
-        //Long failCnt = redisTemplateLong.opsForValue().get("userValidationCodeFailCnt:" + phone);
+        String failCntStr = redisTemplate.opsForValue().get("userValidationCodeFailCnt:" + phone);
+        Long failCnt;
+        if (failCntStr == null) {
+            failCnt = 0L;
+        } else {
+            failCnt = Long.parseLong(failCntStr);
+        }
 
         if (failCnt != null && failCnt >= 5) {
             throw new BusinessException(MessageCode.EXCEEDED_MAX_ATTEMPTS);
