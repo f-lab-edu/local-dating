@@ -3,7 +3,9 @@ package com.local_dating.matching_service.util;
 import com.local_dating.matching_service.util.exception.InvalidateClaimsException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -20,24 +22,36 @@ import static java.util.Objects.isNull;
 @Component
 public class JwtUtil {
 
-    private final SecretKey secret_key = Keys.hmacShaKeyFor("thisisaverysecretkeyandsecure123".getBytes(StandardCharsets.UTF_8));
-    //private final String secret_key = "mysecretkey";
-    //private long accessTokenValidity = 60*60*1000;
-    private long accessTokenValidity = 60 * 60 * 1000;
-    private long refreshTokenValidity = 24 * 60 * 60 * 1000;
+    @Value("${jwt.secret-key}")
+    private String secretString;
 
-    private final JwtParser jwtParser;
+    @Value("${jwt.access-token-validity-seconds}")
+    private long accessTokenValidity;
+
+    @Value("${jwt.refresh-token-validity-seconds}")
+    private long refreshTokenValidity;
+
+    /*private final SecretKey secret_key = Keys.hmacShaKeyFor("thisisaverysecretkeyandsecure123".getBytes(StandardCharsets.UTF_8));
+    private long accessTokenValidity = 60 * 60 * 1000;
+    private long refreshTokenValidity = 24 * 60 * 60 * 1000;*/
+
+    private SecretKey secretKey;
+    private JwtParser jwtParser;
 
     private final String TOKEN_HEADER = "Authorization";
     private final String REFRESH_HEADER = "Refresh-Token";
     private final String TOKEN_PREFIX = "Bearer ";
 
-    public JwtUtil() {
-        this.jwtParser = Jwts.parser().setSigningKey(secret_key).build();
+    @PostConstruct
+    public void init() {
+        this.secretKey = Keys.hmacShaKeyFor(secretString.getBytes(StandardCharsets.UTF_8));
+        this.jwtParser = Jwts.parser().setSigningKey(secretKey).build();
     }
+    /*public JwtUtil() {
+        this.jwtParser = Jwts.parser().setSigningKey(secret_key).build();
+    }*/
 
     public Claims parseJwtClaims(final String token) {
-        //private Claims parseJwtClaims(final String token) {
         return jwtParser.parseClaimsJws(token).getBody();
     }
 
@@ -76,10 +90,10 @@ public class JwtUtil {
 
     public boolean validateClaims(Claims claims) throws AuthenticationException {
         //claims = null; //테스트
-        if (!isNull(claims)) {
-            return claims.getExpiration().after(new Date());
+        if (isNull(claims)) {
+            throw new InvalidateClaimsException(MessageCode.INVALIDATE_CLAIMS_EXCEPTION.getMessage());
         }
-        throw new InvalidateClaimsException(MessageCode.INVALIDATE_CLAIMS_EXCEPTION.getMessage());
+        return claims.getExpiration().after(new Date());
     }
 
     public String getUserId(Claims claims) {
@@ -94,8 +108,8 @@ public class JwtUtil {
     public Authentication getAuthenticationFromToken(String token) {
         try {
             Claims claims = parseJwtClaims(token.replace(TOKEN_PREFIX, "")); // Bearer 제거 후 파싱
-            String userId = claims.getSubject();
-            return new UsernamePasswordAuthenticationToken(userId, token, Collections.emptyList());
+            Long userNo = Long.parseLong(claims.getSubject());
+            return new UsernamePasswordAuthenticationToken(userNo, token, Collections.emptyList());
         } catch (Exception e) {
             throw new RuntimeException("Invalid JWT Token", e);
         }
