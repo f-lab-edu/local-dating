@@ -6,7 +6,7 @@ spring:
     name: matching-service
 
   datasource:
-    url: jdbc:mysql://aws-server/local_dating_matching_service
+    url: jdbc:mysql://aws-server:3307/local_dating_matching_service
     username: root
     password: 1234
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -24,3 +24,8 @@ spring:
 logging:
   level:
     org.hibernate.orm.jdbc.bind: trace
+
+jwt:
+  secret-key: thisisaverysecretkeyandsecure123
+  access-token-validity-seconds: 3600000 # 1시간
+  refresh-token-validity-seconds: 86400000 # 24시간

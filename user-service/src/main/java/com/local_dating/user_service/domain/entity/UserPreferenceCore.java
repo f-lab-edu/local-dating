@@ -1,7 +1,9 @@
 package com.local_dating.user_service.domain.entity;
 
+import com.local_dating.user_service.domain.vo.UserPreferenceCoreVO;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -12,7 +14,21 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Table(name = "user_preference_core")
+@NoArgsConstructor
 public class UserPreferenceCore {
+
+    public UserPreferenceCore(UserPreferenceCoreVO vo) {
+        this.userId = vo.userId();
+        this.gender = vo.gender();
+        this.birthMin = vo.birthMin();
+        this.birthMax = vo.birthMax();
+        this.heightMin = vo.heightMin();
+        this.heightMax = vo.heightMax();
+        this.education = vo.education();
+        this.salaryMin = vo.salaryMin();
+        this.salaryMax = vo.salaryMax();
+        this.rangeMax = vo.rangeMax();
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
