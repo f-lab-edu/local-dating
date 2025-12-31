@@ -3,6 +3,7 @@ package com.local_dating.user_service.application;
 import com.local_dating.user_service.config.cache.CacheTtlProperties;
 import com.local_dating.user_service.domain.vo.UserLoginLogVO;
 import com.local_dating.user_service.domain.vo.UserVO;
+import com.local_dating.user_service.infrastructure.repository.UserRepository;
 import com.local_dating.user_service.presentation.dto.LoginRes;
 import com.local_dating.user_service.util.HttpServletRequestUtil;
 import com.local_dating.user_service.util.JwtUtil;
@@ -10,6 +11,7 @@ import com.local_dating.user_service.util.MessageCode;
 import com.local_dating.user_service.util.exception.BusinessException;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -33,6 +35,7 @@ public class UserLoginService {
     private final CacheTtlProperties cacheTtlProperties;
     private final AuthenticationManager authenticationManager;
     private final KafkaProducer kafkaProducer;
+    private final UserRepository userRepository;
 
     @Value("${cache.keys.refreshToken}")
     private String refreshToken;
@@ -44,15 +47,18 @@ public class UserLoginService {
                             @Qualifier("stringRedisTemplate") final RedisTemplate<String, String> redisTemplate,
                             final CacheTtlProperties cacheTtlProperties,
                             final KafkaProducer kafkaProducer,
-                            final AuthenticationManager authenticationManager) {
+                            final AuthenticationManager authenticationManager,
+                            final UserRepository userRepository) {
         this.jwtUtil = jwtUtil;
         this.customUserDetailsService = customUserDetailsService;
         this.redisTemplate = redisTemplate;
         this.cacheTtlProperties = cacheTtlProperties;
         this.kafkaProducer = kafkaProducer;
         this.authenticationManager = authenticationManager;
+        this.userRepository = userRepository;
     }
 
+    @Transactional
     public LoginRes login(final UserVO userVO, HttpServletRequest request) { // 컨트롤러 기반 로그인
         //public LoginRes login(final UserDTO userDTO, HttpServletRequest request) {
 
@@ -67,6 +73,8 @@ public class UserLoginService {
         redisTemplate.opsForValue().set("userRefreshToken:" + userDetails.getUserNo(), refreshToken, cacheTtlProperties.getRefreshTokenTTL(), TimeUnit.DAYS);
         //redisTemplate.opsForValue().set("userRefreshToken:" + userDetails.getId(), refreshToken, 30, TimeUnit.DAYS);
         kafkaProducer.sendMessage("login-log-topic", new UserLoginLogVO(userDetails.getUserNo(), HttpServletRequestUtil.getIpAddress(request), "N", LocalDateTime.now()), false);
+
+        this.updateLastActive(userDetails.getUserNo());
 
         return loginRes;
     }
@@ -101,6 +109,13 @@ public class UserLoginService {
         redisTemplate.opsForValue().set("userRefreshToken:" + id, newRefreshToken, cacheTtlProperties.getRefreshTokenTTL(), TimeUnit.DAYS);
 
         return new LoginRes(userNo, newAccessToken, newRefreshToken);
+    }
+
+    public void updateLastActive(final Long userNo) {
+        userRepository.findById(userNo).map(el -> {
+            el.setLastLoginDate(LocalDateTime.now());
+            return el;
+        }).orElseThrow(() -> new BusinessException(MessageCode.USER_NOT_FOUND));
     }
 
 }

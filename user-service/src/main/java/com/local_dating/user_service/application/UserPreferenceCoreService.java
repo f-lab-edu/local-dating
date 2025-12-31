@@ -3,6 +3,7 @@ package com.local_dating.user_service.application;
 import com.local_dating.user_service.domain.entity.UserPreferenceCore;
 import com.local_dating.user_service.domain.mapper.UserPreferenceCoreMapper;
 import com.local_dating.user_service.domain.vo.UserPreferenceCoreVO;
+import com.local_dating.user_service.domain.vo.UserProfileCoreVO;
 import com.local_dating.user_service.infrastructure.repository.UserPreferenceCoreRepository;
 import com.local_dating.user_service.infrastructure.repository.UserRepository;
 import com.local_dating.user_service.util.MessageCode;
@@ -10,6 +11,8 @@ import com.local_dating.user_service.util.exception.BusinessException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -19,7 +22,11 @@ public class UserPreferenceCoreService {
     private final UserPreferenceCoreRepository userPreferenceCoreRepository;
     private final UserPreferenceCoreMapper userPreferenceCoreMapper;
 
-    public UserPreferenceCoreVO  viewPreferenceCore(final Long userId) {
+    //
+    //private final UserPreferenceCoreService userPreferenceCoreService;
+    private final UserProfileCoreService userProfileCoreService;
+
+    public UserPreferenceCoreVO viewPreferenceCore(final Long userId) {
         return userPreferenceCoreRepository.findByUserId(userId).map(userPreferenceCoreMapper::userPreferenceCoreToUserPreferenceVo)
                 .orElseThrow(() -> {
                     throw new BusinessException(MessageCode.DATA_NOT_FOUND_EXCEPTION);
@@ -43,5 +50,11 @@ public class UserPreferenceCoreService {
             el.setRangeMax(userPreferenceCoreVO.rangeMax());
             return el;
         }).orElseGet(() -> userPreferenceCoreRepository.save(new UserPreferenceCore(userPreferenceCoreVO)));
+    }
+
+    /////
+    public List<UserProfileCoreVO> searchNext(final Long userNo) {
+        UserPreferenceCoreVO userPreferenceCoreVO = this.viewPreferenceCore(userNo);
+        return userProfileCoreService.searchNext(userNo, userPreferenceCoreVO);
     }
 }
