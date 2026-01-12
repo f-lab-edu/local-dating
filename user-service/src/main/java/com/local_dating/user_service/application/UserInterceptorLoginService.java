@@ -11,6 +11,7 @@ import com.local_dating.user_service.util.JwtUtil;
 import com.local_dating.user_service.util.MessageCode;
 import com.local_dating.user_service.util.exception.BusinessException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -44,6 +45,7 @@ public class UserInterceptorLoginService {
         this.kafkaProducer = kafkaProducer;
     }
 
+    @Transactional
     public LoginRes login(final UserVO userVO, HttpServletRequest request) {
 
         User user = userRepository.findByLoginId(userVO.loginId())
@@ -86,6 +88,8 @@ public class UserInterceptorLoginService {
                 ),
                 false
         );
+
+        user.setLastLoginDate(LocalDateTime.now());
 
         return new LoginRes(userVO.loginId(), accessToken, refreshToken);
     }

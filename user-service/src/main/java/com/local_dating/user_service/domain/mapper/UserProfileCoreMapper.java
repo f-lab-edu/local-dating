@@ -6,6 +6,8 @@ import com.local_dating.user_service.presentation.dto.UserProfileCoreDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring")
 public interface UserProfileCoreMapper {
 
@@ -14,6 +16,8 @@ public interface UserProfileCoreMapper {
     UserProfileCoreVO toUserProfileCoreVo(UserProfileCoreDTO dto);
 
     UserProfileCoreVO userProfileCoreToUserProfileCoreVo(UserProfileCore entity);
+
+    List<UserProfileCoreVO> userProfileCoreListToUserProfileCoreVoList(List<UserProfileCore> entityList);
 
     UserProfileCoreDTO userProfileVoToUserProfileCoreDto(UserProfileCoreVO vo);
 }
