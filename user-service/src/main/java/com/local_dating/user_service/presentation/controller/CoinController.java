@@ -23,14 +23,16 @@ public class CoinController {
     private final JwtUtil jwtUtil;
     private static final Logger logger = LoggerFactory.getLogger(CoinController.class);
 
-    @PreAuthorize("isAuthenticated() and #id == authentication.getPrincipal()")
+    @PreAuthorize("isAuthenticated() and #id == principal.userNo")
+    //@PreAuthorize("isAuthenticated() and #id == authentication.getPrincipal()")
     @GetMapping(value = "/v1/users/{id}/coin")
     public Long viewCoin(final @PathVariable("id") long id, final @RequestHeader("Authorization") String authentication) {
         return userCoinService.viewCoin(id);
         //return userCoinService.viewCoin(jwtUtil.getAuthenticationFromToken(authentication).getPrincipal().toString());
     }
 
-    @PreAuthorize("isAuthenticated() and #id == authentication.getPrincipal()")
+    @PreAuthorize("isAuthenticated() and #id == principal.userNo")
+    //@PreAuthorize("isAuthenticated() and #id == authentication.getPrincipal()")
     @PostMapping(value = "/v1/users/{id}/coin")
     public void saveCoin(final @PathVariable("id") long id, final @RequestHeader("Authorization") String authentication, @RequestBody final UserCoinDTO userCoinDTO) {
 
@@ -38,7 +40,8 @@ public class CoinController {
         userCoinService.saveCoin(id, userCoinMapper.INSTANCE.toUserCoinVO(userCoinDTO));
     }
 
-    @PreAuthorize("isAuthenticated() and #id == authentication.getPrincipal()")
+    @PreAuthorize("isAuthenticated() and #id == principal.userNo")
+    //@PreAuthorize("isAuthenticated() and #id == authentication.getPrincipal()")
     @PostMapping(value = "/v1/users/{id}/coins")
     public void updateCoin(final @PathVariable("id") long id, final @RequestHeader("Authorization") String authentication, @RequestBody final UserCoinDTO userCoinDTO) {
         userCoinService.updateCoin(id, userCoinMapper.INSTANCE.toUserCoinVO(userCoinDTO));
