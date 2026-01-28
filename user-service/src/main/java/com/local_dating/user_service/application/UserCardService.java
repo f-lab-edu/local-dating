@@ -42,7 +42,7 @@ public class UserCardService {
         //return userRecomCardMapper.toUserRecomCardVO(recomCardRepository.findByUserId(userId));
     }
 
-    public List getCardDetail(final Long userId, final String targetId) {
+    public List getCardDetail(final Long userId, final Long targetId) {
         return userRecomCardRepository.findUserRecomCardWithUserProfile(targetId);
     }
 

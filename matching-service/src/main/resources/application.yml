@@ -30,6 +30,10 @@ logging:
   level:
     org.hibernate.orm.jdbc.bind: trace
 
+cache:
+  keys:
+    userSearchCurrent: "userSearchCurrent:"
+
 jwt:
   secret-key: thisisaverysecretkeyandsecure123
   access-token-validity-seconds: 3600000 # 1시간
