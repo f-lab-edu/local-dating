@@ -6,6 +6,7 @@ import com.local_dating.user_service.application.UserCoinService;
 import com.local_dating.user_service.domain.mapper.UserCoinMapper;
 import com.local_dating.user_service.presentation.dto.UserCoinDTO;
 import com.local_dating.user_service.util.JwtUtil;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +34,7 @@ public class CoinController {
 
     @PreAuthorize("isAuthenticated() and #id == principal.userNo")
     //@PreAuthorize("isAuthenticated() and #id == authentication.getPrincipal()")
+    @Operation(summary = "코인 테이블 저장", description = "사용자가 회원 가입 시 내부 서비스 호출되도록 변경")
     @PostMapping(value = "/v1/users/{id}/coin")
     public void saveCoin(final @PathVariable("id") long id, final @RequestHeader("Authorization") String authentication, @RequestBody final UserCoinDTO userCoinDTO) {
 
@@ -42,6 +44,7 @@ public class CoinController {
 
     @PreAuthorize("isAuthenticated() and #id == principal.userNo")
     //@PreAuthorize("isAuthenticated() and #id == authentication.getPrincipal()")
+    @Operation(summary = "코인 테이블 수정", description = "코인 충전, 사용 시 호출")
     @PostMapping(value = "/v1/users/{id}/coins")
     public void updateCoin(final @PathVariable("id") long id, final @RequestHeader("Authorization") String authentication, @RequestBody final UserCoinDTO userCoinDTO) {
         userCoinService.updateCoin(id, userCoinMapper.INSTANCE.toUserCoinVO(userCoinDTO));

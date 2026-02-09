@@ -38,6 +38,7 @@ spring:
       #sasl.client.callback.handler.class: software.amazon.msk.auth.iam.IAMClientCallbackHandler
     topics:
       login-log: login-log-topic
+      coin: coin-topic
 
 #  kafka:
 #    bootstrap-servers: aws-server:9091,aws-server:9092,aws-server:9093
@@ -69,6 +70,8 @@ logging:
 cache:
   keys:
     refreshToken: userRefreshToken
+    coin: "coin:"
+
   ttl:
     refreshToken: 30
     product: 600
