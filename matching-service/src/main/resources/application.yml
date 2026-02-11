@@ -38,3 +38,27 @@ jwt:
   secret-key: thisisaverysecretkeyandsecure123
   access-token-validity-seconds: 3600000 # 1시간
   refresh-token-validity-seconds: 86400000 # 24시간
+
+feign:
+  circuitbreaker:
+    enabled: true
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 5000
+
+resilience4j.circuitbreaker:
+  configs:
+    default:
+      failureRateThreshold: 50 # 50%실패
+      slowCallRateThreshold: 70 # 70%지연
+      slowCallDurationThreshold: 3000 # 지연호출 기준 3초
+      permittedNumberOfCallsInHalfOpenState: 4
+      slidingWindowType: COUNT_BASED
+      slidingWindowSize: 3 # 기준 호출 수
+      minimumNumberOfCalls: 2
+      waitDurationInOpenState: 10000
+  instances:
+    user-service: #feign client 이름
+      baseConfig: default

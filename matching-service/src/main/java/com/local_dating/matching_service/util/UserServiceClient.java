@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@FeignClient(name = "user-service", url = "http://localhost:8080")
+@FeignClient(name = "user-service", url = "http://localhost:8080", fallback = UserServiceClientFallback.class)
 public interface UserServiceClient {
 
     @GetMapping(value = "/v1/users/{id}/coin")

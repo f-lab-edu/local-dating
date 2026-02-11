@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserRegisterService {
 
     private final UserRepository userRepository;
+    private final UserCoinService userCoinService;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
 
@@ -29,7 +30,8 @@ public class UserRegisterService {
         }, () -> {
             User user = new User(userMapper.INSTANCE.toUserVO(dto), passwordEncoder.encode(dto.pwd()));
             user.setRole(RoleType.USER);
-            userRepository.save(user);
+            User saved = userRepository.save(user);
+            userCoinService.saveNewCoinData(saved.getNo());
         });
 
     }
