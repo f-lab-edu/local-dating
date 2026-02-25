@@ -18,6 +18,11 @@ spring:
         dialect: org.hibernate.dialect.MySQL8Dialect
         format_sql: true
         use_sql_comments: true
+        jakarta:
+          persistence:
+            validation:
+              mode: none
+
 
   data:
     redis:

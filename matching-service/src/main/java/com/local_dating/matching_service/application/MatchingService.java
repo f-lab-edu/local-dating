@@ -29,12 +29,13 @@ public class MatchingService {
     private final MatchingeRepository matchingeRepository;
     private final MatchingMapper matchingMapper;
     private final UserServiceClient userServiceClient;
+    private final UserServiceClientWithCircuitBreaker userServiceClientWithCircuitBreaker;
     private final CoinPolicyRepositoryCustom coinPolicyRepository;
 
     @Transactional
     //public int requestMatching(final long userid, final String authentication, final MatchingVO matchingVO) {
     //public void requestMatching(final long userid, final String authentication, final MatchingVO matchingVO) {
-    public MatchingVO requestMatching(final long userid, final String authentication, final MatchingVO matchingVO) {
+    public MatchingVO requestMatching(final long userId, final String authentication, final MatchingVO matchingVO) {
 /*
         if (userServiceClient.viewCoin(userid, authentication) >= 10000L) {
             userServiceClient.saveCoin(userid, authentication, new UserCoinDTO(String.valueOf(userid), -10000L));
@@ -47,15 +48,17 @@ public class MatchingService {
             return -1; //실패
         }*/
 
-        Long coinz = userServiceClient.viewCoin(userid, authentication);
+        Long coinz = userServiceClient.viewCoin(userId, authentication);
         log.info("viewCoin result: {}", coinz); // ✅ 코인 값 확인
-        return Optional.ofNullable(userServiceClient.viewCoin(userid, authentication))
-                .filter(coin -> coin >= Long.valueOf(coinPolicyRepository.getValidPrice(LocalDate.now()).getPrice()))
+        Long price = Long.valueOf(userServiceClientWithCircuitBreaker.viewCoinPolicy(userId, CoinActionType.CONSUME.getCode() ,authentication));
+        return Optional.ofNullable(userServiceClientWithCircuitBreaker.viewCoin(userId, authentication))
+                .filter(coin -> coin >= price)
+                //.filter(coin -> coin >= Long.valueOf(coinPolicyRepository.getValidPrice(LocalDate.now()).getPrice()))
                 .map(coin -> {
-                    userServiceClient.saveCoin(userid, authentication, new UserCoinDTO(String.valueOf(userid), -Long.valueOf(coinPolicyRepository.getValidPrice(LocalDate.now()).getPrice()), CoinActionType.CONSUME));
+                    userServiceClientWithCircuitBreaker.saveCoin(userId, authentication, new UserCoinDTO(String.valueOf(userId), -price, CoinActionType.CONSUME));
 
-                    Matching matching = matchingMapper.INSTANCE.matchingVOtoMatching(matchingVO, MatchingType.MATCHING_REQUEST.getCode(), userid
-                            , LocalDateTime.now(), userid, LocalDateTime.now());
+                    Matching matching = matchingMapper.INSTANCE.matchingVOtoMatching(matchingVO, MatchingType.MATCHING_REQUEST.getCode(), userId
+                            , LocalDateTime.now(), userId, LocalDateTime.now());
                     return matchingMapper.INSTANCE.matchingtoMatchingVO(matchingeRepository.save(matching));
                 })
                 .orElseThrow(() -> new BusinessException(MessageCode.INSUFFICIENT_COIN));
@@ -190,18 +193,19 @@ public class MatchingService {
     */
 
     public void minusCoin(final long userId, final String authentication) {
-        Optional.ofNullable(userServiceClient.viewCoin(userId, authentication))
-                .filter(coin -> coin >= Long.valueOf(coinPolicyRepository.getValidPrice(LocalDate.now()).getPrice()))
+        Long price = Long.valueOf(userServiceClientWithCircuitBreaker.viewCoinPolicy(userId, CoinActionType.CONSUME.getCode() ,authentication));
+        Optional.ofNullable(userServiceClientWithCircuitBreaker.viewCoin(userId, authentication))
+                .filter(coin -> coin >= price)
                 //.filter(coin -> coin >= 10000L)
                 .map(coin -> {
-                    userServiceClient.updateCoin(userId, authentication, new UserCoinDTO(String.valueOf(userId), -Long.valueOf(coinPolicyRepository.getValidPrice(LocalDate.now()).getPrice()), CoinActionType.CONSUME));
+                    userServiceClientWithCircuitBreaker.updateCoin(userId, authentication, new UserCoinDTO(String.valueOf(userId), -price, CoinActionType.CONSUME));
                     return coin;
                 })
                 .orElseThrow(() -> new BusinessException(MessageCode.INSUFFICIENT_COIN));
     }
 
     public void retoreCoin(final long userId, final String authentication, final String requId) {
-        userServiceClient.updateCoin(userId, authentication, new UserCoinDTO(requId, Long.valueOf(coinPolicyRepository.getValidPrice(LocalDate.now()).getPrice()), CoinActionType.RESTORE));
+        userServiceClientWithCircuitBreaker.updateCoin(userId, authentication, new UserCoinDTO(requId, Long.valueOf(coinPolicyRepository.getValidPrice(LocalDate.now()).getPrice()), CoinActionType.RESTORE));
     }
 
     public void viewSchedule(final long userId, final String authentication, final MatchingVO matchingVO) {
@@ -238,10 +242,10 @@ public class MatchingService {
         matchingeRepository.findByIdAndRecvId(matchingVO.id(), userId)
                 .map(el -> {
                     if (el.getStatusCd().equals(MatchingType.MATCHING_REQUEST.getCode())) {
-                        Optional.ofNullable(userServiceClient.viewCoin(userId, authentication))
+                        Optional.ofNullable(userServiceClientWithCircuitBreaker.viewCoin(userId, authentication))
                                 .filter(coin -> coin >= Long.valueOf(coinPolicyRepository.getValidPrice(LocalDate.now()).getPrice()))
                                 .map(coin -> {
-                                    userServiceClient.saveCoin(userId, authentication, new UserCoinDTO(String.valueOf(userId), -Long.valueOf(coinPolicyRepository.getValidPrice(LocalDate.now()).getPrice()), CoinActionType.CONSUME));
+                                    userServiceClientWithCircuitBreaker.saveCoin(userId, authentication, new UserCoinDTO(String.valueOf(userId), -Long.valueOf(coinPolicyRepository.getValidPrice(LocalDate.now()).getPrice()), CoinActionType.CONSUME));
                                     el.setRecvStatusCd(MatchingType.MATCHING_ACCEPT.getCode());
                                     el.setStatusCd(MatchingType.MATCHING_ACCEPT.getCode());
                                     return el;

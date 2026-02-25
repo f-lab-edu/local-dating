@@ -20,6 +20,10 @@ spring:
         dialect: org.hibernate.dialect.MySQL8Dialect
         format_sql: true
         use_sql_comments: true
+        jakarta:
+          persistence:
+            validation:
+              mode: none
 
   data:
     redis:
@@ -52,13 +56,13 @@ resilience4j.circuitbreaker:
   configs:
     default:
       failureRateThreshold: 50 # 50%실패
-      slowCallRateThreshold: 70 # 70%지연
+      slowCallRateThreshold: 50 # 50%지연
       slowCallDurationThreshold: 3000 # 지연호출 기준 3초
       permittedNumberOfCallsInHalfOpenState: 4
       slidingWindowType: COUNT_BASED
-      slidingWindowSize: 3 # 기준 호출 수
-      minimumNumberOfCalls: 2
-      waitDurationInOpenState: 10000
+      slidingWindowSize: 2 # 기준 호출 수
+      minimumNumberOfCalls: 1
+      waitDurationInOpenState: 10000 # open 시 half open 변경까지 걸리는 시간 10초
   instances:
     user-service: #feign client 이름
       baseConfig: default
