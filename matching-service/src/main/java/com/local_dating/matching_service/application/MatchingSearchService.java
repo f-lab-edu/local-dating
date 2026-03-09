@@ -3,7 +3,6 @@ package com.local_dating.matching_service.application;
 import com.local_dating.matching_service.domain.RedisKeys;
 import com.local_dating.matching_service.domain.type.CoinActionType;
 import com.local_dating.matching_service.presentation.dto.UserCoinDTO;
-import com.local_dating.matching_service.util.UserServiceClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -18,7 +17,8 @@ public class MatchingSearchService {
 
     private final StringRedisTemplate stringRedisTemplate;
     //private final RedisTemplate<String, String> redisTemplate;
-    private final UserServiceClient userServiceClient;
+    //private final UserServiceClient userServiceClient;
+    private final UserServiceClientWithCircuitBreaker userServiceClientWithCircuitBreaker;
     private final RedisKeys keys;
 
     //public String searchNext(final Long userNo) {
@@ -26,10 +26,10 @@ public class MatchingSearchService {
         String key = keys.userSearchCurrent() + userNo; //deckKey(userNo);
         String nextId = stringRedisTemplate.opsForList().rightPop(key);
 
-        userServiceClient.updateCoin(userNo, authentication, new UserCoinDTO(String.valueOf(userNo), -10000L, CoinActionType.CONSUME));
+        userServiceClientWithCircuitBreaker.updateCoin(userNo, authentication, new UserCoinDTO(String.valueOf(userNo), -10000L, CoinActionType.CONSUME));
 
         if (nextId == null) {
-            List<String> list = userServiceClient.searchNext(userNo, authentication).stream()
+            List<String> list = userServiceClientWithCircuitBreaker.searchNext(userNo, authentication).stream()
                     .map(el -> String.valueOf(el.userId()))
                     .collect(Collectors.toUnmodifiableList());
             stringRedisTemplate.opsForList().rightPushAll(key, list);
@@ -64,7 +64,7 @@ public class MatchingSearchService {
 
     public String searchCurrent(final Long userNo, final String authentication) {
         String key = keys.userSearchCurrent() + userNo;
-        String currentId = stringRedisTemplate.opsForValue().get(key);
+        String currentId = stringRedisTemplate.opsForList().rightPop(key);
 
         if (currentId == null) {
             currentId = searchNext(userNo, authentication);

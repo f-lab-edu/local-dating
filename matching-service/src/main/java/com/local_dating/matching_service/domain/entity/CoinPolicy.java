@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @Entity
 @RequiredArgsConstructor
 public class CoinPolicy {
-
+// 수정 필요
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")

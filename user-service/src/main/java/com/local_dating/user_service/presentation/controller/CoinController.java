@@ -50,6 +50,13 @@ public class CoinController {
         userCoinService.updateCoin(id, userCoinMapper.INSTANCE.toUserCoinVO(userCoinDTO));
     }
 
+    @PreAuthorize("isAuthenticated() and #id == principal.userNo")
+    @Operation(summary = "코인 테이블 차감", description = "코인 사용 시 호출, 잔액확인")
+    @PostMapping(value = "/api/users/{id}/coins/consume")
+    public void consumeCoin(final @PathVariable("id") long id, final @RequestHeader("Authorization") String authentication, @RequestBody final UserCoinDTO userCoinDTO) {
+        userCoinService.consumeCoin(id, userCoinMapper.INSTANCE.toUserCoinVO(userCoinDTO));
+    }
+
     /*@PreAuthorize("isAuthenticated() and #id == authentication.getPrincipal()")
     @PostMapping(value = "/v1/users/{id}/coin")
     public void saveCoin(final @PathVariable("id") long id, final Authentication authentication, final UserCoinDTO userCoinDTO) {

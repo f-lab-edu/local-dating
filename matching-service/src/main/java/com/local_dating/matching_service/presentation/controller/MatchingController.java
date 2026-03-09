@@ -24,7 +24,7 @@ public class MatchingController {
     private final JwtUtil jwtUtil;
 
     @PostMapping(value = "/v1/matches/users/{id}")
-    @PreAuthorize("isAuthenticated() and #id == authentication.getPrincipal()")
+    @PreAuthorize("isAuthenticated() and #id.toString() == principal")
     @Operation(summary = "매칭 요청", description = "매칭을 요청한다")
     public MatchingDTO requestMatch(final @PathVariable("id") long id, @RequestHeader("Authorization") String authentication, @RequestBody final MatchingDTO dto) {
 
