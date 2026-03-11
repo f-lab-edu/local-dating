@@ -23,10 +23,10 @@ public class MatchingController {
     private final MatchingMapper matchingMapper;
     private final JwtUtil jwtUtil;
 
-    @PostMapping(value = "/v1/matches/users/{id}")
+    @PostMapping(value = "/api/matches/users/{id}")
     @PreAuthorize("isAuthenticated() and #id.toString() == principal")
-    @Operation(summary = "매칭 요청", description = "매칭을 요청한다")
-    public MatchingDTO requestMatch(final @PathVariable("id") long id, @RequestHeader("Authorization") String authentication, @RequestBody final MatchingDTO dto) {
+    @Operation(summary = "매칭 요청", description = "매칭을 요청(생성)한다")
+    public MatchingDTO requestMatch(final @PathVariable("id") Long id, @RequestHeader("Authorization") String authentication, @RequestBody final MatchingDTO dto) {
 
         return matchingMapper.INSTANCE.matchingVOToMatchingDTO(matchingService.requestMatching(id, authentication, matchingMapper.INSTANCE.matchingDTOToMatchingVO(dto)));
     }
@@ -69,16 +69,16 @@ public class MatchingController {
         return matchingMapper.INSTANCE.matchingVOsToMatchingDTOs(matchingService.getSentMatches(id));
     }
 
-    @PutMapping(value = "/v1/matches/users/{id}/accept-matches")
-    @PreAuthorize("isAuthenticated() and #id == authentication.getPrincipal()")
+    @PutMapping(value = "/api/matches/users/{id}/accept-matches")
+    @PreAuthorize("isAuthenticated() and #id.toString() == principal")
     @Operation(summary = "매칭 수락", description = "보낸 매칭에 대한 수락, 코인 지불")
-    public MatchingDTO acceptMatch(@PathVariable("id") final long id, @RequestHeader("Authorization") String authentication, @RequestBody final MatchingDTO dto) {
+    public MatchingDTO acceptMatch(@PathVariable("id") final Long id, @RequestHeader("Authorization") String authentication, @RequestBody final MatchingDTO dto) {
         return matchingMapper.INSTANCE.matchingVOToMatchingDTO(matchingService.acceptMatching(id, authentication, matchingMapper.INSTANCE.matchingDTOToMatchingVO(dto)));
     }
 
-    @PutMapping(value = "/v1/matches/users/{id}/reject-matches")
+    @PutMapping(value = "/api/matches/users/{id}/reject-matches")
     @Operation(summary = "매칭 거절", description = "보낸 매칭에 대한 거절, 요청자 코인 환불")
-    public MatchingDTO rejectMatch(@PathVariable("id") final long id, @RequestHeader("Authorization") String authentication, @RequestBody final MatchingDTO dto) {
+    public MatchingDTO rejectMatch(@PathVariable("id") final Long id, @RequestHeader("Authorization") String authentication, @RequestBody final MatchingDTO dto) {
         return matchingMapper.INSTANCE.matchingVOToMatchingDTO(matchingService.rejectMatching(id, authentication, matchingMapper.INSTANCE.matchingDTOToMatchingVO(dto)));
     }
 

@@ -1,4 +1,13 @@
 package com.local_dating.matching_service.domain.vo;
 
-public record MatchingVO(long id, long requId, long recvId, String statusCd, String requStatusCd, String recvStatusCd, String matchPlace, String matchDate, String matchTime) {
+import java.time.LocalDateTime;
+
+public record MatchingVO(
+        Long id, Long requId, Long recvId
+        , String statusCd
+        , LocalDateTime decisionStartDate
+        , LocalDateTime decisionEndDate
+        , String requStatusCd, String recvStatusCd
+        , String matchPlace, String matchDate, String matchTime
+) {
 }
