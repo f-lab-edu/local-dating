@@ -21,7 +21,7 @@ public class CodeValue {
     private Long id;
 
     @Column(name = "code_group")
-    private String codeGroup;
+    private Long codeGroup;
 
     @Column(name = "code")
     private String code;

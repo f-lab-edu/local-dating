@@ -21,6 +21,8 @@ public class Matching {
         this.requId = vo.requId();
         this.recvId = vo.recvId();
         this.statusCd = vo.statusCd();
+        this.decisionStartDate = vo.decisionStartDate();
+        this.decisionEndDate = vo.decisionEndDate();
         this.requStatusCd = vo.requStatusCd();
         this.recvStatusCd = vo.recvStatusCd();
         this.matchPlace = vo.matchPlace();
@@ -35,13 +37,19 @@ public class Matching {
     private Long id;
 
     @Column(name = "requ_id")
-    private long requId; // 요청자
+    private Long requId; // 요청자
 
     @Column(name = "recv_id")
-    private long recvId; // 수신자
+    private Long recvId; // 수신자
 
     @Column(name = "status_cd")
     private String statusCd;
+
+    @Column(name = "decision_start_date")
+    private LocalDateTime decisionStartDate;
+
+    @Column(name = "decision_end_date")
+    private LocalDateTime decisionEndDate;;
 
     @Column(name = "requ_status_cd")
     private String requStatusCd;
@@ -59,14 +67,14 @@ public class Matching {
     private String matchTime;
 
     @Column(name = "in_user")
-    private long inUser;
+    private Long inUser;
 
     @Column(name = "in_date")
     @CreationTimestamp
     private LocalDateTime inDate;
 
     @Column(name = "mod_user")
-    private long modUser;
+    private Long modUser;
 
     @Column(name = "mod_date")
     @UpdateTimestamp
