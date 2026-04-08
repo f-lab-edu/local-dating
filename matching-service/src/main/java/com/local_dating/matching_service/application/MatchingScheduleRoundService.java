@@ -13,13 +13,14 @@ public class MatchingScheduleRoundService {
 
     private final MatchingScheduleRoundRepository matchingScheduleRoundRepository;
 
-    public void saveMatchingScheduleRound(Long matchingId, Integer round, String statusCd, LocalDate roundStartDate, LocalDate roundEndDate) {
+    public void saveMatchingScheduleRound(Long matchingId, Integer round, String statusCd, LocalDate roundStartDate, LocalDate roundEndDate, Long userId) {
         matchingScheduleRoundRepository.save(new MatchingScheduleRound(
                 matchingId,
                 round,
                 statusCd,
                 roundStartDate,
-                roundEndDate
+                roundEndDate,
+                userId
         ));
     }
 }

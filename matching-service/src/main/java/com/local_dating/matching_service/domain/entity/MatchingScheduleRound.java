@@ -46,10 +46,13 @@ public class MatchingScheduleRound {
     @UpdateTimestamp
     private LocalDateTime modDate;
 
-    public MatchingScheduleRound(final Long matchingId, final Integer round, final String statusCd, final LocalDate roundStartDate, final LocalDate roundEndDate) {
+    public MatchingScheduleRound(final Long matchingId, final Integer round, final String statusCd, final LocalDate roundStartDate, final LocalDate roundEndDate, final Long user) {
         this.matchingId = matchingId;
+        this.round = round;
         this.statusCd = statusCd;
         this.roundStartDate = roundStartDate;
         this.roundEndDate = roundEndDate;
+        this.inUser = user;
+        this.modUser = user;
     }
 }

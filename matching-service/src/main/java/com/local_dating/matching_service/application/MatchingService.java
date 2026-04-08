@@ -1,6 +1,7 @@
 package com.local_dating.matching_service.application;
 
 import com.local_dating.matching_service.domain.entity.Matching;
+import com.local_dating.matching_service.domain.entity.MatchingScheduleRound;
 import com.local_dating.matching_service.domain.mapper.MatchingMapper;
 import com.local_dating.matching_service.domain.type.CoinActionType;
 import com.local_dating.matching_service.domain.type.ItemType;
@@ -9,6 +10,7 @@ import com.local_dating.matching_service.domain.type.MatchingType;
 import com.local_dating.matching_service.domain.vo.MatchingVO;
 import com.local_dating.matching_service.infrastructure.repository.CoinPolicyRepositoryCustom;
 import com.local_dating.matching_service.infrastructure.repository.MatchingRepository;
+import com.local_dating.matching_service.infrastructure.repository.MatchingScheduleRoundRepository;
 import com.local_dating.matching_service.presentation.dto.UserCoinDTO;
 import com.local_dating.matching_service.util.MessageCode;
 import com.local_dating.matching_service.util.UserServiceClient;
@@ -35,6 +37,7 @@ public class MatchingService {
     private final UserServiceClientWithCircuitBreaker userServiceClientWithCircuitBreaker;
     private final CoinPolicyRepositoryCustom coinPolicyRepository;
     private final PriceService priceService;
+    private final MatchingScheduleRoundRepository matchingScheduleRoundRepository;
 
     @Transactional
     //public int requestMatching(final long userid, final String authentication, final MatchingVO matchingVO) {
@@ -244,7 +247,15 @@ public class MatchingService {
                     );
                     //userServiceClientWithCircuitBreaker.saveCoin(userId, authentication, new UserCoinDTO(String.valueOf(userId), -price, CoinActionType.CONSUME));
                     matching.setStatusCd(matchingType.getCode());
-                    matchingScheduleRoundService.saveMatchingScheduleRound(matchingVO.id(), 1, MatchingScheduleRoundType.OPEN.getCode(), LocalDate.now(), LocalDate.now().plusDays(2));
+                    matchingScheduleRoundRepository.save(new MatchingScheduleRound(
+                            matchingVO.id(),
+                            1,
+                            MatchingScheduleRoundType.OPEN.getCode(),
+                            LocalDate.now(),
+                            LocalDate.now().plusDays(2),
+                            userId
+                    ));
+                    //matchingScheduleRoundService.saveMatchingScheduleRound(matchingVO.id(), 1, MatchingScheduleRoundType.OPEN.getCode(), LocalDate.now(), LocalDate.now().plusDays(2));
                     return matching;
                 })
                 .orElseThrow(() -> new BusinessException(MessageCode.INSUFFICIENT_COIN));
