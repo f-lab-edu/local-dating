@@ -25,4 +25,6 @@ public interface MatchingRepository extends JpaRepository<Matching, Long> {
     public List<Matching> findByRecvIdAndStatusCdNotIn(long id, List<String> statusCd);
 
     public List<Matching> findByRequIdAndStatusCdNotIn(long id, List<String> statusCd);
+
+    Optional<Matching> findByIdAndRequIdOrRecvId(long id, long requId, long recvId);
 }

@@ -1,6 +1,7 @@
 package com.local_dating.matching_service.presentation.controller;
 
 import com.local_dating.matching_service.application.MatchingScheduleRequestedService;
+import com.local_dating.matching_service.application.ValidateMatchingService;
 import com.local_dating.matching_service.domain.mapper.MatchingScheduleRequestedMapper;
 import com.local_dating.matching_service.presentation.dto.MatchingScheduleRequestDTO;
 import com.local_dating.matching_service.presentation.dto.MatchingScheduleRequestListDTO;
@@ -17,6 +18,7 @@ public class MatchingScheduleRequestedController {
 
     private final MatchingScheduleRequestedService matchingScheduleRequestedService;
     private final MatchingScheduleRequestedMapper matchingScheduleRequestedMapper;
+    private final ValidateMatchingService validateMatchingService;
 
     @GetMapping(value = "/api/matches/{match}/users/{id}/round/{round}")
     @PreAuthorize("isAuthenticated() and #id.toString() == principal")
@@ -33,7 +35,9 @@ public class MatchingScheduleRequestedController {
     @PreAuthorize("isAuthenticated() and #id.toString() == principal")
     @Operation(summary = "라운드에 해당하는 매칭 스케줄 등록", description = "라운드에 해당하는 매칭 스케줄 등록, 스케줄계산")
     public void saveMatchingScheduleRequested(final @PathVariable("id") Long id, @RequestHeader("Authorization") final String authorization, @RequestBody final MatchingScheduleRequestListDTO matchingScheduleRequestListDTO) {
-    //public String saveMatchingScheduleRequested(final @PathVariable("id") Long id, @RequestHeader("Authorization") final String authorization, final MatchingScheduleRequestDTO matchingScheduleRequestDTO) {
+
+        validateMatchingService.validationMatchingScheduleList(id, matchingScheduleRequestListDTO);
+
         matchingScheduleRequestedService.saveMatchingScheduleRequested(id, authorization, matchingScheduleRequestListDTO.getMatchingScheduleRequestDTOs());
         matchingScheduleRequestedService.checkRoundSchedule(matchingScheduleRequestListDTO.getMatchingScheduleRequestDTOs().get(0));
         //matchingScheduleRequestedService.checkRoundSchedule(id, authorization, matchingScheduleRequestListDTO.getMatchingScheduleRequestDTOs());

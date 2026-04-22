@@ -22,12 +22,19 @@ public class MatchingScheduleRequestedService {
     private final MatchingScheduleRequestedRepository matchingScheduleRequestedRepository;
     private final MatchingScheduleRequestedMapper matchingScheduleRequestedMapper;
 
+    private final ValidateMatchingService validateMatchingService;
+
     public List<MatchingScheduleRequested> getMatchingScheduleRequested(final Long match, final Long id, final Long round, final String authorization) {
         return matchingScheduleRequestedRepository.findByMatchingIdAndMatchingScheduleRoundIdAndUserId(match, round, id);
     }
 
     @Transactional
     public List<MatchingScheduleRequested> saveMatchingScheduleRequested(final Long id, final String authorization, final List<MatchingScheduleRequestDTO> matchingScheduleRequestDTOS) {
+
+        validateMatchingService.validationMatchingSchduleV2(id, matchingScheduleRequestDTOS); // 종합
+        //validateMatchingService.validationMatchingSchedule(id, matchingScheduleRequestDTOS); // 1개만 보는거
+        //validateMatchingService.validationMatchingScheduleList(id, matchingScheduleRequestDTOS);
+        //validateMatchingScheduleList(id, matchingScheduleRequestDTOS);
 
         List duplicatedData = matchingScheduleRequestDTOS.stream().filter(el -> matchingScheduleRequestedRepository
                 .findDuplicatedData(
@@ -95,7 +102,7 @@ public class MatchingScheduleRequestedService {
         //List<MatchingScheduleRequested> roundScheduleMatched;
         if (result.size() >= 2) { // 모두 스케줄 제출
             //계산
-            roundScheduleMatched = this.calcRoundScheduleInter(matchingScheduleRequestDTO.matchingId(), MatchingScheduleRequestedType.SUBMITTED.getCode(), result.get(0).userId(), result.get(1).userId());
+            //roundScheduleMatched = this.calcRoundScheduleInter(matchingScheduleRequestDTO.matchingId(), MatchingScheduleRequestedType.SUBMITTED.getCode(), result.get(0).userId(), result.get(1).userId());
 
             /*roundScheduleMatched.stream().forEach(el -> {
                 matchingScheduleRequestedRepository.findMatchingScheduleRequestedData(
@@ -114,6 +121,7 @@ public class MatchingScheduleRequestedService {
         }
     }
 
+    /* 임시주석
     private List<MatchingScheduleRequestDTO> calcRoundScheduleInter(final Long matchingId, final String statusCd, final Long userId1, final Long userId2) {
     //private List<MatchingScheduleRequested> calcRoundScheduleInter(final Long matchingId, final String statusCd, final Long userId1, final Long userId2) {
     //private void calcRoundScheduleInter(final Long matchingId, final String statusCd, final Long userId1, final Long userId2) {
@@ -132,6 +140,6 @@ public class MatchingScheduleRequestedService {
                         && el2.getMatchingTimeType().equals(el.getMatchingTimeType())
                 )
         ).collect(Collectors.toUnmodifiableList());
-    }
+    }*/
 
 }
