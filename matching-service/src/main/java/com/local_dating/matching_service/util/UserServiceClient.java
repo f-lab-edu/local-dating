@@ -28,4 +28,7 @@ public interface UserServiceClient {
     List<UserProfileCoreVO> searchNext(final @PathVariable("id") Long id, final @RequestHeader("Authorization") String authentication);
     //List<UserProfileCoreVO> searchNext(final @PathVariable("id") Long id);
     //List<UserProfileCoreVO> searchNext(final @PathVariable("id") Long id, final @RequestHeader("Authorization") Authentication authentication);
+
+    @GetMapping("/api/validate/users/{id}")
+    void validateUserId(final @PathVariable("id") Long id, final @RequestHeader("Authorization") String authentication);
 }

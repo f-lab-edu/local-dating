@@ -16,6 +16,8 @@ public interface MatchingScheduleRequestedRepository extends JpaRepository<Match
 
     List<MatchingScheduleRequested> findByMatchingIdAndMatchingScheduleRoundIdAndUserId(Long matchingId, Long matchingScheduleRoundId, Long userId);
 
+    Optional<MatchingScheduleRequested> findByMatchingIdAndUserId(Long matchingId, Long userId);
+
     @Query("select m "
             + "from MatchingScheduleRequested m "
             + "where m.matchingId = :matchingId "

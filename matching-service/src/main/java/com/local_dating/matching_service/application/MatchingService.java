@@ -38,28 +38,17 @@ public class MatchingService {
     private final CoinPolicyRepositoryCustom coinPolicyRepository;
     private final PriceService priceService;
     private final MatchingScheduleRoundRepository matchingScheduleRoundRepository;
+    private final ValidateMatchingService validateMatchingService;
 
     @Transactional
-    //public int requestMatching(final long userid, final String authentication, final MatchingVO matchingVO) {
-    //public void requestMatching(final long userid, final String authentication, final MatchingVO matchingVO) {
     public MatchingVO requestMatching(final Long userId, final String authentication, final MatchingVO matchingVO) {
-/*
-        if (userServiceClient.viewCoin(userid, authentication) >= 10000L) {
-            userServiceClient.saveCoin(userid, authentication, new UserCoinDTO(String.valueOf(userid), -10000L));
 
-            Matching matching = matchingMapper.INSTANCE.matchingVOtoMatching(matchingVO, "000", userid
-                    , LocalDateTime.now(), userid, LocalDateTime.now());
-            matchingeRepository.save(matching);
-            return 0;
-        } else {
-            return -1; //실패
-        }*/
+        userServiceClientWithCircuitBreaker.validateUserId(matchingVO.requId(), authentication);
+        userServiceClientWithCircuitBreaker.validateUserId(matchingVO.recvId(), authentication);
 
-        Long coinz = userServiceClient.viewCoin(userId, authentication);
-        log.info("viewCoin result: {}", coinz); // ✅ 코인 값 확인
+        //Long coinz = userServiceClient.viewCoin(userId, authentication);
+        //log.info("viewCoin result: {}", coinz); // ✅ 코인 값 확인
         Long price = priceService.viewPrice(userId, authentication, ItemType.SEARCHING);
-        //Long price = Long.valueOf(userServiceClientWithCircuitBreaker.viewCoinPolicy(userId, ItemType.SEARCHING.getCode(), authentication));
-        //Long price = Long.valueOf(userServiceClientWithCircuitBreaker.viewCoinPolicy(userId, CoinActionType.CONSUME.getCode() ,authentication));
         return Optional.ofNullable(userServiceClientWithCircuitBreaker.viewCoin(userId, authentication))
                 .filter(coin -> coin >= price)
                 //.filter(coin -> coin >= Long.valueOf(coinPolicyRepository.getValidPrice(LocalDate.now()).getPrice()))

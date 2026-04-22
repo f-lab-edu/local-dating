@@ -44,6 +44,11 @@ public class UserServiceClientWithCircuitBreaker {
         return userServiceClient.searchNext(id, authentication);
     }
 
+    @CircuitBreaker(name = "user-service", fallbackMethod = "validateUserIdFail")
+    public void validateUserId(final long id, final String authentication) {
+        userServiceClient.validateUserId(id, authentication);
+    }
+
     private Long viewCoinPolicyFail(final long id, final String type, final String authentication, Exception e) {
         log.error(Thread.currentThread().getStackTrace()[1].getMethodName(), e);
         throw new CircuitBreakingException(EXTERNAL_EXCEPTION.getMessage(), e);
@@ -64,4 +69,8 @@ public class UserServiceClientWithCircuitBreaker {
         throw new CircuitBreakingException(EXTERNAL_EXCEPTION.getMessage(), e);
     }
 
+    private void validateUserIdFail(final long id, final String authentication, Exception e) {
+        log.error(Thread.currentThread().getStackTrace()[1].getMethodName(), e);
+        throw new CircuitBreakingException(EXTERNAL_EXCEPTION.getMessage(), e);
+    }
 }
