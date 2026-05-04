@@ -1,5 +1,6 @@
 package com.local_dating.matching_service.util.exception;
 
+import com.local_dating.matching_service.util.MessageCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -19,7 +20,7 @@ public class MatchExceptionHandler {
     public ResponseEntity handleException(Exception e) {
         logger.error(e.getClass().getName());
         logger.error(e.getMessage());
-        return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(MessageCode.INTERNAL_SERVER_ERROR.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(BusinessException.class)
@@ -27,11 +28,23 @@ public class MatchExceptionHandler {
 
         logger.error(e.getClass().getName());
         logger.error(e.getMessage());
+        if (e.getErrorValue() != null) {
+            logger.error("invalidData: {}", e.getErrorValue());
+        }
+        if (e.getErrorValues() != null && !e.getErrorValues().isEmpty()) {
+            logger.error("invalidData: {}", e.getErrorValues());
+        }
 
         Map<String, Object> response = new HashMap<>();
         response.put("errorCode", e.getMessageCode().getCode());
         response.put("errorMessage", e.getMessageCode().getMessage());
         response.put("status", e.getMessageCode().getStatus());
+        if (e.getErrorValue() != null) {
+            response.put("invalidData", e.getErrorValue());
+        }
+        if (e.getErrorValues() != null && !e.getErrorValues().isEmpty()) {
+            response.put("invalidData", e.getErrorValues());
+        }
 
         return new ResponseEntity<>(response, e.getMessageCode().getStatus());
         //return new ResponseEntity<>(e.getMessage(), e.getMessageCode().getStatus());
