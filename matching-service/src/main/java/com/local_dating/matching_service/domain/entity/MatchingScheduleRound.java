@@ -1,7 +1,9 @@
 package com.local_dating.matching_service.domain.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -9,6 +11,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
+@Getter
+@Setter
 @RequiredArgsConstructor
 public class MatchingScheduleRound {
 
@@ -31,6 +35,12 @@ public class MatchingScheduleRound {
 
     @Column(name = "round_end_date")
     private LocalDate roundEndDate;
+
+    @Column(name = "matching_date")
+    private LocalDate matchingDate;
+
+    @Column(name = "matching_time_type")
+    private String matchingTimeType;
 
     @Column(name = "in_user")
     private Long inUser;
