@@ -46,16 +46,16 @@ public class MatchingScheduleRequestValidator {
                 .collect(Collectors.toUnmodifiableSet());
 
         list.forEach(el -> {
-            if (!validateMatchingIdV2(el.matchingId(), validMatchingIds)) {
+            if (!validMatchingIds.contains(el.matchingId())) {
                 invalidData.add(Map.of(VALIDATION_EXCEPTION_MATCHING_ID.getMessage(), el.matchingId().toString()));
             }
-            if (!validateMatchingRoundId(el.matchingScheduleRoundId(), el.matchingId(), validMatchingRoundKeys)) {
+            if (!validMatchingRoundKeys.contains(getMatchingRoundKey(el.matchingScheduleRoundId(), el.matchingId()))) {
                 invalidData.add(Map.of(VALIDATION_EXCEPTION_MATCHING_SCHEDULE_ROUND.getMessage(), el.matchingId().toString()));
             }
             if (!validateMatchingDateV2(el.matchingDate(), el.matchingTimeType())) {
                 invalidData.add(Map.of(VALIDATION_EXCEPTION_MATCHING_DATE.getMessage(), el.matchingDate() + " " + el.matchingTimeType()));
             }
-            if (MatchingScheduleRequestedType.SUBMITTED.getCode().equals(el.statusCd())) {
+            if (!MatchingScheduleRequestedType.SUBMITTED.getCode().equals(el.statusCd())) {
                 invalidData.add(Map.of(VALIDATION_EXCEPTION_MATCHING_SCHEDULE_REQUEST.getMessage(), el.statusCd()));
             }
         });
@@ -85,20 +85,12 @@ public class MatchingScheduleRequestValidator {
         }
     }
 
-    public Boolean validateMatchingIdV2(final Long matchingId, final Set<Long> validMatchingIds) {
-        return validMatchingIds.contains(matchingId);
-    }
-
     public void validateMatchingId(final Long userId, final Long matchingId, List<Map<String, String>> invalidData) {
         Boolean isValid = matchingRepository.findByIdAndRequIdOrRecvId(matchingId, userId, userId)
                 .isPresent();
         if (!isValid) {
             invalidData.add(Map.of(VALIDATION_EXCEPTION_MATCHING_ID.getMessage(), matchingId.toString()));
         }
-    }
-
-    public Boolean validateMatchingRoundId(final Long matchingScheduleRoundId, final Long matchingId, final Set<String> validMatchingRoundKeys) {
-        return validMatchingRoundKeys.contains(getMatchingRoundKey(matchingScheduleRoundId, matchingId));
     }
 
     public void validateMatchingRoundId(final Long matchingScheduleRoundId, final Long matchingId, List<Map<String, String>> invalidData) {
@@ -114,10 +106,9 @@ public class MatchingScheduleRequestValidator {
             final String matchingTimeType
     ) {
         return matchingDate.isAfter(LocalDate.now())
-                && !(
-                MatchingTimeType.AFTERNOON.getCode().equals(matchingTimeType)
-                        || MatchingTimeType.EVENING.getCode().equals(matchingTimeType)
-        );
+                &&
+                (MatchingTimeType.AFTERNOON.getCode().equals(matchingTimeType)
+                        || MatchingTimeType.EVENING.getCode().equals(matchingTimeType));
     }
 
     public void validateMatchingDate(final LocalDate matchingDate, final String matchingTimeType, List<Map<String, String>> invalidData) {

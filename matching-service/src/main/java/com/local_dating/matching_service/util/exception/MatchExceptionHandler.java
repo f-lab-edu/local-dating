@@ -18,16 +18,13 @@ public class MatchExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity handleException(Exception e) {
-        logger.error(e.getClass().getName());
-        logger.error(e.getMessage());
+        logger.error("미확인 오류", e);
         return new ResponseEntity<>(MessageCode.INTERNAL_SERVER_ERROR.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity handleException(BusinessException e) {
-
-        logger.error(e.getClass().getName());
-        logger.error(e.getMessage());
+        logger.error("BusinessException 오류", e);
         if (e.getErrorValue() != null) {
             logger.error("invalidData: {}", e.getErrorValue());
         }

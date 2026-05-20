@@ -15,23 +15,21 @@ public class BusinessException extends RuntimeException {
     private final List<Long> errorValues;
 
     public BusinessException(MessageCode messageCode) {
-        super(messageCode.getMessage());
-        this.messageCode = messageCode;
-        this.errorValue = null;
-        this.errorValues = null;
+        this(messageCode, null, null);
     }
 
     public BusinessException(MessageCode messageCode, String errorValue) {
-        super(messageCode.getMessage());
-        this.messageCode = messageCode;
-        this.errorValue = errorValue;
-        this.errorValues = null;
+        this(messageCode, errorValue, null);
     }
 
     public BusinessException(MessageCode messageCode, List<Long> errorValues) {
+        this(messageCode, null, errorValues);
+    }
+
+    public BusinessException(MessageCode messageCode, String errorValue, List<Long> errorValues) {
         super(messageCode.getMessage());
         this.messageCode = messageCode;
-        this.errorValue = null;
+        this.errorValue = errorValue;
         this.errorValues = errorValues;
     }
 }
