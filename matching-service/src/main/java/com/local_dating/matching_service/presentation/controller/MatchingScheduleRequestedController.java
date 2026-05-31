@@ -24,24 +24,15 @@ public class MatchingScheduleRequestedController {
     @PreAuthorize("isAuthenticated() and #id.toString() == principal")
     @Operation(summary = "라운드에 해당하는 매칭 스케줄 조회", description = "라운드에 해당하는 매칭 스케줄 조회")
     public List<MatchingScheduleRequestDTO> getMatchingScheduleRequested(final @PathVariable("match") Long match, final @PathVariable("id") Long id, final @PathVariable("round") Long round, @RequestHeader("Authorization") final String authorization) {
-    //public List<MatchingScheduleRequested> getMatchingScheduleRequested(final @PathVariable("match") Long match, final @PathVariable("id") Long id, final @PathVariable("round") Long round, @RequestHeader("Authorization") final String authorization) {
         return matchingScheduleRequestedMapper.entityListToDtoList(matchingScheduleRequestedService.getMatchingScheduleRequested(match, id, round, authorization));
     }
-    /*public List<MatchingScheduleRequested> getMatchingScheduleRequested(final @PathVariable("match") Long match, final @PathVariable("id") Long id, final @PathVariable("round") Long round, @RequestHeader("Authorization") final String authorization) {
-        return matchingScheduleRequestedService.getMatchingScheduleRequested(match, id, round, authorization);
-    }*/
 
     @PostMapping(value = "/api/matches/users/{id}/schedule-requests")
     @PreAuthorize("isAuthenticated() and #id.toString() == principal")
     @Operation(summary = "라운드에 해당하는 매칭 스케줄 등록", description = "라운드에 해당하는 매칭 스케줄 등록, 스케줄계산")
     public void saveMatchingScheduleRequested(final @PathVariable("id") Long id, @RequestHeader("Authorization") final String authorization, @RequestBody final MatchingScheduleRequestListDTO matchingScheduleRequestListDTO) {
 
-        //matchingScheduleRequestValidator.validationMatchingScheduleList(id, matchingScheduleRequestListDTO);
-
         matchingScheduleRequestedService.saveMatchingScheduleRequested(id, authorization, matchingScheduleRequestListDTO.getMatchingScheduleRequestDTOs());
-        matchingScheduleRequestedService.checkRoundSchedule(matchingScheduleRequestListDTO.getMatchingScheduleRequestDTOs().get(0));
-        //matchingScheduleRequestedService.checkRoundSchedule(id, authorization, matchingScheduleRequestListDTO.getMatchingScheduleRequestDTOs());
-        //return matchingScheduleRequestedService.saveMatchingScheduleRequested(id, authorization, matchingScheduleRequestDTO);
     }
 
     //@Operation(summary = "스케줄계산", description = "라운드에 양 사용자 스케줄 등록 확인, 스케줄계산")

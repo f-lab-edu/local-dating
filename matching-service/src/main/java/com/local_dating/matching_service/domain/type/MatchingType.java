@@ -22,6 +22,7 @@ public enum MatchingType {
     , MATCHING_ACCEPT	("MATCHING_ACCEPT", "매칭 요청 수락", "-")
     , MATCHING_REJECT	("MATCHING_REJECT", "매칭 요청 거절", "+")
     , SCHEDULE_ACCEPT("SCHEDULE_ACCEPT", "스케줄 확정", null)
+    , SCHEDULE_EXPIRED("SCHEDULE_EXPIRED", "스케줄 조정 만료", null)
     , MEETING_PENDING("MEETING_PENDING", "만남일 위치정보 갱신 대기", null)
     , MEETING_COMPLETE("MEETING_COMPLETE", "만남 완료", null)
     , MEETING_FAIL("MEETING_FAIL", "만남 불성립", null)

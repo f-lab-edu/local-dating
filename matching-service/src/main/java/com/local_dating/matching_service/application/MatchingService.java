@@ -1,5 +1,6 @@
 package com.local_dating.matching_service.application;
 
+import com.local_dating.matching_service.application.validation.MatchingScheduleRequestValidator;
 import com.local_dating.matching_service.domain.entity.Matching;
 import com.local_dating.matching_service.domain.entity.MatchingScheduleRound;
 import com.local_dating.matching_service.domain.mapper.MatchingMapper;
@@ -38,7 +39,7 @@ public class MatchingService {
     private final CoinPolicyRepositoryCustom coinPolicyRepository;
     private final PriceService priceService;
     private final MatchingScheduleRoundRepository matchingScheduleRoundRepository;
-    private final ValidateMatchingService validateMatchingService;
+    private final MatchingScheduleRequestValidator matchingScheduleRequestValidator;
 
     @Transactional
     public MatchingVO requestMatching(final Long userId, final String authentication, final MatchingVO matchingVO) {
@@ -236,7 +237,7 @@ public class MatchingService {
                     );
                     //userServiceClientWithCircuitBreaker.saveCoin(userId, authentication, new UserCoinDTO(String.valueOf(userId), -price, CoinActionType.CONSUME));
                     matching.setStatusCd(matchingType.getCode());
-                    matchingScheduleRoundRepository.save(new MatchingScheduleRound(
+                    matchingScheduleRoundRepository.save(new MatchingScheduleRound( // 매칭 수락 시 1 라운드가 설정
                             matchingVO.id(),
                             1,
                             MatchingScheduleRoundType.OPEN.getCode(),
