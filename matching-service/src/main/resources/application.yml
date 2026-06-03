@@ -30,6 +30,13 @@ spring:
       host: aws-server
       port: 6379
 
+  batch:
+    job:
+      enabled: true
+    jdbc:
+      initialize-schema: always
+
+
 logging:
   level:
     org.hibernate.orm.jdbc.bind: trace

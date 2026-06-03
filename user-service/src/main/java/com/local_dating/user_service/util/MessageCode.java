@@ -21,8 +21,9 @@ public enum MessageCode {
     , INSUFFICIENT_COIN("INSUFFICIENT_COIN", "코인 부족", HttpStatus.BAD_REQUEST)
     , SEND_MESSAGE_FAIL("SEND_MESSAGE_FAIL", "메시지 전송 실패", HttpStatus.INTERNAL_SERVER_ERROR)
     , INSUFFICIENT_AUTHENTICATION("INSUFFICIENT_AUTHENTICATION_EXCEPTION", "인증 만료", HttpStatus.UNAUTHORIZED)
-    , INVALIDATE_REFRESH_TOKEN("INVALIDATE_REFRESH_TOKEN_EXCEPTION", "유효하지 않는 리프레시 토큰", HttpStatus.UNAUTHORIZED);
-    
+    , INVALIDATE_REFRESH_TOKEN("INVALIDATE_REFRESH_TOKEN_EXCEPTION", "유효하지 않는 리프레시 토큰", HttpStatus.UNAUTHORIZED)
+    , DATA_LIMIT_EXCEEDED_EXCEPTION("DATA_LIMIT_EXCEEDED_EXCEPTION", "데이터 제한 초과", HttpStatus.BAD_REQUEST);
+
     private final String code;
     private final String message;
     private final HttpStatus status;
