@@ -57,6 +57,10 @@ dependencies {
 	annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
 	annotationProcessor "jakarta.annotation:jakarta.annotation-api"
 	annotationProcessor "jakarta.persistence:jakarta.persistence-api"
+
+	// shedlock
+	implementation 'net.javacrumbs.shedlock:shedlock-spring:7.7.0'
+	implementation 'net.javacrumbs.shedlock:shedlock-provider-jdbc-template:7.7.0'
 }
 
 dependencyManagement {

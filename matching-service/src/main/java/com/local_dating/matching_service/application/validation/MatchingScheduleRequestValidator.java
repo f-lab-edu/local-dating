@@ -46,16 +46,22 @@ public class MatchingScheduleRequestValidator {
                 .collect(Collectors.toUnmodifiableSet());
 
         list.forEach(el -> {
-            if (!validMatchingIds.contains(el.matchingId())) {
+
+            Boolean idCheck = !validMatchingIds.contains(el.matchingId());
+            Boolean roundCheck = !validMatchingRoundKeys.contains(getMatchingRoundKey(el.matchingScheduleRoundId(), el.matchingId()));
+            Boolean dateCheck = !validateMatchingDateV2(el.matchingDate(), el.matchingTimeType());
+            Boolean statusCheck = !el.statusCd().equals(MatchingScheduleRequestedType.SUBMITTED.getCode());
+
+            if (idCheck) {
                 invalidData.add(Map.of(VALIDATION_EXCEPTION_MATCHING_ID.getMessage(), el.matchingId().toString()));
             }
-            if (!validMatchingRoundKeys.contains(getMatchingRoundKey(el.matchingScheduleRoundId(), el.matchingId()))) {
+            if (roundCheck) {
                 invalidData.add(Map.of(VALIDATION_EXCEPTION_MATCHING_SCHEDULE_ROUND.getMessage(), el.matchingId().toString()));
             }
-            if (!validateMatchingDateV2(el.matchingDate(), el.matchingTimeType())) {
+            if (dateCheck) {
                 invalidData.add(Map.of(VALIDATION_EXCEPTION_MATCHING_DATE.getMessage(), el.matchingDate() + " " + el.matchingTimeType()));
             }
-            if (!MatchingScheduleRequestedType.SUBMITTED.getCode().equals(el.statusCd())) {
+            if (statusCheck) {
                 invalidData.add(Map.of(VALIDATION_EXCEPTION_MATCHING_SCHEDULE_REQUEST.getMessage(), el.statusCd()));
             }
         });
