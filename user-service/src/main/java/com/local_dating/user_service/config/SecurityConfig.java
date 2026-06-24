@@ -38,6 +38,7 @@ public class SecurityConfig {
     private final LoginFailureHandler loginFailureHandler;
     private final ObjectMapper objectMapper;
     private final AuthenticationConfiguration authenticationConfiguration;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(final HttpSecurity http) throws Exception {
@@ -46,12 +47,20 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/v1/users/register").permitAll()
                         .requestMatchers("/v1/auth/login","/v1/users/login", "/v1/users/{id}/refresh").permitAll()
+                        .requestMatchers("/oauth2/**", "/login/oauth2/**", "/error").permitAll() // OAuth 로그인경로, 로그인 콜백경로
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                         .anyRequest().authenticated()
                 )
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterAt(jsonUsernamePasswordAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class) // 로그인 처리
-                .addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class) // JWT 인증 처리
+                .oauth2Login(oauth -> oauth
+                        .successHandler(oAuth2SuccessHandler)
+                )
+
+                /*.oauth2Login(oauth2 -> oauth2
+                        .loginPage("/v1/auth/login")
+                        .defaultSuccessUrl("/v1/users/login"))*/
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+                .addFilterAt(jsonUsernamePasswordAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(authenticationEntryPoint)
                         .accessDeniedHandler(accessDeniedHandler)
@@ -93,7 +102,7 @@ public class SecurityConfig {
         return (web) -> web.ignoring()
                 .requestMatchers("/resources/", "/static/", "/css/", "/js/", "/images/**"
                         , "/v1/interceptor/**"
-                        , "/v1/auth/get-code", "/v1/auth/send-code/{code}/id/{id}", "/v1/auth/check-code"); //필요한가?
+                        , "/v1/auth/get-code", "/v1/auth/send-code/{code}/id/{id}", "/v1/auth/check-code");
         //, "/", "/v1/users/login", "/v1/users/register", "/v1/users/{id}/refresh");
         //.requestMatchers("/v2/api-docs", "/configuration/ui", "/swagger-resources/**", "/configuration/security", "/swagger-ui.html", "/webjars/**");
     }
@@ -129,8 +138,8 @@ public class SecurityConfig {
                 .addFilterAt(jsonUsernamePasswordAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthorizationFilter, JsonUsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(ex -> ex
-                        .authenticationEntryPoint(authenticationEntryPoint)  // 401 핸들링
-                        .accessDeniedHandler(accessDeniedHandler)            // 403 핸들링
+                        .authenticationEntryPoint(authenticationEntryPoint)
+                        .accessDeniedHandler(accessDeniedHandler)
                 )
 //                .exceptionHandling((exceptions) -> exceptions
 //                        .authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint())

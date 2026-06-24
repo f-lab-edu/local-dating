@@ -3,7 +3,7 @@ spring:
     name: user-service
 
   datasource:
-    url: jdbc:mysql://aws-server:3306/local_dating
+    url: jdbc:mysql://${AWS_SERVER}:3306/local_dating
     #url: jdbc:mysql://localhost:3306/local_dating
     username: root
     password: 1234
@@ -23,14 +23,26 @@ spring:
             validation:
               mode: none
 
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope:
+              - openid
+              - email
+              - profile
+
 
   data:
     redis:
-      host: aws-server
+      host: ${AWS_SERVER}
       port: 6379
 
   kafka:
-    bootstrap-servers: aws-server:19091, aws-server:19092, aws-server:19093
+    bootstrap-servers: ${AWS_SERVER}:19091, ${AWS_SERVER}:19092, ${AWS_SERVER}:19093
     #bootstrap-servers: aws-server
     #bootstrap-servers: msk 1 2 3
     producer:
@@ -82,6 +94,6 @@ cache:
     product: 600
 
 jwt:
-  secret-key: thisisaverysecretkeyandsecure123
+  secret-key: ${jwt_secret_key}
   access-token-validity-seconds: 3600000 # 1시간
   refresh-token-validity-seconds: 86400000 # 24시간
