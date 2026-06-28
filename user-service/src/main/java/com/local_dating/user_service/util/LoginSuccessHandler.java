@@ -1,21 +1,25 @@
 package com.local_dating.user_service.util;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.local_dating.user_service.application.CustomUserDetails;
 import com.local_dating.user_service.application.KafkaProducer;
 import com.local_dating.user_service.config.cache.CacheTtlProperties;
 import com.local_dating.user_service.domain.vo.UserLoginLogVO;
 import com.local_dating.user_service.domain.vo.UserVO;
+import com.local_dating.user_service.presentation.dto.LoginRes;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
 
@@ -31,11 +35,15 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
     @Value("${spring.kafka.topics.login-log}")
     private String loginLogTopic;
 
-    public LoginSuccessHandler(JwtUtil jwtUtil, KafkaProducer kafkaProducer, @Qualifier("stringRedisTemplate") final RedisTemplate<String, String> redisTemplate, CacheTtlProperties cacheTtlProperties) {
+    private final ObjectMapper objectMapper;
+
+    public LoginSuccessHandler(JwtUtil jwtUtil, KafkaProducer kafkaProducer, @Qualifier("stringRedisTemplate") final RedisTemplate<String, String> redisTemplate
+            , CacheTtlProperties cacheTtlProperties, ObjectMapper objectMapper) {
         this.jwtUtil = jwtUtil;
         this.kafkaProducer = kafkaProducer;
         this.redisTemplate = redisTemplate;
         this.cacheTtlProperties = cacheTtlProperties;
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -72,7 +80,13 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
                 ),
                 false
         );
-
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setStatus(HttpServletResponse.SC_OK);
+
+        objectMapper.writeValue(
+                response.getWriter(),
+                new LoginRes(String.valueOf(userDetails.getUserNo()), accessToken, refreshToken)
+        );
     }
 }
