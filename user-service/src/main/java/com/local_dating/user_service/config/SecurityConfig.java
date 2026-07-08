@@ -39,6 +39,7 @@ public class SecurityConfig {
     private final ObjectMapper objectMapper;
     private final AuthenticationConfiguration authenticationConfiguration;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
+    private final RedisOAuth2AuthorizationRequestRepository redisOAuth2AuthorizationRequestRepository;
 
     @Bean
     public SecurityFilterChain securityFilterChain(final HttpSecurity http) throws Exception {
@@ -52,6 +53,9 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth -> oauth
+                        .authorizationEndpoint(authorization -> authorization
+                                .authorizationRequestRepository(redisOAuth2AuthorizationRequestRepository)
+                        )
                         .successHandler(oAuth2SuccessHandler)
                 )
 
@@ -102,7 +106,9 @@ public class SecurityConfig {
         return (web) -> web.ignoring()
                 .requestMatchers("/resources/", "/static/", "/css/", "/js/", "/images/**"
                         , "/v1/interceptor/**"
-                        , "/v1/auth/get-code", "/v1/auth/send-code/{code}/id/{id}", "/v1/auth/check-code");
+                        , "/v1/auth/get-code", "/v1/auth/send-code/{code}/id/{id}", "/v1/auth/check-code"
+                        //, "/oauth2/**", "/login/oauth2/**", "/error" // OAuth 로그인경로, 로그인 콜백경로
+                );
         //, "/", "/v1/users/login", "/v1/users/register", "/v1/users/{id}/refresh");
         //.requestMatchers("/v2/api-docs", "/configuration/ui", "/swagger-resources/**", "/configuration/security", "/swagger-ui.html", "/webjars/**");
     }

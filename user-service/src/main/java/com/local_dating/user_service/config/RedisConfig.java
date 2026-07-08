@@ -1,5 +1,6 @@
 package com.local_dating.user_service.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,10 +20,13 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @EnableCaching
 public class RedisConfig {
 
+    @Value("${AWS_SERVER}")
+    private String awsServer;
+
     @Bean
     @Primary
     public LettuceConnectionFactory redisConnectionFactory() {
-        return new LettuceConnectionFactory(new RedisStandaloneConfiguration("aws-server", 6379));
+        return new LettuceConnectionFactory(new RedisStandaloneConfiguration(awsServer, 6379));
     }
 
     //값 직렬화기(단일 인스턴스 공유)

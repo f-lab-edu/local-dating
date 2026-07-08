@@ -48,19 +48,18 @@ public class MatchingScheduleRequestValidator {
         list.forEach(el -> {
 
             Boolean idCheck = !validMatchingIds.contains(el.matchingId());
-            Boolean roundCheck = !validMatchingRoundKeys.contains(getMatchingRoundKey(el.matchingScheduleRoundId(), el.matchingId()));
-            Boolean dateCheck = !validateMatchingDateV2(el.matchingDate(), el.matchingTimeType());
-            Boolean statusCheck = !el.statusCd().equals(MatchingScheduleRequestedType.SUBMITTED.getCode());
-
             if (idCheck) {
                 invalidData.add(Map.of(VALIDATION_EXCEPTION_MATCHING_ID.getMessage(), el.matchingId().toString()));
             }
+            Boolean roundCheck = !validMatchingRoundKeys.contains(getMatchingRoundKey(el.matchingScheduleRoundId(), el.matchingId()));
             if (roundCheck) {
                 invalidData.add(Map.of(VALIDATION_EXCEPTION_MATCHING_SCHEDULE_ROUND.getMessage(), el.matchingId().toString()));
             }
+            Boolean dateCheck = !validateMatchingDateV2(el.matchingDate(), el.matchingTimeType());
             if (dateCheck) {
                 invalidData.add(Map.of(VALIDATION_EXCEPTION_MATCHING_DATE.getMessage(), el.matchingDate() + " " + el.matchingTimeType()));
             }
+            Boolean statusCheck = !el.statusCd().equals(MatchingScheduleRequestedType.SUBMITTED.getCode());
             if (statusCheck) {
                 invalidData.add(Map.of(VALIDATION_EXCEPTION_MATCHING_SCHEDULE_REQUEST.getMessage(), el.statusCd()));
             }
