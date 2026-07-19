@@ -27,7 +27,7 @@ public class ProfileController {
     private final UserProfileMapper userProfileMapper;
 
     @Secured("ROLE_USER")
-    //@PreAuthorize("isAuthenticated() and #id == authentication.getPrincipal()")
+    @PreAuthorize("isAuthenticated() and #id == principal.userNo")
     @PostMapping(value = "/v1/users/{id}/profile")
     @ResponseStatus(HttpStatus.CREATED)
     public void saveProfile(final @PathVariable("id") long id, final Authentication authentication, @RequestBody @Valid final UserProfileListDTO userProfileDTOList) {

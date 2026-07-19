@@ -4,14 +4,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.local_dating.user_service.application.KafkaProducer;
 import com.local_dating.user_service.application.UserCoinService;
 import com.local_dating.user_service.config.cache.CacheTtlProperties;
+import com.local_dating.user_service.domain.entity.OAuthInfo;
 import com.local_dating.user_service.domain.entity.User;
 import com.local_dating.user_service.domain.type.RoleType;
 import com.local_dating.user_service.domain.vo.UserLoginLogVO;
 import com.local_dating.user_service.domain.vo.UserVO;
+import com.local_dating.user_service.infrastructure.repository.OAuthInfoRepository;
 import com.local_dating.user_service.infrastructure.repository.UserRepository;
 import com.local_dating.user_service.presentation.dto.LoginRes;
 import com.local_dating.user_service.util.HttpServletRequestUtil;
 import com.local_dating.user_service.util.JwtUtil;
+import com.local_dating.user_service.util.MessageCode;
+import com.local_dating.user_service.util.exception.BusinessException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -41,6 +45,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
+    private final OAuthInfoRepository oAuthInfoRepository;
     private final UserCoinService userCoinService;
     private final CacheTtlProperties cacheTtlProperties;
     private final KafkaProducer kafkaProducer;
@@ -112,31 +117,48 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         final String name = (String) attributes.get("name");
         final String loginId = "google:" + googleSubject;
 
-        return userRepository.findByLoginId(loginId)
+        return oAuthInfoRepository.findByProviderId(loginId)
                 .or(() -> findByEmailGoogle(email))
+                .map(el->userRepository.findById(el.getUserNo())
+                        .orElseThrow(() -> new BusinessException(MessageCode.USER_NOT_FOUND)))
                 .orElseGet(() -> createGoogleUser(loginId, email, name));
+
+        /*return userRepository.findByLoginId(loginId)
+                .or(() -> findByEmailGoogle(email))
+                .orElseGet(() -> createGoogleUser(loginId, email, name));*/
     }
 
-    private Optional<User> findByEmailGoogle(final String email) {
+    private Optional<OAuthInfo> findByEmailGoogle(final String email) {
+    //private Optional<User> findByEmailGoogle(final String email) {
         if (email == null || email.isBlank()) {
             return Optional.empty();
         }
 
-        return userRepository.findByEmail(email)
-                .filter(user -> user.getLoginId() != null && user.getLoginId().startsWith("google:"));
+        return oAuthInfoRepository.findByEmail(email)
+                .filter(user -> user.getProviderId() != null && user.getProviderId().startsWith("google:"));
+
+        /*return userRepository.findByEmail(email)
+                .filter(user -> user.getLoginId() != null && user.getLoginId().startsWith("google:"));*/
     }
 
     private User createGoogleUser(final String loginId, final String email, final String name) {
         final User user = new User();
-        user.setLoginId(loginId);
+        //user.setLoginId(loginId);
         user.setEmail(email);
         user.setName(name);
         user.setNickname(name);
         user.setRole(RoleType.USER);
         user.setStatusCd("ACTIVE");
         user.setLgFail(0L);
-
         final User saved = userRepository.save(user);
+
+        final OAuthInfo oAuthInfo = new OAuthInfo();
+        oAuthInfo.setUserNo(saved.getNo());
+        oAuthInfo.setProvider("GOOGLE");
+        oAuthInfo.setProviderId(loginId); //"google:" + googleSubject 형태
+        oAuthInfo.setEmail(email);
+        oAuthInfoRepository.save(oAuthInfo);
+
         userCoinService.saveNewCoinData(saved.getNo());
         return saved;
     }
