@@ -7,5 +7,5 @@ import jakarta.validation.constraints.Size;
 public record UserDTO(Long no,
                       @Size(max = 20, message = "id길이 초과") @NotBlank(message = "id빈값") @JsonProperty("loginId") String loginId,
                       @Size(max = 20, message = "pwd길이 초과") @NotBlank(message = "pwd빈값") String pwd, String name,
-                      String nickname, String birth, String phone) {
+                      String nickname, String birth, String phone, String email) {
 }

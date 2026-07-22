@@ -65,7 +65,7 @@ public class UserLoginService {
         final Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userVO.loginId(), userVO.pwd()));
         final String userId = authentication.getName();logger.info("getname: " + userId);
         final CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-        final UserVO user = new UserVO(userDetails.getUserNo(), userId, userVO.pwd(), userVO.name(), userVO.nickname(), userVO.birth(), userVO.phone());
+        final UserVO user = new UserVO(userDetails.getUserNo(), userId, userVO.pwd(), userVO.name(), userVO.nickname(), userVO.birth(), userVO.phone(), userVO.email());
         final String accessToken = jwtUtil.createAccessToken(user);
         final String refreshToken = jwtUtil.createRefreshToken(user);
         final LoginRes loginRes = new LoginRes(userId, accessToken, refreshToken);
@@ -101,7 +101,7 @@ public class UserLoginService {
         UserVO user = new UserVO(
                 userDetails.getUserNo(),
                 userDetails.getUsername(),
-                userDetails.getPassword(), null, null, null, null
+                userDetails.getPassword(), null, null, null, null, null
         );
         String newAccessToken  = jwtUtil.createAccessToken(user);
         String newRefreshToken = jwtUtil.createRefreshToken(user);

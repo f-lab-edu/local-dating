@@ -5,17 +5,20 @@ import com.local_dating.user_service.application.UserInterceptorLoginService;
 import com.local_dating.user_service.application.UserLoginService;
 import com.local_dating.user_service.application.UserOAuthService;
 import com.local_dating.user_service.domain.mapper.UserMapper;
+import com.local_dating.user_service.domain.vo.UserOAuthLinkVO;
 import com.local_dating.user_service.presentation.dto.LoginRes;
 import com.local_dating.user_service.presentation.dto.UserDTO;
 import com.local_dating.user_service.presentation.dto.UserOAuthDTO;
 import com.local_dating.user_service.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.Map;
 
 @RestController
@@ -56,6 +59,16 @@ public class LoginController {
     public void linkOauth(@PathVariable("id") final Long id, @AuthenticationPrincipal final CustomUserDetails userDetails
             , @RequestBody @Valid final UserOAuthDTO userOAuthDTO
     ) {
-        userOAuthService.linkOauthByEmail(id, userOAuthDTO);
+        //userOAuthService.linkOauthByEmail(id, userOAuthDTO);
+    }
+
+    // 일반사용자 OAuth 연동
+    @PostMapping("/api/users/link/{provider}")
+    public void linkOauth(@PathVariable final String provider, @AuthenticationPrincipal final CustomUserDetails userDetails
+    //public void linkOauth(@PathVariable String provider, @AuthenticationPrincipal UserPrincipal principal
+            , HttpServletRequest request, HttpServletResponse response
+    ) throws IOException {
+        request.getSession().setAttribute("OAUTH_LINK_INFO", new UserOAuthLinkVO(userDetails.getUserNo(), provider));
+        response.sendRedirect("/oauth2/authorization/" + provider);
     }
 }
