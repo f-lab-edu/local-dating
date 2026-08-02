@@ -54,7 +54,7 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
                 userDetails.getUserNo(),
                 userDetails.getUsername(),
                 userDetails.getPassword(),
-                null, null, null, null
+                null, null, null, null, null
         );
 
         String accessToken = jwtUtil.createAccessToken(user);

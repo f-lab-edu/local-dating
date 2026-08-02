@@ -100,6 +100,9 @@ public class User {
     @Column(name = "last_pwd_mod_date")
     private LocalDateTime lastPwdModDate;
 
+    @Column(name = "register_type")
+    private String registerType;
+
     @Column(name = "in_date")
     @CreationTimestamp
     private LocalDateTime inDate;

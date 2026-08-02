@@ -64,7 +64,8 @@ public class UserInterceptorLoginService {
                 user.getName(),
                 user.getNickname(),
                 user.getBirth(),
-                user.getPhone()
+                user.getPhone(),
+                user.getEmail()
         );
 
         String accessToken = jwtUtil.createAccessToken(newVO);
