@@ -46,6 +46,9 @@ public class User {
     private Long no;
     //private Long id;
 
+    @Column(name = "ci")
+    private String ci;
+
     @Column(name = "login_id")
     private String loginId;
     /*@Column(name = "user_id")
