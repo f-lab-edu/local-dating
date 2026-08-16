@@ -10,6 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -37,6 +39,8 @@ public class UserExceptionHandler {
         HttpStatus status = code.getStatus();
         String errorValue = e.getErrorValue();
 
+        logger.error("BusinessException: code={}, errorValue={}", code, e.getErrorValue(), e);
+
         if (message == null) message = MessageCode.UNKNOWN_EXCEPTION.getMessage();
         if (status == null) status = HttpStatus.BAD_REQUEST;
         if (errorValue != null) message += " (" + errorValue + ")";
@@ -48,8 +52,11 @@ public class UserExceptionHandler {
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity AccessDeniedException(AccessDeniedException e) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         logger.error(e.getClass().getName());
         logger.error(e.getMessage());
+        logger.error("principal={}", authentication == null ? null : authentication.getPrincipal());
+        logger.error("authorities={}", authentication == null ? null : authentication.getAuthorities());
         return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
     }
 

@@ -87,50 +87,56 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
         final User user = checkProvider(provider, oauthUser);
 
-        user.setLastLoginDate(LocalDateTime.now());
+        if (user != null) {
 
-        final UserVO tokenUser = new UserVO(
-                user.getNo(),
-                user.getLoginId(),
-                user.getPwd(),
-                user.getName(),
-                user.getNickname(),
-                user.getBirth(),
-                user.getPhone(),
-                user.getEmail()
-        );
+            user.setLastLoginDate(LocalDateTime.now());
 
-        final String accessToken = jwtUtil.createAccessToken(tokenUser);
-        final String refreshToken = jwtUtil.createRefreshToken(tokenUser);
+            final UserVO tokenUser = new UserVO(
+                    user.getNo(),
+                    user.getLoginId(),
+                    user.getPwd(),
+                    user.getName(),
+                    user.getNickname(),
+                    user.getBirth(),
+                    user.getPhone(),
+                    user.getEmail()
+            );
 
-        redisTemplate.opsForValue().set(
-                "userRefreshToken:" + user.getNo(),
-                refreshToken,
-                cacheTtlProperties.getRefreshTokenTTL(),
-                TimeUnit.DAYS
-        );
+            final String accessToken = jwtUtil.createAccessToken(tokenUser);
+            final String refreshToken = jwtUtil.createRefreshToken(tokenUser);
 
-        kafkaProducer.sendMessage(
-                loginLogTopic,
-                new UserLoginLogVO(
-                        user.getNo(),
-                        HttpServletRequestUtil.getIpAddress(request),
-                        "Y",
-                        LocalDateTime.now()
-                ),
-                false
-        );
+            redisTemplate.opsForValue().set(
+                    "userRefreshToken:" + user.getNo(),
+                    refreshToken,
+                    cacheTtlProperties.getRefreshTokenTTL(),
+                    TimeUnit.DAYS
+            );
 
-        response.setStatus(HttpServletResponse.SC_OK);
-        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.addHeader("Authorization", "Bearer " + accessToken);
-        response.addHeader("Refresh-Token", refreshToken);
+            kafkaProducer.sendMessage(
+                    loginLogTopic,
+                    new UserLoginLogVO(
+                            user.getNo(),
+                            HttpServletRequestUtil.getIpAddress(request),
+                            "Y",
+                            LocalDateTime.now()
+                    ),
+                    false
+            );
 
-        objectMapper.writeValue(
-                response.getWriter(),
-                new LoginRes(String.valueOf(user.getNo()), accessToken, refreshToken)
-        );
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            response.addHeader("Authorization", "Bearer " + accessToken);
+            response.addHeader("Refresh-Token", refreshToken);
+
+            objectMapper.writeValue(
+                    response.getWriter(),
+                    new LoginRes(String.valueOf(user.getNo()), accessToken, refreshToken)
+            );
+        } else {
+
+            // FE
+        }
     }
 
     private void linkOauth(final UserOAuthLinkVO userOAuthLinkVO, final String provider, final OAuth2User oauthUser) {
@@ -163,21 +169,11 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         final String providerId = "google:" + googleSubject;
 
         return oAuthInfoRepository.findByProviderId(providerId)
-                .or(() -> findByEmailGoogle(email))
-                .map(el->userRepository.findById(el.getUserNo())
+                .map(el -> userRepository.findById(el.getUserNo())
                         .orElseThrow(() -> new BusinessException(MessageCode.USER_NOT_FOUND)))
-                .orElseGet(() -> {
-                            userRepository.findByEmail(email).map(el -> createOauthInfo("google", googleSubject, email, el.getNo()))
-                            //userRepository.findByEmail(email).map(el -> createOauthInfo(providerId, email, el.getNo()))
-                                    .orElseGet(() -> createGoogleUser(providerId, email, name));
-                            return null;
-                        }
-                ); // oauth 테이블에 데이터가 없으면 생성
-                //.orElseGet(() -> createGoogleUser(providerId, email, name)); // oauth 테이블에 데이터가 없으면 생성
+                .orElse(null);
 
-        /*return userRepository.findByLoginId(loginId)
-                .or(() -> findByEmailGoogle(email))
-                .orElseGet(() -> createGoogleUser(loginId, email, name));*/
+
     }
 
     private Optional<OAuthInfo> findByEmailGoogle(final String email) {
@@ -194,6 +190,9 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
     }
 
     private User createGoogleUser(final String providerId, final String email, final String name) { // user 테이블, oauth 테이블 저장
+
+
+
         final User user = new User();
         //user.setLoginId(loginId);
         user.setEmail(email);
