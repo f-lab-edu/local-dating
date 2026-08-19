@@ -39,8 +39,7 @@ public class PreferenceCoreController {
     @Secured(value = {"ROLE_USER"})
     @PreAuthorize("isAuthenticated() and #id == principal.userNo")
     @GetMapping(value = "/api/users/{id}/next")
-    public List<UserProfileCoreVO> searchNext(final @PathVariable("id") Long id, final Authentication authentication) {
-    //public List<UserProfileCoreVO> searchNext(final @PathVariable("id") Long id) {
+    public List<UserProfileCoreVO> searchNext(final @PathVariable("id") long id) {
         return userPreferenceCoreService.searchNext(id);
     }
 

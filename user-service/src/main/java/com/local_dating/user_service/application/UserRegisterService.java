@@ -41,10 +41,11 @@ public class UserRegisterService {
         Map<String, String> ciValidationObj = checkCiValidation(ciCheckDTO);
         //boolean isNewUser = checkCiValidation(ciCheckDTO);
 
-        userRepository.findByLoginId(userMapper.INSTANCE.toUserVO(dto).loginId())
-                .orElseThrow(() -> new UserAlreadyExistsException(MessageCode.DATA_ALREADY_EXISTS_EXCEPTION.getMessage() + ": " + dto.loginId()));
+        if (userRepository.existsByLoginId(userMapper.INSTANCE.toUserVO(dto).loginId())) {
+            throw new UserAlreadyExistsException(MessageCode.DATA_ALREADY_EXISTS_EXCEPTION.getMessage() + ": " + dto.loginId());
+        }
 
-        if (ciValidationObj.get("result").equals("true")) {
+        if (ciValidationObj.get("result").equals("true")) { // 신규가입
             User userNew = new User(userMapper.INSTANCE.toUserVO(dto), passwordEncoder.encode(dto.pwd()));
             userNew.setRole(RoleType.USER);
             userNew.setRegisterType(RegisterType.MANUAL.name());
@@ -60,18 +61,55 @@ public class UserRegisterService {
             user.setBirth(dto.birth());
             user.setPhone(dto.phone());
             user.setRegisterType(RegisterType.SOCIAL.name());
-            User saved = userRepository.save(user);
-            userCoinService.saveNewCoinData(saved.getNo());
+            userRepository.save(user);
         } else {
             throw new BusinessException(MessageCode.UNKNOWN_EXCEPTION);
         }
     }
 
     private Map<String, String> checkCiValidation(CiCheckDTO ciCheckDTO) {
-    //private boolean checkCiValidation(CiCheckDTO ciCheckDTO) {
 
         Map<String, String> obj = new HashMap<>();
 
+        String ciCheckToken = ciCheckDTO.token();
+        String ci;
+        if (ciCheckToken == null || ciCheckToken.isEmpty()) {
+            obj.put("ci", null);
+            obj.put("result", "true");
+            return obj;
+        }
+
+        // CI 인증을 거친 회원가입 루트
+        ci = stringRedisTemplate.opsForValue().getAndDelete("ciCheck:" + ciCheckToken);
+
+        if (ci == null) {
+            // 만료되었거나 유효하지 않은 상태
+            throw new BusinessException(MessageCode.DATA_NOT_FOUND_EXCEPTION);
+        }
+
+        return userRepository.findByCi(ci)
+                .map(user -> {
+                    List<OAuthInfo> authInfoList = oAuthInfoRepository.findByUserNo(user.getNo());
+
+                    if (!authInfoList.isEmpty() && user.getPwd() == null) {
+                        // OAuth 가입자
+                        obj.put("result", "false");
+                        obj.put("userNo", user.getNo().toString());
+                        return obj;
+                    }
+
+                    // 이미 일반회원으로 가입되어 있음
+                    throw new UserAlreadyExistsException(MessageCode.USER_ALREADY_EXISTS_EXCEPTION.getMessage() + ": " + user.getLoginId());
+                })
+                .orElseGet(() -> {
+                    // 해당 CI로 가입된 사용자가 없음
+                    obj.put("result", "true");
+                    obj.put("ci", ci);
+                    return obj;
+                });
+
+
+        /*
         String ci = stringRedisTemplate.opsForValue().get("ciCheck:" + ciCheckDTO.token());
         return userRepository.findByCi(ci).map(el -> {
             List<OAuthInfo> authInfoList = oAuthInfoRepository.findByUserNo(el.getNo());
@@ -89,18 +127,34 @@ public class UserRegisterService {
             obj.put("ci", ci);
             return obj;
         }); // 완전 신규회원
+        */
     }
 
     public String getCiInfo(CiCheckDTO dto) {
         String ci = ciGeneratorUtil.generateCi(dto.hpNo());
-        userRepository.findByCi(ci).map(el -> {
+
+        userRepository.findByCi(ci).ifPresent(el -> {
+            if (el.getPwd() != null) {
+                throw new UserAlreadyExistsException(MessageCode.USER_ALREADY_EXISTS_EXCEPTION.getMessage() + ": " + dto.hpNo());
+            }
+        });
+
+        /*if (userRepository.findByCi(ci).isPresent()) {
+            userRepository.findByCi(ci).filter(el -> el.getPwd() != null)
+                    .orElseThrow(() -> new UserAlreadyExistsException(MessageCode.USER_ALREADY_EXISTS_EXCEPTION.getMessage() + ": " + dto.hpNo()));
+        }*/
+        String ciCheckToken = UUID.randomUUID().toString();
+        stringRedisTemplate.opsForValue().set("ciCheck:" + ciCheckToken, ci, 20, TimeUnit.MINUTES);
+        return ciCheckToken;
+
+        /*return userRepository.findByCi(ci).map(el -> {
             throw new UserAlreadyExistsException(MessageCode.USER_ALREADY_EXISTS_EXCEPTION.getMessage() + ": " + dto.hpNo());
         }).orElseGet(() -> {
             String ciCheckToken = UUID.randomUUID().toString();
             stringRedisTemplate.opsForValue().set("ciCheck:" + ciCheckToken, ci, 20, TimeUnit.MINUTES);
             return ciCheckToken;
-        });
-        return null;
+        });*/
+        //return null;
     }
 
 }

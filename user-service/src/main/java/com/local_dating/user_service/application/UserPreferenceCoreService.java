@@ -53,7 +53,7 @@ public class UserPreferenceCoreService {
     }
 
     /////
-    public List<UserProfileCoreVO> searchNext(final Long userNo) {
+    public List<UserProfileCoreVO> searchNext(final long userNo) {
         UserPreferenceCoreVO userPreferenceCoreVO = this.viewPreferenceCore(userNo);
         return userProfileCoreService.searchNext(userNo, userPreferenceCoreVO);
     }
