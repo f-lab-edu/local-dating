@@ -46,7 +46,7 @@ public class SecurityConfig {
         return http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/v1/users/register").permitAll()
+                        .requestMatchers("/", "/api/users/register", "/api/users/ci").permitAll()
                         .requestMatchers("/v1/auth/login","/v1/users/login", "/v1/users/{id}/refresh").permitAll()
                         .requestMatchers("/oauth2/**", "/login/oauth2/**", "/error").permitAll() // OAuth 로그인경로, 로그인 콜백경로
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()

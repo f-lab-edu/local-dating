@@ -16,6 +16,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.LocalDateTime;
 
@@ -69,6 +71,8 @@ public class UserCoinService {
             kafkaProducer.sendMessage(topics.coin(), new UserCoinLogVO(userId, userCoinVO.balance(), CoinActionType.CHARGE.getCode(), LocalDateTime.now(), userId), false);
             return userCoinRepository.save(new UserCoin(userId, userCoinVO.balance()));
         });
+
+        evictCoinCacheAfterCommit(keys.coin() + userId);
     }
 
     @Transactional
@@ -120,6 +124,26 @@ public class UserCoinService {
         userCoin.setBalance(userCoin.getBalance() - price);
 
         kafkaProducer.sendMessage(topics.coin(), new UserCoinLogVO(userId, -price, CoinActionType.CONSUME.getCode(), LocalDateTime.now(), userCoinVO.userId()), false);
+    }
+
+    private void evictCoinCacheAfterCommit(final String cacheKey) {
+        if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+            stringRedisTemplate.delete(cacheKey);
+            return;
+        }
+
+        TransactionSynchronizationManager.registerSynchronization(
+                new TransactionSynchronization() {
+                    @Override
+                    public void afterCommit() {
+                        try {
+                            stringRedisTemplate.delete(cacheKey);
+                        } catch (RuntimeException e) {
+                            log.error("삭제 실패. key={}", cacheKey, e);
+                        }
+                    }
+                }
+        );
     }
 
 }

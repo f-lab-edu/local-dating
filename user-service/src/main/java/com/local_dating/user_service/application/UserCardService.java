@@ -36,13 +36,13 @@ public class UserCardService {
 
     // 현재 사용자의 선호 정보를 바탕으로 사용자 정보를 가져와서 카드로 넣어서 리턴함
 
-    public List<UserRecomCardVO> getCard(final Long userId) {
+    public List<UserRecomCardVO> getCard(final long userId) {
 
         return userRecomCardMapper.toUserRecomCardVOs(userRecomCardRepositoryCustom.findValidCard(userId));
         //return userRecomCardMapper.toUserRecomCardVO(recomCardRepository.findByUserId(userId));
     }
 
-    public List getCardDetail(final Long userId, final Long targetId) {
+    public List getCardDetail(final Long targetId) {
         return userRecomCardRepository.findUserRecomCardWithUserProfile(targetId);
     }
 

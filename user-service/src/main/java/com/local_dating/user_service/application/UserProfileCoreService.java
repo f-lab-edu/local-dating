@@ -23,7 +23,7 @@ public class UserProfileCoreService {
     private final UserProfileCoreMapper userProfileCoreMapper;
     //private final UserProfileCoreRepositoryCustomImpl userProfileCoreRepositoryCustom;
 
-    public UserProfileCoreVO viewProfileCore(final Long userId) {
+    public UserProfileCoreVO viewProfileCore(final long userId) {
         return userProfileCoreRepository.findByUserId(userId).map(userProfileCoreMapper::userProfileCoreToUserProfileCoreVo)
                 .orElseThrow(() -> {
                     throw new BusinessException(MessageCode.DATA_NOT_FOUND_EXCEPTION);
@@ -31,9 +31,9 @@ public class UserProfileCoreService {
     }
 
     @Transactional
-    public void saveProfileCore(final UserProfileCoreVO userProfileCoreVO) {
+    public void saveProfileCore(final long id, final UserProfileCoreVO userProfileCoreVO) {
 
-        userRepository.findById(userProfileCoreVO.userId()).orElseThrow(() -> {
+        userRepository.findById(id).orElseThrow(() -> {
             throw new BusinessException(MessageCode.USER_NOT_FOUND);
         });
 
