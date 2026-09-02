@@ -48,10 +48,10 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                 || path.startsWith("/swagger-ui/")
                 || path.startsWith("/v3/api-docs/")
                 || path.equals("/swagger-ui.html")
-                || path.equals("/v1/auth/login")
-                || path.equals("/v1/users/login")
-                || path.equals("/v1/users/register")
-                || (path.startsWith("/v1/users/") && path.endsWith("/refresh"));
+                || path.equals("/api/auth/login")
+                || path.equals("/api/users/login")
+                || path.equals("/api/users/register")
+                || (path.startsWith("/api/users/") && path.endsWith("/refresh"));
     }
 
     @Override
@@ -61,7 +61,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
             , final FilterChain filterChain) throws ServletException, IOException {
 
         final String path = request.getRequestURI();
-        if (path.equals("/v1/users/refresh")) {
+        if (path.equals("/api/users/refresh") || path.equals("/api/users/*/refresh")) { //?
             filterChain.doFilter(request, response);
             return;
         }
@@ -76,7 +76,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
             logger.debug("token : " + accessToken);
             final Claims claims = jwtUtil.resolveClaims(request);
 
-            if (jwtUtil.validateClaims(claims)) {
+            if (jwtUtil.validateAccessTokenClaims(claims)) {
             //if (claims != null & jwtUtil.validateClaims(claims)) {
                 final String userNo = claims.getSubject();
                 logger.debug("userNo: " + userNo);

@@ -1,5 +1,6 @@
 package com.local_dating.user_service.util;
 
+import com.local_dating.user_service.domain.type.TokenType;
 import com.local_dating.user_service.domain.vo.UserVO;
 import com.local_dating.user_service.util.exception.InvalidateClaimsException;
 import io.jsonwebtoken.*;
@@ -55,6 +56,7 @@ public class JwtUtil {
                 //.claim("no", user.no()) // user테이블 id
                 .claim("name",user.name())
                 .claim("role", "USER")
+                .claim("tokenType", "ACCESS")
                 .setIssuedAt(tokenCreateTime)
                 .setExpiration(tokenValidity)
                 .signWith(secretKey, SignatureAlgorithm.HS256)
@@ -70,6 +72,7 @@ public class JwtUtil {
                 //.setSubject(user.loginId())
                 .claim("name",user.name())
                 .claim("role", "USER")
+                .claim("tokenType", "REFRESH")
                 .setIssuedAt(tokenCreateTime)
                 .setExpiration(tokenValidity)
                 .signWith(secretKey, SignatureAlgorithm.HS256)
@@ -112,8 +115,21 @@ public class JwtUtil {
         return authentication;
     }
 
-    public boolean validateClaims(Claims claims) throws AuthenticationException {
-        if (isNull(claims)) {
+    public boolean validateAccessTokenClaims(Claims claims) throws AuthenticationException {
+        String tokenType = claims.get("tokenType", String.class);
+
+        if (isNull(claims) || !TokenType.ACCESS.name().equals(tokenType)) {
+            throw new InvalidateClaimsException(MessageCode.INVALIDATE_CLAIMS_EXCEPTION.getMessage());
+        }
+
+
+        return claims.getExpiration().after(new Date());
+    }
+
+    public boolean validateRefreshTokenClaims(Claims claims) throws AuthenticationException {
+        String tokenType = claims.get("tokenType", String.class);
+
+        if (isNull(claims) || !TokenType.REFRESH.name().equals(tokenType)) {
             throw new InvalidateClaimsException(MessageCode.INVALIDATE_CLAIMS_EXCEPTION.getMessage());
         }
         return claims.getExpiration().after(new Date());

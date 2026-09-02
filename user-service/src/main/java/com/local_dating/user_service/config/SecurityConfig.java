@@ -47,7 +47,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/api/users/register", "/api/users/ci").permitAll()
-                        .requestMatchers("/v1/auth/login","/v1/users/login", "/v1/users/{id}/refresh").permitAll()
+                        .requestMatchers("/api/auth/login","/api/users/login", "/api/users/{id}/refresh").permitAll()
                         .requestMatchers("/oauth2/**", "/login/oauth2/**", "/error").permitAll() // OAuth 로그인경로, 로그인 콜백경로
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                         .anyRequest().authenticated()
@@ -105,8 +105,8 @@ public class SecurityConfig {
     public WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> web.ignoring()
                 .requestMatchers("/resources/", "/static/", "/css/", "/js/", "/images/**"
-                        , "/v1/interceptor/**"
-                        , "/v1/auth/get-code", "/v1/auth/send-code/{code}/id/{id}", "/v1/auth/check-code"
+                        , "/api/interceptor/**"
+                        , "/api/auth/get-code", "/api/auth/send-code/{code}/id/{id}", "/api/auth/check-code"
                         //, "/oauth2/**", "/login/oauth2/**", "/error" // OAuth 로그인경로, 로그인 콜백경로
                 );
         //, "/", "/v1/users/login", "/v1/users/register", "/v1/users/{id}/refresh");

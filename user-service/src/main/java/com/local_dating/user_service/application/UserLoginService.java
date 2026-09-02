@@ -94,6 +94,10 @@ public class UserLoginService {
             throw new BusinessException(MessageCode.INVALIDATE_REFRESH_TOKEN);
         }
 
+        if (!jwtUtil.validateRefreshTokenClaims(claims)) {
+            throw new BusinessException(MessageCode.INVALIDATE_REFRESH_TOKEN);
+        }
+
         String userNo = claims.getSubject();
         CustomUserDetails userDetails = (CustomUserDetails) customUserDetailsService.loadUserByUserNo(Long.parseLong(userNo));
         //CustomUserDetails userDetails = (CustomUserDetails) userDetailsService.loadUserByUsername(loginId);

@@ -31,13 +31,13 @@ public class UserProfileCoreService {
     }
 
     @Transactional
-    public void saveProfileCore(final long id, final UserProfileCoreVO userProfileCoreVO) {
+    public void saveProfileCore(final long userId, final UserProfileCoreVO userProfileCoreVO) {
 
-        userRepository.findById(id).orElseThrow(() -> {
+        userRepository.findById(userId).orElseThrow(() -> {
             throw new BusinessException(MessageCode.USER_NOT_FOUND);
         });
 
-        userProfileCoreRepository.findByUserId(userProfileCoreVO.userId()).map(el -> {
+        userProfileCoreRepository.findByUserId(userId).map(el -> {
                     el.setGender(userProfileCoreVO.gender());
                     el.setBirth(userProfileCoreVO.birth());
                     el.setHeight(userProfileCoreVO.height());
