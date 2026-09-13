@@ -15,7 +15,7 @@ public class VerificationController {
 
     private final UserMapper userMapper;
 
-    @PostMapping("/v1/auth/get-code")
+    @PostMapping("/api/auth/get-code")
     public UserValidationDTO getVerificationCode(@RequestBody @Valid final UserValidationDTO userValidationDTO) {
         return userMapper.UserValidationVOToUserValidationDTO(
                 userVerificationService.getVerificationCode(userMapper.UserValidationDTOToUserValidationVO(userValidationDTO))
@@ -23,12 +23,12 @@ public class VerificationController {
         //return userVerificationService.getVerificationCode(userValidationDTO);
     }
 
-    @PostMapping("/v1/auth/check-code")
+    @PostMapping("/api/auth/check-code")
     public String checkVerificationCode(@RequestBody @Valid final UserValidationDTO userValidationDTO) {
         return userVerificationService.checkVerificationCode(userMapper.UserValidationDTOToUserValidationVO(userValidationDTO));
     }
 
-    @GetMapping("/v1/auth/send-code/{code}/id/{id}")
+    @GetMapping("/api/auth/send-code/{code}/id/{id}")
     public String sendVerificationCode(@PathVariable("code") final String code, @PathVariable("id") final Long id) {
         return userVerificationService.sendVerificationCode(code, id);
     }

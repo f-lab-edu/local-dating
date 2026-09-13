@@ -25,7 +25,7 @@ public class JwtAuthInterceptor implements HandlerInterceptor {
 
         try {
             Claims claims = jwtUtil.parseJwtClaims(token);
-            if (!jwtUtil.validateClaims(claims)) {
+            if (!jwtUtil.validateAccessTokenClaims(claims)) {
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid token");
                 return false;
             }

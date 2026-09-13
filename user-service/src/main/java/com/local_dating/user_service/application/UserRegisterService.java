@@ -5,6 +5,7 @@ import com.local_dating.user_service.domain.entity.User;
 import com.local_dating.user_service.domain.mapper.UserMapper;
 import com.local_dating.user_service.domain.type.RegisterType;
 import com.local_dating.user_service.domain.type.RoleType;
+import com.local_dating.user_service.domain.vo.CheckCiValidationVO;
 import com.local_dating.user_service.infrastructure.repository.OAuthInfoRepository;
 import com.local_dating.user_service.infrastructure.repository.UserRepository;
 import com.local_dating.user_service.presentation.dto.CiCheckDTO;
@@ -20,7 +21,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -38,22 +40,22 @@ public class UserRegisterService {
     @Transactional
     public void registerUser(@Valid final UserDTO dto, final CiCheckDTO ciCheckDTO) {
 
-        Map<String, String> ciValidationObj = checkCiValidation(ciCheckDTO);
+        CheckCiValidationVO ciValidationObj = checkCiValidation(ciCheckDTO);
         //boolean isNewUser = checkCiValidation(ciCheckDTO);
 
         if (userRepository.existsByLoginId(userMapper.INSTANCE.toUserVO(dto).loginId())) {
             throw new UserAlreadyExistsException(MessageCode.DATA_ALREADY_EXISTS_EXCEPTION.getMessage() + ": " + dto.loginId());
         }
 
-        if (ciValidationObj.get("result").equals("true")) { // 신규가입
+        if (Boolean.TRUE.equals(ciValidationObj.isResult())) { // 신규가입
             User userNew = new User(userMapper.INSTANCE.toUserVO(dto), passwordEncoder.encode(dto.pwd()));
             userNew.setRole(RoleType.USER);
             userNew.setRegisterType(RegisterType.MANUAL.name());
-            userNew.setCi(ciValidationObj.get("ci"));
+            userNew.setCi(ciValidationObj.getCi());
             User saved = userRepository.save(userNew);
             userCoinService.saveNewCoinData(saved.getNo());
-        } else if (ciValidationObj.get("result").equals("false")) {
-            User user = userRepository.findById(Long.valueOf(ciValidationObj.get("userNo")))
+        } else if (Boolean.FALSE.equals(ciValidationObj.isResult())) {
+            User user = userRepository.findById(Long.valueOf(ciValidationObj.getUserNo()))
                     .orElseThrow(() -> new BusinessException(MessageCode.DATA_NOT_FOUND_EXCEPTION));
             user.setLoginId(dto.loginId());
             user.setPwd(passwordEncoder.encode(dto.pwd()));
@@ -67,16 +69,16 @@ public class UserRegisterService {
         }
     }
 
-    private Map<String, String> checkCiValidation(CiCheckDTO ciCheckDTO) {
+    private CheckCiValidationVO checkCiValidation(CiCheckDTO ciCheckDTO) {
 
-        Map<String, String> obj = new HashMap<>();
+        CheckCiValidationVO returnObj = new CheckCiValidationVO();
 
         String ciCheckToken = ciCheckDTO.token();
         String ci;
         if (ciCheckToken == null || ciCheckToken.isEmpty()) {
-            obj.put("ci", null);
-            obj.put("result", "true");
-            return obj;
+            returnObj.setCi(null);
+            returnObj.setResult(true);
+            return returnObj;
         }
 
         // CI 인증을 거친 회원가입 루트
@@ -93,9 +95,9 @@ public class UserRegisterService {
 
                     if (!authInfoList.isEmpty() && user.getPwd() == null) {
                         // OAuth 가입자
-                        obj.put("result", "false");
-                        obj.put("userNo", user.getNo().toString());
-                        return obj;
+                        returnObj.setResult(false);
+                        returnObj.setUserNo(user.getNo());
+                        return returnObj;
                     }
 
                     // 이미 일반회원으로 가입되어 있음
@@ -103,9 +105,9 @@ public class UserRegisterService {
                 })
                 .orElseGet(() -> {
                     // 해당 CI로 가입된 사용자가 없음
-                    obj.put("result", "true");
-                    obj.put("ci", ci);
-                    return obj;
+                    returnObj.setResult(true);
+                    returnObj.setCi(ci);
+                    return returnObj;
                 });
 
 

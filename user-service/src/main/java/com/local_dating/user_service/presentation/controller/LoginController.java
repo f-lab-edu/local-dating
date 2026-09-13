@@ -31,17 +31,17 @@ public class LoginController {
     private final UserInterceptorLoginService userInterceptorLoginService;
     private final UserOAuthService userOAuthService;
 
-    @PostMapping(value = "/v1/users/login")
+    @PostMapping(value = "/api/users/login")
     public LoginRes login(@RequestBody @Valid final UserDTO userDTO, HttpServletRequest request) {
         return userLoginService.login(userMapper.INSTANCE.toUserVO(userDTO), request);
     }
 
-    @PostMapping(value = "/v1/interceptor/users/login")
+    @PostMapping(value = "/api/interceptor/users/login")
     public LoginRes loginInterceptor(@RequestBody @Valid final UserDTO userDTO, HttpServletRequest request) {
         return userInterceptorLoginService.login(userMapper.INSTANCE.toUserVO(userDTO), request);
     }
 
-    @PostMapping("/v1/users/{id}/refresh")
+    @PostMapping("/api/users/{id}/refresh")
     public LoginRes refresh(
             @RequestHeader("Authorization") String authentication,
             HttpServletRequest request,

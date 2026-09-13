@@ -64,7 +64,7 @@ public class UserCoinService {
 
         stringRedisTemplate.delete(keys.coin() + userId);
         userCoinRepository.findByUserId(userId).map(el -> {
-            el.setBalance(el.getBalance() + userCoinVO.balance());
+            userCoinRepository.addCoin(userId, userCoinVO.balance());
             kafkaProducer.sendMessage(topics.coin(), new UserCoinLogVO(userId, userCoinVO.balance(), CoinActionType.CHARGE.getCode(), LocalDateTime.now(), userId), false);
             return userCoinRepository.save(el);
         }).orElseGet(()->{
@@ -79,19 +79,19 @@ public class UserCoinService {
     //@CacheEvict(value = "coin", key = "#userId")
     public void updateCoin(final Long userId, final UserCoinVO userCoinVO) {
 
-        try {
+        /*try {
             Thread.sleep(5000);
             log.error("try 5000");
         } catch (Exception exception) {
             log.error("catch 5000");
-        }
+        }*/
 
         stringRedisTemplate.delete(keys.coin() + userId);
 
         UserCoin userCoin = userCoinRepository.findByUserId(userId)
                 .orElseThrow(() -> new BusinessException(MessageCode.DATA_NOT_FOUND_EXCEPTION));
 
-        userCoin.setBalance(userCoin.getBalance() + userCoinVO.balance());
+        userCoinRepository.addCoin(userId, userCoinVO.balance());
 
         kafkaProducer.sendMessage(topics.coin(), new UserCoinLogVO(userId, userCoinVO.balance(), userCoinVO.coinActionType().getCode(), LocalDateTime.now(), userCoinVO.userId()), false);
 
@@ -121,7 +121,7 @@ public class UserCoinService {
 
         if (price > balance) throw new BusinessException(MessageCode.INSUFFICIENT_COIN);
 
-        userCoin.setBalance(userCoin.getBalance() - price);
+        userCoinRepository.consumeCoin(userId, price);
 
         kafkaProducer.sendMessage(topics.coin(), new UserCoinLogVO(userId, -price, CoinActionType.CONSUME.getCode(), LocalDateTime.now(), userCoinVO.userId()), false);
     }
