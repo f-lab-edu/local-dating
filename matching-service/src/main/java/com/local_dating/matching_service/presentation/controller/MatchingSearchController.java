@@ -17,8 +17,7 @@ public class MatchingSearchController {
 
     @GetMapping(value = "/api/matches/users/{id}/next")
     //@GetMapping(value = "/api/matches/next")
-    @PreAuthorize("isAuthenticated() and #id.toString() == principal")
-    //@PreAuthorize("isAuthenticated() and #id == principal.userNo")
+    @PreAuthorize("isAuthenticated() and #id == principal.userNo")
     @Operation(summary = "사용자 탐색", description = "사용자를 탐색한다")
     public String searchNext(final @PathVariable("id") Long id, @RequestHeader("Authorization") final String authorization) {
     //public String searchNext(@AuthenticationPrincipal(expression = "userNo") Long userNo, String authentication) {
@@ -27,7 +26,7 @@ public class MatchingSearchController {
     }
 
     @GetMapping(value = "/api/matches/users/{id}/current")
-    @PreAuthorize("isAuthenticated() and #id.toString() == principal")
+    @PreAuthorize("isAuthenticated() and #id == principal.userNo")
     @Operation(summary = "현재 보는 카드 조회", description = "현재 보는 카드 조회")
     public String searchCurrent(final @PathVariable("id") Long id, @RequestHeader("Authorization") final String authorization) {
         return matchingSearchService.searchCurrent(id, authorization);

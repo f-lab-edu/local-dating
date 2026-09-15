@@ -47,14 +47,14 @@ public class UserRegisterService {
             throw new UserAlreadyExistsException(MessageCode.DATA_ALREADY_EXISTS_EXCEPTION.getMessage() + ": " + dto.loginId());
         }
 
-        if (Boolean.TRUE.equals(ciValidationObj.isResult())) { // 신규가입
+        if (ciValidationObj.isResult()) { // 신규가입
             User userNew = new User(userMapper.INSTANCE.toUserVO(dto), passwordEncoder.encode(dto.pwd()));
             userNew.setRole(RoleType.USER);
             userNew.setRegisterType(RegisterType.MANUAL.name());
             userNew.setCi(ciValidationObj.getCi());
             User saved = userRepository.save(userNew);
             userCoinService.saveNewCoinData(saved.getNo());
-        } else if (Boolean.FALSE.equals(ciValidationObj.isResult())) {
+        } else if (!ciValidationObj.isResult()) {
             User user = userRepository.findById(Long.valueOf(ciValidationObj.getUserNo()))
                     .orElseThrow(() -> new BusinessException(MessageCode.DATA_NOT_FOUND_EXCEPTION));
             user.setLoginId(dto.loginId());

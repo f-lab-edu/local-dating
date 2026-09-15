@@ -34,13 +34,13 @@ public class UserPreferenceCoreService {
     }
 
     @Transactional
-    public void savePreferenceCore(final UserPreferenceCoreVO userPreferenceCoreVO) {
+    public void savePreferenceCore(final Long userId, final UserPreferenceCoreVO userPreferenceCoreVO) {
 
-        userRepository.findById(userPreferenceCoreVO.userId()).orElseThrow(() -> {
+        userRepository.findById(userId).orElseThrow(() -> {
             throw new BusinessException(MessageCode.USER_NOT_FOUND);
         });
 
-        userPreferenceCoreRepository.findByUserId(userPreferenceCoreVO.userId()).map(el->{
+        userPreferenceCoreRepository.findByUserId(userId).map(el->{
             el.setBirthMin(userPreferenceCoreVO.birthMin());
             el.setBirthMax(userPreferenceCoreVO.birthMax());
             el.setHeightMin(userPreferenceCoreVO.heightMin());
@@ -49,7 +49,7 @@ public class UserPreferenceCoreService {
             el.setSalaryMax(userPreferenceCoreVO.salaryMax());
             el.setRangeMax(userPreferenceCoreVO.rangeMax());
             return el;
-        }).orElseGet(() -> userPreferenceCoreRepository.save(new UserPreferenceCore(userPreferenceCoreVO)));
+        }).orElseGet(() -> userPreferenceCoreRepository.save(new UserPreferenceCore(userId, userPreferenceCoreVO)));
     }
 
     /////

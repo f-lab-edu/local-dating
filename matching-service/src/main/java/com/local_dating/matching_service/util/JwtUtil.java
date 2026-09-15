@@ -1,7 +1,11 @@
 package com.local_dating.matching_service.util;
 
+import com.local_dating.matching_service.application.AuthenticatedUserDetails;
 import com.local_dating.matching_service.util.exception.InvalidateClaimsException;
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtParser;
+import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
@@ -108,8 +112,8 @@ public class JwtUtil {
     public Authentication getAuthenticationFromToken(String token) {
         try {
             Claims claims = parseJwtClaims(token.replace(TOKEN_PREFIX, "")); // Bearer 제거 후 파싱
-            Long userNo = Long.parseLong(claims.getSubject());
-            return new UsernamePasswordAuthenticationToken(userNo, token, Collections.emptyList());
+            AuthenticatedUserDetails principal = new AuthenticatedUserDetails(Long.valueOf(claims.getSubject()));
+            return new UsernamePasswordAuthenticationToken(principal, token, Collections.emptyList());
         } catch (Exception e) {
             throw new RuntimeException("Invalid JWT Token", e);
         }

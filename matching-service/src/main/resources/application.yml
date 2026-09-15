@@ -6,7 +6,7 @@ spring:
     name: matching-service
 
   datasource:
-    url: jdbc:mysql://aws-server:3307/local_dating_matching_service
+    url: jdbc:mysql://${AWS_SERVER}:3307/local_dating_matching_service
     username: root
     password: 1234
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -27,7 +27,7 @@ spring:
 
   data:
     redis:
-      host: aws-server
+      host: ${AWS_SERVER}
       port: 6379
 
   batch:
