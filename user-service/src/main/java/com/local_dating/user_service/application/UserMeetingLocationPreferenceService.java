@@ -39,7 +39,7 @@ public class UserMeetingLocationPreferenceService {
             throw new BusinessException(MessageCode.DATA_LIMIT_EXCEEDED_EXCEPTION);
         }
 
-        userMeetingLocationPreferenceRepository.save(new UserMeetingLocationPreference(userMeetingLocationPreferenceVO));
+        userMeetingLocationPreferenceRepository.save(new UserMeetingLocationPreference(userId, userMeetingLocationPreferenceVO));
     }
 
     @Transactional

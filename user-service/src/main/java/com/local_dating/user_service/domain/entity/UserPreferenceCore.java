@@ -17,8 +17,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class UserPreferenceCore {
 
-    public UserPreferenceCore(UserPreferenceCoreVO vo) {
-        this.userId = vo.userId();
+    public UserPreferenceCore(Long userId, UserPreferenceCoreVO vo) {
+        this.userId = userId;
         this.gender = vo.gender();
         this.birthMin = vo.birthMin();
         this.birthMax = vo.birthMax();
