@@ -24,7 +24,7 @@ public class MatchingController {
     private final JwtUtil jwtUtil;
 
     @PostMapping(value = "/api/matches/users/{id}")
-    @PreAuthorize("isAuthenticated() and #id.toString() == principal")
+    @PreAuthorize("isAuthenticated() and #id == principal.userNo")
     @Operation(summary = "매칭 요청", description = "매칭을 요청(생성)한다")
     public MatchingDTO requestMatch(final @PathVariable("id") Long id, @RequestHeader("Authorization") String authentication, @RequestBody final MatchingDTO dto) {
 
@@ -33,7 +33,7 @@ public class MatchingController {
 
     @PatchMapping(value = "/v1/matches/users/{id}/matches")
     //@PutMapping(value = "/v1/users/{id}/matches")
-    @PreAuthorize("isAuthenticated() and #id == authentication.getPrincipal()")
+    @PreAuthorize("isAuthenticated() and #id == principal.userNo")
     public void updateMatch(@PathVariable("id") long id, @RequestHeader("Authorization") String authentication, @RequestBody MatchingDTO dto) {
     //public void updateMatch(@PathVariable("id") long userId, @RequestBody MatchingDTO dto) {
 
@@ -42,19 +42,19 @@ public class MatchingController {
     }
 
     @GetMapping(value = "/v1/matches/users/{id}/matches") //기본 api
-    @PreAuthorize("isAuthenticated() and #id == authentication.getPrincipal()")
+    @PreAuthorize("isAuthenticated() and #id == principal.userNo")
     public List<MatchingDTO> getMatch(@PathVariable("id") long id) {
         return matchingMapper.INSTANCE.matchingVOsToMatchingDTOs(matchingService.getMatchingInfos(id));
     }
 
     @GetMapping(value = "/v1/matches/users/{id}/matches/{matchId}") //기본 api
-    @PreAuthorize("isAuthenticated() and #id == authentication.getPrincipal()")
+    @PreAuthorize("isAuthenticated() and #id == principal.userNo")
     public Optional<MatchingDTO> getMatch(@PathVariable("id") long id, @PathVariable("matchId") long matchId) {
         return Optional.ofNullable(matchingMapper.INSTANCE.matchingVOToMatchingDTO(matchingService.getMatchingInfo(id, matchId)));
     }
 
     @GetMapping(value = "/v1/matches/users/{id}/received-matches")
-    @PreAuthorize("isAuthenticated() and #id == authentication.getPrincipal()")
+    @PreAuthorize("isAuthenticated() and #id == principal.userNo")
     @Operation(summary = "받은 매칭 조회", description = "사용자가 요청받은 매칭")
     public List<MatchingDTO> getReceivedMatches(@PathVariable("id") final long id) {
         //String userId = authentication.getPrincipal().toString();
@@ -62,7 +62,7 @@ public class MatchingController {
     }
 
     @GetMapping(value = "/v1/matches/users/{id}/sent-matches")
-    @PreAuthorize("isAuthenticated() and #id == authentication.getPrincipal()")
+    @PreAuthorize("isAuthenticated() and #id == principal.userNo")
     @Operation(summary = "보낸 매칭 조회", description = "사용자가 요청한 매칭")
 
     public List<MatchingDTO> getSentMatches(@PathVariable("id") final long id, final Authentication authentication) {
@@ -70,12 +70,13 @@ public class MatchingController {
     }
 
     @PutMapping(value = "/api/matches/users/{id}/accept-matches")
-    @PreAuthorize("isAuthenticated() and #id.toString() == principal")
+    @PreAuthorize("isAuthenticated() and #id == principal.userNo")
     @Operation(summary = "매칭 수락", description = "보낸 매칭에 대한 수락, 코인 지불")
     public MatchingDTO acceptMatch(@PathVariable("id") final Long id, @RequestHeader("Authorization") String authentication, @RequestBody final MatchingDTO dto) {
         return matchingMapper.INSTANCE.matchingVOToMatchingDTO(matchingService.acceptMatching(id, authentication, matchingMapper.INSTANCE.matchingDTOToMatchingVO(dto)));
     }
 
+    @PreAuthorize("isAuthenticated() and #id == principal.userNo")
     @PutMapping(value = "/api/matches/users/{id}/reject-matches")
     @Operation(summary = "매칭 거절", description = "보낸 매칭에 대한 거절, 요청자 코인 환불")
     public MatchingDTO rejectMatch(@PathVariable("id") final Long id, @RequestHeader("Authorization") String authentication, @RequestBody final MatchingDTO dto) {

@@ -1,6 +1,7 @@
 package com.local_dating.matching_service.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.local_dating.matching_service.application.AuthenticatedUserDetails;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -55,12 +56,12 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                 logger.debug("userNo: " + userNo);
 
                 List<SimpleGrantedAuthority> authorities = new ArrayList<>();
-                if (claims.get("role") != null) {
+                if (claims.get("role") != null && "ACCESS".equals(claims.get("tokenType"))) {
                     authorities.add(new SimpleGrantedAuthority("ROLE_" + claims.get("role").toString()));
                 }
 
-                //final CustomUserDetails userDetails = (CustomUserDetails) customUserDetailsService.loadUserByUsername(userId);
-                final Authentication authentication = new UsernamePasswordAuthenticationToken(userNo, null, authorities);
+                AuthenticatedUserDetails principal = new AuthenticatedUserDetails(Long.valueOf(claims.getSubject()));
+                final Authentication authentication = new UsernamePasswordAuthenticationToken(principal, null, authorities);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         } catch (ExpiredJwtException ex) {

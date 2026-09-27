@@ -17,8 +17,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class UserProfileCore {
 
-    public UserProfileCore(UserProfileCoreVO vo) {
-        this.userId = vo.userId();
+    public UserProfileCore(long userId, UserProfileCoreVO vo) {
+        this.userId = userId;
         this.gender = vo.gender();
         this.birth = vo.birth();
         this.height = vo.height();

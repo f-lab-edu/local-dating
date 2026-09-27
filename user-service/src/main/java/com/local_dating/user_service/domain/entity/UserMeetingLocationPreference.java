@@ -19,8 +19,8 @@ import java.time.LocalDateTime;
 @Table(name = "user_meeting_location_preference")
 public class UserMeetingLocationPreference {
 
-    public UserMeetingLocationPreference(UserMeetingLocationPreferenceVO userMeetingLocationPreferenceVO) {
-        this.userId = userMeetingLocationPreferenceVO.userId();
+    public UserMeetingLocationPreference(Long userId, UserMeetingLocationPreferenceVO userMeetingLocationPreferenceVO) {
+        this.userId = userId;
         this.areaName = userMeetingLocationPreferenceVO.areaName();
         this.address = userMeetingLocationPreferenceVO.address();
         this.addressDetail1 = userMeetingLocationPreferenceVO.addressDetail1();

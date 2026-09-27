@@ -46,7 +46,7 @@ public class UserProfileCoreService {
                     el.setEducation(userProfileCoreVO.education());
                     return el;
                 })
-                .orElseGet(() -> userProfileCoreRepository.save(new UserProfileCore(userProfileCoreVO)));
+                .orElseGet(() -> userProfileCoreRepository.save(new UserProfileCore(userId, userProfileCoreVO)));
     }
 
     public List<UserProfileCoreVO> searchNext(final Long userNo, final UserPreferenceCoreVO userPreferenceCoreVO) {

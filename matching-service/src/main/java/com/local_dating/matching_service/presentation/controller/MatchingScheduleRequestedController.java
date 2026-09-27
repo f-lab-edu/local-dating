@@ -21,14 +21,14 @@ public class MatchingScheduleRequestedController {
     private final MatchingScheduleRequestValidator matchingScheduleRequestValidator;
 
     @GetMapping(value = "/api/matches/{match}/users/{id}/round/{round}")
-    @PreAuthorize("isAuthenticated() and #id.toString() == principal")
+    @PreAuthorize("isAuthenticated() and #id == principal.userNo")
     @Operation(summary = "라운드에 해당하는 매칭 스케줄 조회", description = "라운드에 해당하는 매칭 스케줄 조회")
     public List<MatchingScheduleRequestDTO> getMatchingScheduleRequested(final @PathVariable("match") Long match, final @PathVariable("id") Long id, final @PathVariable("round") Long round, @RequestHeader("Authorization") final String authorization) {
         return matchingScheduleRequestedMapper.entityListToDtoList(matchingScheduleRequestedService.getMatchingScheduleRequested(match, id, round, authorization));
     }
 
     @PostMapping(value = "/api/matches/users/{id}/schedule-requests")
-    @PreAuthorize("isAuthenticated() and #id.toString() == principal")
+    @PreAuthorize("isAuthenticated() and #id == principal.userNo")
     @Operation(summary = "라운드에 해당하는 매칭 스케줄 등록", description = "라운드에 해당하는 매칭 스케줄 등록, 스케줄계산")
     public void saveMatchingScheduleRequested(final @PathVariable("id") Long id, @RequestHeader("Authorization") final String authorization, @RequestBody final MatchingScheduleRequestListDTO matchingScheduleRequestListDTO) {
 
