@@ -19,4 +19,7 @@ public interface UserProfileRepository extends JpaRepository<UserProfile,Long> {
 
     //UserProfile save(UserProfile userProfile);
     //int save(UserProfileVO userProfileVO);
+
+    List<UserProfile> findByUserIdIn(List<Long> userIds);
+
 }

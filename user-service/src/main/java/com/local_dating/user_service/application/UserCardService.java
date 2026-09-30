@@ -1,16 +1,15 @@
 package com.local_dating.user_service.application;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.local_dating.user_service.domain.entity.RecommendationShowed;
 import com.local_dating.user_service.domain.entity.UserPreference;
 import com.local_dating.user_service.domain.entity.UserRecomCard;
 import com.local_dating.user_service.domain.mapper.UserPreferenceMapper;
 import com.local_dating.user_service.domain.mapper.UserRecomCardMapper;
+import com.local_dating.user_service.domain.vo.RecommendationShowedVO;
 import com.local_dating.user_service.domain.vo.UserPreferenceCountVO2;
 import com.local_dating.user_service.domain.vo.UserRecomCardVO;
-import com.local_dating.user_service.infrastructure.repository.UserPreferenceRepository;
-import com.local_dating.user_service.infrastructure.repository.UserPreferenceRepositoryCustom;
-import com.local_dating.user_service.infrastructure.repository.UserRecomCardRepository;
-import com.local_dating.user_service.infrastructure.repository.UserRecomCardRepositoryCustom;
+import com.local_dating.user_service.infrastructure.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -33,11 +32,11 @@ public class UserCardService {
     private final Random random = new Random();
     private final UserRecomCardRepository userRecomCardRepository;
     private final UserPreferenceRepository userPreferenceRepository;
+    private final RecommendationShowedRepository recommendationShowedRepository;
 
     // 현재 사용자의 선호 정보를 바탕으로 사용자 정보를 가져와서 카드로 넣어서 리턴함
 
     public List<UserRecomCardVO> getCard(final long userId) {
-
         return userRecomCardMapper.toUserRecomCardVOs(userRecomCardRepositoryCustom.findValidCard(userId));
         //return userRecomCardMapper.toUserRecomCardVO(recomCardRepository.findByUserId(userId));
     }
@@ -66,8 +65,11 @@ public class UserCardService {
         //List<UserPreferenceCountVO2> recommendUser = userPreferenceRepositoryCustom.findRecommendUser(userId, Stream.concat(userPreferenceList1.stream(), userPreferenceList2.stream()).toList());
         //List<UserPreferenceCountVO> recommendUser = userPreferenceRepositoryCustom.findRecommendUser(userId, Stream.concat(userPreferenceList1.stream(), userPreferenceList2.stream()).toList());
 
-        recomCardRepository.save(new UserRecomCard(new UserRecomCardVO(userId, recommendUser.get(random.nextInt(recommendUser.size())).getUserId(), "Y")));
+        String selectedId = recommendUser.get(random.nextInt(recommendUser.size())).getUserId();
+        recomCardRepository.save(new UserRecomCard(new UserRecomCardVO(userId, selectedId, "Y")));
 
+        // 기록
+        recommendationShowedRepository.save(new RecommendationShowed(new RecommendationShowedVO(userId, Long.valueOf(selectedId))));
 
         /*for (UserPreferenceCountVO item : recommendUser) {
             System.out.println("item: " + item.userId() + "    count: " + item.count());
