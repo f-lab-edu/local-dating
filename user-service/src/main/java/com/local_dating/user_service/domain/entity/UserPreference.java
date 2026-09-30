@@ -23,6 +23,7 @@ public class UserPreference {
         this.prefCd = vo.prefCd();
         this.prefVal = vo.prefVal();
         this.prior = vo.prior();
+        this.requiredYn = vo.requiredYn();
         this.inUser = vo.userId();
         this.modUser = vo.userId();
     }
@@ -32,6 +33,7 @@ public class UserPreference {
         this.prefCd = userPreferenceVO.prefCd();
         this.prefVal = userPreferenceVO.prefVal();
         this.prior = userPreferenceVO.prior();
+        this.requiredYn = userPreferenceVO.requiredYn();
         this.inUser = userId;
         this.modUser = userId;
     }
@@ -52,6 +54,9 @@ public class UserPreference {
 
     @Column(name = "prior")
     private int prior;
+
+    @Column(name = "required_yn")
+    private String requiredYn;
 
     @Column(name = "in_date")
     @CreationTimestamp
