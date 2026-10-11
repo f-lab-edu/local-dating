@@ -48,6 +48,8 @@ public class UserPreferenceCoreService {
             el.setSalaryMin(userPreferenceCoreVO.salaryMin());
             el.setSalaryMax(userPreferenceCoreVO.salaryMax());
             el.setRangeMax(userPreferenceCoreVO.rangeMax());
+            el.setEducation(userPreferenceCoreVO.education());
+            el.setGender(userPreferenceCoreVO.gender());
             return el;
         }).orElseGet(() -> userPreferenceCoreRepository.save(new UserPreferenceCore(userId, userPreferenceCoreVO)));
     }

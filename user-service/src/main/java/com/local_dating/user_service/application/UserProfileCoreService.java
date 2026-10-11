@@ -43,7 +43,7 @@ public class UserProfileCoreService {
                     el.setHeight(userProfileCoreVO.height());
                     el.setEducation(userProfileCoreVO.education());
                     el.setSalary(userProfileCoreVO.salary());
-                    el.setEducation(userProfileCoreVO.education());
+                    el.setRegion(userProfileCoreVO.region());
                     return el;
                 })
                 .orElseGet(() -> userProfileCoreRepository.save(new UserProfileCore(userId, userProfileCoreVO)));

@@ -2,6 +2,7 @@ package com.local_dating.user_service.infrastructure.repository;
 
 import com.local_dating.user_service.domain.entity.QUser;
 import com.local_dating.user_service.domain.entity.QUserProfileCore;
+import com.local_dating.user_service.domain.entity.UserPreferenceCore;
 import com.local_dating.user_service.domain.entity.UserProfileCore;
 import com.local_dating.user_service.domain.vo.UserPreferenceCoreVO;
 import com.querydsl.core.BooleanBuilder;
@@ -59,6 +60,50 @@ public class UserProfileCoreRepositoryCustomImpl implements UserProfileCoreRepos
                 .where(where)
                 .orderBy(user.lastLoginDate.desc())
                 .limit(limit)
+                .fetch();
+    }
+
+    @Override
+    public List<UserProfileCore> selectCoreMatched(Long userNo, UserPreferenceCore pref) {
+        QUserProfileCore userProfileCore = QUserProfileCore.userProfileCore;
+        QUser user = QUser.user;
+
+        BooleanBuilder where = new BooleanBuilder();
+
+        // 자기 자신 제외
+        where.and(user.no.ne(userNo));
+
+        // 동적 선호 조건 (null/빈값 무시)
+        if (pref.getGender() != null && !pref.getGender().isEmpty()) {
+            where.and(userProfileCore.gender.eq(pref.getGender()));
+        }
+        if (pref.getBirthMin() != null) {
+            where.and(userProfileCore.birth.goe(pref.getBirthMin())); // >=
+        }
+        if (pref.getBirthMax() != null) {
+            where.and(userProfileCore.birth.loe(pref.getBirthMax())); // <=
+        }
+        if (pref.getHeightMin() != null) {
+            where.and(userProfileCore.height.goe(pref.getHeightMin()));
+        }
+        if (pref.getHeightMax() != null) {
+            where.and(userProfileCore.height.loe(pref.getHeightMax()));
+        }
+        if (pref.getEducation() != null && !pref.getEducation().isEmpty()) {
+            where.and(userProfileCore.education.eq(pref.getEducation()));
+        }
+        if (pref.getSalaryMin() != null) {
+            where.and(userProfileCore.salary.goe(pref.getSalaryMin().longValue()));
+        }
+        if (pref.getSalaryMax() != null) {
+            where.and(userProfileCore.salary.loe(pref.getSalaryMax().longValue()));
+        }
+
+        return queryFactory
+                .selectFrom(userProfileCore)
+                .join(user).on(user.no.eq(userProfileCore.userId))
+                .where(where)
+                .orderBy(user.lastLoginDate.desc())
                 .fetch();
     }
 }
