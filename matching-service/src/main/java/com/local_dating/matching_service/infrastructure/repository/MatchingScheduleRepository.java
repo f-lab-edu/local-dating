@@ -19,6 +19,7 @@ public interface MatchingScheduleRepository extends JpaRepository<MatchingSchedu
     public Optional<MatchingSchedule> findMatchingScheduleByIdAndUserId(Long id, Long userId);
 
     public Optional<MatchingSchedule> findMatchingScheduleByIdAndUserIdAndScheduleStatus(Long id, Long userId, String status);
+    Optional<MatchingSchedule> findMatchingScheduleByIdAndMatchingIdAndUserIdAndScheduleStatus(Long scheduleId, Long matchingId, Long userId, String status);
 
     public List<MatchingSchedule> findMatchingSchedulesByMatchingIdAndUserId(Long id, Long userId);
 

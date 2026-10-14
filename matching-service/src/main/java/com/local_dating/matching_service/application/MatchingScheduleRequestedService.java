@@ -34,13 +34,18 @@ public class MatchingScheduleRequestedService {
     private final MatchingScheduleRoundRepository matchingScheduleRoundRepository;
 
     private final ApplicationEventPublisher eventPublisher;
+    private final MatchingService matchingService;
 
     public List<MatchingScheduleRequested> getMatchingScheduleRequested(final Long match, final Long id, final Long round, final String authorization) {
+        matchingService.getMatchingInfo(id, match);
         return matchingScheduleRequestedRepository.findByMatchingIdAndMatchingScheduleRoundIdAndUserId(match, round, id);
     }
 
     @Transactional
     public List<MatchingScheduleRequested> saveMatchingScheduleRequested(final Long id, final String authorization, final List<MatchingScheduleRequestDTO> matchingScheduleRequestDTOS) {
+        if (matchingScheduleRequestDTOS.stream().anyMatch(dto -> dto.userId() != null && !dto.userId().equals(id))) {
+            throw new BusinessException(MessageCode.MATCHING_ACCESS_DENIED);
+        }
 
         matchingScheduleRequestValidator.validationMatchingSchduleV3(id, matchingScheduleRequestDTOS); // 종합 수정
         //validateMatchingService.validationMatchingSchduleV2(id, matchingScheduleRequestDTOS); // 종합
@@ -53,7 +58,7 @@ public class MatchingScheduleRequestedService {
                 //.findByMatchingIdAndMatchingScheduleRoundIdAndUserIdAndMatchingDateAndMatchingTimeTypeAndStatusCd(
                         el.matchingId()
                         , el.matchingScheduleRoundId()
-                        , el.userId()
+                        , id
                         , el.matchingDate()
                         , el.matchingTimeType()
                         , el.statusCd()
@@ -67,7 +72,7 @@ public class MatchingScheduleRequestedService {
                         new MatchingScheduleRequested(
                                 el.matchingId(),
                                 el.matchingScheduleRoundId(),
-                                el.userId(),
+                                id,
                                 el.matchingDate(),
                                 el.matchingTimeType(),
                                 el.statusCd()

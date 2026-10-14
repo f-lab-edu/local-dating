@@ -44,7 +44,10 @@ public class MatchingService {
     @Transactional
     public MatchingVO requestMatching(final Long userId, final String authentication, final MatchingVO matchingVO) {
 
-        userServiceClientWithCircuitBreaker.validateUserId(matchingVO.requId(), authentication);
+        if (!(userId != null && userId.equals(matchingVO.requId()))) {
+            throw new BusinessException(MessageCode.MATCHING_ACCESS_DENIED);
+        }
+        userServiceClientWithCircuitBreaker.validateUserId(userId, authentication);
         userServiceClientWithCircuitBreaker.validateUserId(matchingVO.recvId(), authentication);
 
         //Long coinz = userServiceClient.viewCoin(userId, authentication);
@@ -59,6 +62,7 @@ public class MatchingService {
                     Matching matching = matchingMapper.INSTANCE.matchingVOtoMatching(matchingVO, MatchingType.MATCHING_REQUEST.getCode()
                             , LocalDateTime.now(), LocalDateTime.now().plusDays(2)
                             , userId, LocalDateTime.now(), userId, LocalDateTime.now());
+                    matching.setRequId(userId);
                     return matchingMapper.INSTANCE.matchingtoMatchingVO(matchingRepository.save(matching));
                 })
                 .orElseThrow(() -> new BusinessException(MessageCode.INSUFFICIENT_COIN));
@@ -118,6 +122,11 @@ public class MatchingService {
 
     public Optional<MatchingVO> getMatchingInfo(final long userId, final long matchId) {
         return Optional.ofNullable(matchingRepository.findById(matchId).map(el -> {
+            boolean requester = el.getRequId() != null && el.getRequId().equals(userId);
+            boolean receiver = el.getRecvId() != null && el.getRecvId().equals(userId);
+            if (!(requester || receiver)) {
+                throw new BusinessException(MessageCode.MATCHING_ACCESS_DENIED);
+            }
             return matchingMapper.INSTANCE.matchingtoMatchingVO(el);
         }).orElseThrow(() -> new BusinessException(MessageCode.MATCHING_NOT_FOUND)));
         //return matchingMapper.INSTANCE.matchingtoMatchingVO(matchingeRepository.findById(matchId));
@@ -219,9 +228,8 @@ public class MatchingService {
     }
 
     private Matching setMatchingStatus(final Long userId, final String authentication, final MatchingVO matchingVO, final MatchingType matchingType) {
+        Matching matching = findMatchingForReceiver(matchingVO.id(), userId);
         Long price = priceService.viewPrice(userId, authentication, ItemType.MATCHING);
-        Matching matching = matchingRepository.findById(matchingVO.id())
-                .orElseThrow(() -> new BusinessException(MessageCode.MATCHING_NOT_FOUND));
 
         return Optional.ofNullable(userServiceClientWithCircuitBreaker.viewCoin(userId, authentication))
                 .filter(coin -> coin >= price)
@@ -254,9 +262,8 @@ public class MatchingService {
     }
 
     private Matching setMatchingReject(final Long userId, final String authentication, final MatchingVO matchingVO, final MatchingType matchingType) {
+        Matching matching = findMatchingForReceiver(matchingVO.id(), userId);
         Long price = priceService.viewPrice(userId, authentication, ItemType.MATCHING);
-        Matching matching = matchingRepository.findById(matchingVO.id())
-                .orElseThrow(() -> new BusinessException(MessageCode.MATCHING_NOT_FOUND));
 
         return Optional.ofNullable(userServiceClientWithCircuitBreaker.viewCoin(userId, authentication))
                 .map(coin -> {
@@ -264,7 +271,7 @@ public class MatchingService {
                             userId
                             , authentication
                             , new UserCoinDTO(
-                                    String.valueOf(matchingVO.requId())
+                                    String.valueOf(matching.getRequId())
                                     , Long.valueOf(matchingType.getOperator() + price)
                                     , CoinActionType.CONSUME
                             )
@@ -274,6 +281,15 @@ public class MatchingService {
                 })
                 .orElseThrow(() -> new BusinessException(MessageCode.INSUFFICIENT_COIN));
         //return matching;
+    }
+
+    private Matching findMatchingForReceiver(final Long matchingId, final Long userId) {
+        Matching matching = matchingRepository.findById(matchingId)
+                .orElseThrow(() -> new BusinessException(MessageCode.MATCHING_NOT_FOUND));
+        if (!(matching.getRecvId() != null && matching.getRecvId().equals(userId))) {
+            throw new BusinessException(MessageCode.MATCHING_ACCESS_DENIED);
+        }
+        return matching;
     }
 
     private Matching setMatchingStatus(final long userId, final MatchingVO matchingVO, final MatchingType matchingType) {
