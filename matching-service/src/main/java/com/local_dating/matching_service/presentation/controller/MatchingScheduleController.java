@@ -50,24 +50,25 @@ public class MatchingScheduleController {
     @PreAuthorize("isAuthenticated() and #userId == principal.userNo")
     @Operation(summary = "매칭 스케줄 업데이트", description = "특정 매칭 스케줄 정보 업데이트") // 확인
     public MatchingScheduleDTO updateMatchingSchedule(@PathVariable final Long id, @PathVariable("userId") final Long userId
+            , @PathVariable("scheduleId") final Long scheduleId
             , @RequestHeader("Authorization") String authentication
             , @RequestBody final MatchingScheduleDTO matchingScheduleDTO) {
         //, @RequestBody final List<MatchingScheduleDTO> matchingScheduleDTOs) {
         return matchingScheduleMapper.INSTANCE.matchingScheduleVOToMatchingScheduleDTO(
-                matchingScheduleService.updateSchedule(id, userId, matchingScheduleMapper.matchingScheduleDTOToMatchingScheduleVO(matchingScheduleDTO))
+                matchingScheduleService.updateSchedule(id, userId, scheduleId, matchingScheduleMapper.matchingScheduleDTOToMatchingScheduleVO(matchingScheduleDTO))
         );
     }
 
     @PutMapping(value = "/v1/matches/{id}/users/{userId}/request-schedules/{scheduleId}")
     @PreAuthorize("isAuthenticated() and #userId == principal.userNo")
     public MatchingScheduleDTO requestMatchSchedule(@PathVariable final Long id, @PathVariable("userId") final Long userId, @PathVariable("scheduleId") final Long scheduleId, @RequestHeader("Authorization") String authentication) {
-        return matchingScheduleMapper.INSTANCE.matchingScheduleVOToMatchingScheduleDTO(matchingScheduleService.requestMatchingSchedule(id, scheduleId));
+        return matchingScheduleMapper.INSTANCE.matchingScheduleVOToMatchingScheduleDTO(matchingScheduleService.requestMatchingSchedule(id, userId, scheduleId));
     }
 
     @PutMapping(value = "/v1/matches/{id}/users/{userId}/accept-schedules/{scheduleId}")
     @PreAuthorize("isAuthenticated() and #userId == principal.userNo")
     public MatchingScheduleDTO acceptMatchSchedule(@PathVariable final Long id, @PathVariable("userId") final Long userId, @PathVariable("scheduleId") final Long scheduleId, @RequestHeader("Authorization") String authentication) {
-        return matchingScheduleMapper.INSTANCE.matchingScheduleVOToMatchingScheduleDTO(matchingScheduleService.acceptMatchingSchedule(id, scheduleId));
+        return matchingScheduleMapper.INSTANCE.matchingScheduleVOToMatchingScheduleDTO(matchingScheduleService.acceptMatchingSchedule(id, userId, scheduleId));
     }
     /*public void acceptMatchSchedule(@PathVariable final Long id, @PathVariable("userId") final Long userId, @PathVariable("scheduleId") final Long scheduleId, @RequestHeader("Authorization") String authentication) {
         matchingScheduleService.acceptMatchingSchedule(id, scheduleId);
@@ -76,7 +77,7 @@ public class MatchingScheduleController {
     @PutMapping(value = "/v1/matches/{id}/users/{userId}/reject-schedules/{scheduleId}")
     @PreAuthorize("isAuthenticated() and #userId == principal.userNo")
     public MatchingScheduleDTO rejectMatchSchedule(@PathVariable final Long id, @PathVariable("userId") final Long userId, @PathVariable("scheduleId") final Long scheduleId, @RequestHeader("Authorization") String authentication) {
-        return matchingScheduleMapper.INSTANCE.matchingScheduleVOToMatchingScheduleDTO(matchingScheduleService.rejectMatchingSchedule(id, scheduleId));
+        return matchingScheduleMapper.INSTANCE.matchingScheduleVOToMatchingScheduleDTO(matchingScheduleService.rejectMatchingSchedule(id, userId, scheduleId));
     }
     /*public void rejectMatchSchedule(@PathVariable final Long id, @PathVariable("userId") final Long userId, @PathVariable("scheduleId") final Long scheduleId, @RequestHeader("Authorization") String authentication) {
         matchingScheduleService.rejectMatchingSchedule(id, scheduleId);
