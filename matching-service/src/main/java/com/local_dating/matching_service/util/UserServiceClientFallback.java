@@ -4,6 +4,8 @@ import com.local_dating.matching_service.domain.vo.UserProfileCoreVO;
 import com.local_dating.matching_service.presentation.dto.UserCoinDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 import java.util.List;
 
@@ -27,8 +29,17 @@ public class UserServiceClientFallback implements UserServiceClient{
     }
 
     @Override
+    public Long viewPricingPolicy(long id, String type, String authentication) {
+        return 0L;
+    }
+
+    @Override
     public List<UserProfileCoreVO> searchNext(Long id, String authentication) {
         log.error("error searchNext");
         return null;
     }
+
+    @Override
+    public void validateUserId(final @PathVariable("id") Long id, final @RequestHeader("Authorization") String authentication) { log.error("error validateUserId"); }
 }
+ // 미사용

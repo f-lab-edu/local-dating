@@ -1,7 +1,6 @@
 package com.local_dating.matching_service.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.local_dating.matching_service.application.AuthenticatedUserDetails;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -14,17 +13,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Component
@@ -55,13 +50,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                 final String userNo = claims.getSubject();
                 logger.debug("userNo: " + userNo);
 
-                List<SimpleGrantedAuthority> authorities = new ArrayList<>();
-                if (claims.get("role") != null && "ACCESS".equals(claims.get("tokenType"))) {
-                    authorities.add(new SimpleGrantedAuthority("ROLE_" + claims.get("role").toString()));
-                }
-
-                AuthenticatedUserDetails principal = new AuthenticatedUserDetails(Long.valueOf(claims.getSubject()));
-                final Authentication authentication = new UsernamePasswordAuthenticationToken(principal, null, authorities);
+                final Authentication authentication = AccessTokenAuthentication.verifiedClaims(claims);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         } catch (ExpiredJwtException ex) {

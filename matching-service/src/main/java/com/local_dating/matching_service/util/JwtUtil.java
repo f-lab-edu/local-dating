@@ -1,6 +1,5 @@
 package com.local_dating.matching_service.util;
 
-import com.local_dating.matching_service.application.AuthenticatedUserDetails;
 import com.local_dating.matching_service.util.exception.InvalidateClaimsException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -10,14 +9,13 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -93,11 +91,13 @@ public class JwtUtil {
     }
 
     public boolean validateClaims(Claims claims) throws AuthenticationException {
-        //claims = null; //테스트
         if (isNull(claims)) {
             throw new InvalidateClaimsException(MessageCode.INVALIDATE_CLAIMS_EXCEPTION.getMessage());
         }
-        return claims.getExpiration().after(new Date());
+        if (!"ACCESS".equals(claims.get("tokenType"))) {
+            throw new BadCredentialsException(MessageCode.INVALIDATE_CLAIMS_EXCEPTION.getMessage());
+        }
+        return claims.getExpiration() != null && claims.getExpiration().after(new Date());
     }
 
     public String getUserId(Claims claims) {
@@ -112,10 +112,11 @@ public class JwtUtil {
     public Authentication getAuthenticationFromToken(String token) {
         try {
             Claims claims = parseJwtClaims(token.replace(TOKEN_PREFIX, "")); // Bearer 제거 후 파싱
-            AuthenticatedUserDetails principal = new AuthenticatedUserDetails(Long.valueOf(claims.getSubject()));
-            return new UsernamePasswordAuthenticationToken(principal, token, Collections.emptyList());
+            return AccessTokenAuthentication.verifiedClaims(claims);
+        } catch (AuthenticationException e) {
+            throw e;
         } catch (Exception e) {
-            throw new RuntimeException("Invalid JWT Token", e);
+            throw new BadCredentialsException("Invalid JWT Token", e);
         }
     }
 
