@@ -50,7 +50,7 @@ public class MatchingController {
     @GetMapping(value = "/v1/matches/users/{id}/matches/{matchId}") //기본 api
     @PreAuthorize("isAuthenticated() and #id == principal.userNo")
     public Optional<MatchingDTO> getMatch(@PathVariable("id") long id, @PathVariable("matchId") long matchId) {
-        return Optional.ofNullable(matchingMapper.INSTANCE.matchingVOToMatchingDTO(matchingService.getMatchingInfo(id, matchId)));
+        return Optional.ofNullable(matchingMapper.INSTANCE.matchingVOToMatchingDTO(matchingService.isValidMatching(id, matchId)));
     }
 
     @GetMapping(value = "/v1/matches/users/{id}/received-matches")

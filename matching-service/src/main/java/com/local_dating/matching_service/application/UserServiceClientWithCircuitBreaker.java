@@ -40,6 +40,11 @@ public class UserServiceClientWithCircuitBreaker {
         userServiceClient.updateCoin(id, authentication, userCoinDTO);
     }
 
+    @CircuitBreaker(name = "user-service", fallbackMethod = "consumeCoinFail")
+    public void consumeCoin(final long id, final String authentication, final UserCoinDTO userCoinDTO) {
+        userServiceClient.consumeCoin(id, authentication, userCoinDTO);
+    }
+
     public List<UserProfileCoreVO> searchNext(final Long id, final String authentication) {
         return userServiceClient.searchNext(id, authentication);
     }
@@ -65,6 +70,11 @@ public class UserServiceClientWithCircuitBreaker {
     }
 
     private void updateCoinFail(final long id, final String authentication, final UserCoinDTO userCoinDTO, Exception e) {
+        log.error(Thread.currentThread().getStackTrace()[1].getMethodName(), e);
+        throw new CircuitBreakingException(EXTERNAL_EXCEPTION.getMessage(), e);
+    }
+
+    private void consumeCoinFail(final long id, final String authentication, final UserCoinDTO userCoinDTO, Exception e) {
         log.error(Thread.currentThread().getStackTrace()[1].getMethodName(), e);
         throw new CircuitBreakingException(EXTERNAL_EXCEPTION.getMessage(), e);
     }
