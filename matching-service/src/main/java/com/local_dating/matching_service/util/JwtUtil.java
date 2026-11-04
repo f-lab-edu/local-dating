@@ -1,5 +1,6 @@
 package com.local_dating.matching_service.util;
 
+import com.local_dating.matching_service.domain.type.TokenType;
 import com.local_dating.matching_service.util.exception.InvalidateClaimsException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -94,7 +95,7 @@ public class JwtUtil {
         if (isNull(claims)) {
             throw new InvalidateClaimsException(MessageCode.INVALIDATE_CLAIMS_EXCEPTION.getMessage());
         }
-        if (!"ACCESS".equals(claims.get("tokenType"))) {
+        if (!TokenType.ACCESS.name().equals(claims.get("tokenType"))) {
             throw new BadCredentialsException(MessageCode.INVALIDATE_CLAIMS_EXCEPTION.getMessage());
         }
         return claims.getExpiration() != null && claims.getExpiration().after(new Date());

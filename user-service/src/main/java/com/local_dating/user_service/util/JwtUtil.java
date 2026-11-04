@@ -56,7 +56,7 @@ public class JwtUtil {
                 //.claim("no", user.no()) // user테이블 id
                 .claim("name",user.name())
                 .claim("role", "USER")
-                .claim("tokenType", "ACCESS")
+                .claim("tokenType", TokenType.ACCESS.name())
                 .setIssuedAt(tokenCreateTime)
                 .setExpiration(tokenValidity)
                 .signWith(secretKey, SignatureAlgorithm.HS256)
@@ -72,7 +72,7 @@ public class JwtUtil {
                 //.setSubject(user.loginId())
                 .claim("name",user.name())
                 .claim("role", "USER")
-                .claim("tokenType", "REFRESH")
+                .claim("tokenType", TokenType.REFRESH.name())
                 .setIssuedAt(tokenCreateTime)
                 .setExpiration(tokenValidity)
                 .signWith(secretKey, SignatureAlgorithm.HS256)

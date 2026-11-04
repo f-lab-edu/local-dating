@@ -44,6 +44,7 @@ logging:
 cache:
   keys:
     userSearchCurrent: "userSearchCurrent:"
+    userNowSelected: "userNowSelected:"
 
 jwt:
   secret-key: thisisaverysecretkeyandsecure123
