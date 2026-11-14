@@ -37,7 +37,7 @@ public class MatchingScheduleRequestedService {
     private final MatchingService matchingService;
 
     public List<MatchingScheduleRequested> getMatchingScheduleRequested(final Long match, final Long id, final Long round, final String authorization) {
-        matchingService.getMatchingInfo(id, match);
+        matchingService.isValidMatching(id, match);
         return matchingScheduleRequestedRepository.findByMatchingIdAndMatchingScheduleRoundIdAndUserId(match, round, id);
     }
 

@@ -1,6 +1,7 @@
 package com.local_dating.matching_service.util;
 
 import com.local_dating.matching_service.application.AuthenticatedUserDetails;
+import com.local_dating.matching_service.domain.type.TokenType;
 
 import io.jsonwebtoken.Claims;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -16,7 +17,7 @@ public final class AccessTokenAuthentication {
     private AccessTokenAuthentication() {}
 
     public static Authentication verifiedClaims(Claims claims) {
-            if (claims == null || !"ACCESS".equals(claims.get("tokenType", String.class))
+            if (claims == null || !TokenType.ACCESS.name().equals(claims.get("tokenType", String.class))
                     || claims.getExpiration() == null || !claims.getExpiration().after(new Date())) {
                 throw new BadCredentialsException(MessageCode.INVALIDATE_CLAIMS_EXCEPTION.getMessage());
             }

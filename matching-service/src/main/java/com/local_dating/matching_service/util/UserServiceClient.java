@@ -31,4 +31,7 @@ public interface UserServiceClient {
 
     @GetMapping("/api/validate/users/{id}")
     void validateUserId(final @PathVariable("id") Long id, final @RequestHeader("Authorization") String authentication);
+
+    @PostMapping("/api/users/{id}/coins/consume")
+    void consumeCoin(@PathVariable("id") final long id, @RequestHeader("Authorization") final String authentication, @RequestBody final UserCoinDTO userCoinDTO);
 }

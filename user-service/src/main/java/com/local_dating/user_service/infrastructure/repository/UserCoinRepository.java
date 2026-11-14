@@ -17,5 +17,5 @@ public interface UserCoinRepository extends JpaRepository<UserCoin, Long> {
 
     @Modifying
     @Query("UPDATE UserCoin c SET c.balance = c.balance - :balance WHERE c.userId = :userId AND c.balance >= :balance")
-    void consumeCoin(@Param("userId") Long userId, @Param("balance") Long balance);
+    int consumeCoin(@Param("userId") Long userId, @Param("balance") Long balance);
 }

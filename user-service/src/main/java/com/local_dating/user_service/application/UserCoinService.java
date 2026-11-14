@@ -117,11 +117,16 @@ public class UserCoinService {
                 .orElseThrow(() -> new BusinessException(MessageCode.DATA_NOT_FOUND_EXCEPTION));
 
         Long price = pricingPolicyRepository.getPricingPolicy("searching").getPrice();
-        Long balance = this.viewCoin(userId);
+        //Long balance = this.viewCoin(userId);
 
-        if (price > balance) throw new BusinessException(MessageCode.INSUFFICIENT_COIN);
+        //if (price > balance) throw new BusinessException(MessageCode.INSUFFICIENT_COIN); consumeCoin() 으로 검사
 
-        userCoinRepository.consumeCoin(userId, price);
+        int updateCount = userCoinRepository.consumeCoin(userId, price);
+
+        if (updateCount == 0) {
+            throw new BusinessException(MessageCode.INSUFFICIENT_COIN);
+        }
+        evictCoinCacheAfterCommit(keys.coin() + userId);
 
         kafkaProducer.sendMessage(topics.coin(), new UserCoinLogVO(userId, -price, CoinActionType.CONSUME.getCode(), LocalDateTime.now(), userCoinVO.userId()), false);
     }

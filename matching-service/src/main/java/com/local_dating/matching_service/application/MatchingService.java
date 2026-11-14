@@ -120,7 +120,7 @@ public class MatchingService {
         //return matchingeRepository.findByRecvIdAndStatusCdNot090(userId);
     }
 
-    public Optional<MatchingVO> getMatchingInfo(final long userId, final long matchId) {
+    public Optional<MatchingVO> isValidMatching(final long userId, final long matchId) {
         return Optional.ofNullable(matchingRepository.findById(matchId).map(el -> {
             boolean requester = el.getRequId() != null && el.getRequId().equals(userId);
             boolean receiver = el.getRecvId() != null && el.getRecvId().equals(userId);
@@ -132,7 +132,7 @@ public class MatchingService {
         //return matchingMapper.INSTANCE.matchingtoMatchingVO(matchingeRepository.findById(matchId));
     }
 
-    public Optional<MatchingVO> getMatchingInfo(final Long matchId) {
+    public Optional<MatchingVO> isValidMatching(final Long matchId) {
         return Optional.ofNullable(matchingRepository.findById(matchId).map(el -> {
             return matchingMapper.INSTANCE.matchingtoMatchingVO(el);
         }).orElseThrow(() -> new BusinessException(MessageCode.MATCHING_NOT_FOUND)));
@@ -284,12 +284,21 @@ public class MatchingService {
     }
 
     private Matching findMatchingForReceiver(final Long matchingId, final Long userId) {
-        Matching matching = matchingRepository.findById(matchingId)
+
+        return matchingRepository.findById(matchingId)
+                .map(matching -> {
+                    if (!(matching.getRecvId() != null && matching.getRecvId().equals(userId))) {
+                        throw new BusinessException(MessageCode.MATCHING_ACCESS_DENIED);
+                    }
+                    return matching;
+                })
+                .orElseThrow(() -> new BusinessException(MessageCode.MATCHING_NOT_FOUND));
+        /*Matching matching = matchingRepository.findById(matchingId)
                 .orElseThrow(() -> new BusinessException(MessageCode.MATCHING_NOT_FOUND));
         if (!(matching.getRecvId() != null && matching.getRecvId().equals(userId))) {
             throw new BusinessException(MessageCode.MATCHING_ACCESS_DENIED);
         }
-        return matching;
+        return matching;*/
     }
 
     private Matching setMatchingStatus(final long userId, final MatchingVO matchingVO, final MatchingType matchingType) {
