@@ -30,6 +30,19 @@ public interface MatchingMapper {
             , LocalDateTime decisionStartDate, LocalDateTime decisionEndDate
             , long inUser, LocalDateTime inDate, long modUser, LocalDateTime modDate);
 
+    @Mapping(target = "id", ignore = true) // 엔티티 생성 시 키 자동생성을 위해서 무시
+    @Mapping(target = "requId", source = "actionUser")
+    @Mapping(target = "statusCd", source = "statusCd")
+    @Mapping(target = "decisionStartDate", source = "nowDate")
+    @Mapping(target = "decisionEndDate", source = "decisionEndDate")
+    @Mapping(target = "inUser", source = "actionUser")
+    @Mapping(target = "inDate", source = "nowDate")
+    @Mapping(target = "modUser", source = "actionUser")
+    @Mapping(target = "modDate", source = "nowDate")
+    Matching matchingVOtoMatching(MatchingVO matchingVO, String statusCd
+            , LocalDateTime nowDate, LocalDateTime decisionEndDate
+            , Long actionUser);
+
     List<MatchingVO> matchingstoMatchingVOs(List<Matching> matchings);
 
     MatchingVO matchingtoMatchingVO(Matching matching);
