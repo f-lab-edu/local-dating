@@ -1,5 +1,7 @@
 package com.local_dating.matching_service.application;
 
+import com.local_dating.matching_service.domain.vo.CoinSpendRequestVO;
+import com.local_dating.matching_service.domain.vo.OperationResultVO;
 import com.local_dating.matching_service.domain.vo.UserProfileCoreVO;
 import com.local_dating.matching_service.presentation.dto.UserCoinDTO;
 import com.local_dating.matching_service.util.UserServiceClient;
@@ -54,6 +56,12 @@ public class UserServiceClientWithCircuitBreaker {
         userServiceClient.validateUserId(id, authentication);
     }
 
+    @CircuitBreaker(name = "user-service", fallbackMethod = "spendCoinFail")
+    public OperationResultVO spendCoin(final String authentication, final CoinSpendRequestVO request) {
+
+        return userServiceClient.spendCoin(request.userId(), authentication, request);
+    }
+
     private Long viewCoinPolicyFail(final long id, final String type, final String authentication, Exception e) {
         log.error(Thread.currentThread().getStackTrace()[1].getMethodName(), e);
         throw new CircuitBreakingException(EXTERNAL_EXCEPTION.getMessage(), e);
@@ -80,6 +88,11 @@ public class UserServiceClientWithCircuitBreaker {
     }
 
     private void validateUserIdFail(final long id, final String authentication, Exception e) {
+        log.error(Thread.currentThread().getStackTrace()[1].getMethodName(), e);
+        throw new CircuitBreakingException(EXTERNAL_EXCEPTION.getMessage(), e);
+    }
+
+    private OperationResultVO spendCoinFail(String authentication, CoinSpendRequestVO request, Exception e) {
         log.error(Thread.currentThread().getStackTrace()[1].getMethodName(), e);
         throw new CircuitBreakingException(EXTERNAL_EXCEPTION.getMessage(), e);
     }

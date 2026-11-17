@@ -1,5 +1,6 @@
 package com.local_dating.matching_service.presentation.controller;
 
+import com.local_dating.matching_service.application.MatchingOrchestrator;
 import com.local_dating.matching_service.application.MatchingService;
 import com.local_dating.matching_service.domain.mapper.MatchingMapper;
 import com.local_dating.matching_service.presentation.dto.MatchingDTO;
@@ -22,13 +23,14 @@ public class MatchingController {
     private final MatchingService matchingService;
     private final MatchingMapper matchingMapper;
     private final JwtUtil jwtUtil;
+    private final MatchingOrchestrator matchingOrchestrator;
 
     @PostMapping(value = "/api/matches/users/{id}")
     @PreAuthorize("isAuthenticated() and #id == principal.userNo")
     @Operation(summary = "매칭 요청", description = "매칭을 요청(생성)한다")
     public MatchingDTO requestMatch(final @PathVariable("id") Long id, @RequestHeader("Authorization") String authentication, @RequestBody final MatchingDTO dto) {
-
-        return matchingMapper.INSTANCE.matchingVOToMatchingDTO(matchingService.requestMatching(id, authentication, matchingMapper.INSTANCE.matchingDTOToMatchingVO(dto)));
+        return matchingMapper.INSTANCE.matchingVOToMatchingDTO(matchingOrchestrator.requestMatching(id, authentication, matchingMapper.INSTANCE.matchingDTOToMatchingVO(dto)));
+        //return matchingMapper.INSTANCE.matchingVOToMatchingDTO(matchingService.requestMatching(id, authentication, matchingMapper.INSTANCE.matchingDTOToMatchingVO(dto)));
     }
 
     @PatchMapping(value = "/v1/matches/users/{id}/matches")
@@ -50,7 +52,7 @@ public class MatchingController {
     @GetMapping(value = "/v1/matches/users/{id}/matches/{matchId}") //기본 api
     @PreAuthorize("isAuthenticated() and #id == principal.userNo")
     public Optional<MatchingDTO> getMatch(@PathVariable("id") long id, @PathVariable("matchId") long matchId) {
-        return Optional.ofNullable(matchingMapper.INSTANCE.matchingVOToMatchingDTO(matchingService.isValidMatching(id, matchId)));
+        return Optional.ofNullable(matchingMapper.INSTANCE.matchingVOToMatchingDTO(matchingService.getValidMatching(id, matchId)));
     }
 
     @GetMapping(value = "/v1/matches/users/{id}/received-matches")
