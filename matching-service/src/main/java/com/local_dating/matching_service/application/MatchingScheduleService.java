@@ -31,12 +31,12 @@ public class MatchingScheduleService {
     private final MatchingService matchingService;
 
     public List<MatchingScheduleVO> viewSchedule(final Long id, final Long userId) {
-        matchingService.isValidMatching(userId, id);
+        matchingService.getValidMatching(userId, id);
         return matchingScheduleMapper.INSTANCE.matchingSchedulesToMatchingScheduleVOs(matchingScheduleRepository.findMatchingSchedulesByMatchingIdAndUserId(id, userId));
     }
 
     public List<MatchingScheduleVO> viewScheduleSame(final Long matchingId, final Long userId) {
-        matchingService.isValidMatching(userId, matchingId);
+        matchingService.getValidMatching(userId, matchingId);
         return matchingScheduleMapper.INSTANCE.matchingSchedulesToMatchingScheduleVOs(matchingScheduleRepository.findMatchingSchedulesByMatchingIdAndScheduleStatus(matchingId, MatchingType.SAME.getCode()));
         //return matchingScheduleMapper.INSTANCE.matchingSchedulesToMatchingScheduleVOs(matchingScheduleRepository.findMatchingSchedulesByMatchingIdAndScheduleStatus(matchingId, MatchingType.SAME.getCode()));
         //return matchingScheduleMapper.INSTANCE.matchingSchedulesToMatchingScheduleVOs(matchingScheduleRepository.findMatchingSchedulesByMatchingIdAndUserIdAndScheduleStatus(matchingId, userId, MatchingType.SAME.getCode()));
@@ -44,7 +44,7 @@ public class MatchingScheduleService {
 
     @Transactional
     public List<MatchingScheduleVO> saveSchedule(final Long id, final Long userId, final List<MatchingScheduleVO> matchingScheduleVOs) {
-        matchingService.isValidMatching(userId, id);
+        matchingService.getValidMatching(userId, id);
         matchingScheduleVOs.forEach(vo -> validateScheduleIdentity(id, userId, vo));
 
         List<MatchingSchedule> matchingScheduleList = matchingScheduleVOs.stream()
@@ -93,7 +93,7 @@ public class MatchingScheduleService {
 
     @Transactional
     public MatchingScheduleVO updateSchedule(final Long matchingId, final Long userId, final Long scheduleId, final MatchingScheduleVO matchingScheduleVO) {
-        matchingService.isValidMatching(userId, matchingId);
+        matchingService.getValidMatching(userId, matchingId);
         validateScheduleIdentity(matchingId, userId, matchingScheduleVO);
         MatchingSchedule matchingSchedule = matchingScheduleRepository.findMatchingScheduleByIdAndMatchingIdAndUserIdAndScheduleStatus(scheduleId, matchingId, userId, MatchingScheduleType.SUBMITTED.getCode()).map(el -> {
             el.setMatchingDate(matchingScheduleVO.matchingDate());
@@ -110,7 +110,7 @@ public class MatchingScheduleService {
     @Transactional(propagation = Propagation.NESTED)
     public void checkMatchingSchedule(final Long id) {
 
-        Optional<MatchingVO> matchingVO = matchingService.isValidMatching(id);
+        Optional<MatchingVO> matchingVO = matchingService.getValidMatching(id);
 
         List<MatchingSchedule> scheduleVO1;
         scheduleVO1 = matchingScheduleRepository.findMatchingSchedulesByMatchingIdAndUserId(id, matchingVO.get().requId()); //매칭요청자가 보낸 스케줄
@@ -203,7 +203,7 @@ public class MatchingScheduleService {
 
     private MatchingScheduleVO setScheduleStatus(final Long id, final Long userId, final Long scheduleId, final MatchingType checkType, final MatchingScheduleType setType) {
     //private MatchingScheduleVO setScheduleStatus(final Long id, final Long scheduleId, final MatchingType checkType, final MatchingType setType) {
-        matchingService.isValidMatching(userId, id);
+        matchingService.getValidMatching(userId, id);
         return matchingScheduleRepository.findMatchingScheduleByIdAndMatchingIdAndScheduleStatus(scheduleId, id, checkType.getCode())
                 .map(el -> {
                     el.setScheduleStatus(setType.getCode());

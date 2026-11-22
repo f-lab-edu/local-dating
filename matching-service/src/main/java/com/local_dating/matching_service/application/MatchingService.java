@@ -69,6 +69,23 @@ public class MatchingService {
     }
 
     @Transactional
+    public MatchingVO createRequestedMatching(final Long userId, final MatchingVO matchingVO) {
+
+        LocalDateTime now = LocalDateTime.now();
+
+        Matching matching = MatchingMapper.INSTANCE.matchingVOtoMatching(matchingVO, MatchingType.MATCHING_REQUEST.getCode(), now,
+                now.plusDays(2), userId);
+        /*Matching matching = MatchingMapper.INSTANCE.matchingVOtoMatching(matchingVO, MatchingType.MATCHING_REQUEST.getCode(), now,
+                now.plusDays(2), userId, now);*/
+
+        //matching.setRequId(userId);
+
+        Matching saved = matchingRepository.save(matching);
+
+        return MatchingMapper.INSTANCE.matchingtoMatchingVO(saved);
+    }
+
+    @Transactional
     public void updateMatchingInfo(final long userId, final String authentication, final MatchingVO matchingVO) {
 
         if (matchingVO.requId() == userId) { // 요청자 업데이트
@@ -120,7 +137,7 @@ public class MatchingService {
         //return matchingeRepository.findByRecvIdAndStatusCdNot090(userId);
     }
 
-    public Optional<MatchingVO> isValidMatching(final long userId, final long matchId) {
+    public Optional<MatchingVO> getValidMatching(final long userId, final long matchId) {
         return Optional.ofNullable(matchingRepository.findById(matchId).map(el -> {
             boolean requester = el.getRequId() != null && el.getRequId().equals(userId);
             boolean receiver = el.getRecvId() != null && el.getRecvId().equals(userId);
@@ -132,7 +149,7 @@ public class MatchingService {
         //return matchingMapper.INSTANCE.matchingtoMatchingVO(matchingeRepository.findById(matchId));
     }
 
-    public Optional<MatchingVO> isValidMatching(final Long matchId) {
+    public Optional<MatchingVO> getValidMatching(final Long matchId) {
         return Optional.ofNullable(matchingRepository.findById(matchId).map(el -> {
             return matchingMapper.INSTANCE.matchingtoMatchingVO(el);
         }).orElseThrow(() -> new BusinessException(MessageCode.MATCHING_NOT_FOUND)));
@@ -154,7 +171,7 @@ public class MatchingService {
         return matchingMapper.INSTANCE.matchingtoMatchingVO(matching);
         /*Matching matching = matchingeRepository.findByIdAndRecvId(matchingVO.id(), userId)
                 .orElseThrow(() -> new BusinessException(MessageCode.MATCHING_NOT_FOUND));
-        minusCoin(userId, authentication);
+        minusCoin(userId, authentication);cxc
         matching.setStatusCd(MatchingType.MATCHED.getCode());*/
     }
 
@@ -229,6 +246,9 @@ public class MatchingService {
 
     private Matching setMatchingStatus(final Long userId, final String authentication, final MatchingVO matchingVO, final MatchingType matchingType) {
         Matching matching = findMatchingForReceiver(matchingVO.id(), userId);
+        if (matching.getStatusCd().equals(matchingType.getCode())) { // 중복처리 방지
+            throw new BusinessException(MessageCode.DATA_ALREADY_EXISTS_EXCEPTION);
+        }
         Long price = priceService.viewPrice(userId, authentication, ItemType.MATCHING);
 
         return Optional.ofNullable(userServiceClientWithCircuitBreaker.viewCoin(userId, authentication))
