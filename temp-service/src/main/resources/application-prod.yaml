@@ -1,0 +1,10 @@
+# prod는 mysql도 활성화한다. 임시 서명 키는 운영에서 사용하지 않는다.
+app:
+  auth:
+    ephemeral-key: false
+
+# 중앙 로그 수집기에서 서비스별 로그를 검색하기 쉬운 구조화된 JSON 출력.
+logging:
+  structured:
+    format:
+      console: ecs

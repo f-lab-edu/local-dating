@@ -1,0 +1,77 @@
+spring:
+  application:
+    name: temp-service
+  profiles:
+    # 로컬에서는 외부 DB와 인증 서버 없이 API를 개발할 수 있다.
+    default: local
+    group:
+      prod: mysql
+  datasource:
+    embedded-database-connection: none
+  jpa:
+    # DB 구조는 Flyway가 관리하고 Hibernate는 매핑만 검증한다.
+    open-in-view: false
+    # SQL은 로깅 프레임워크로 출력하여 show-sql과 중복되지 않도록 한다.
+    show-sql: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: ${SQL_FORMAT:false}
+        jdbc:
+          time_zone: UTC
+  flyway:
+    locations: classpath:db/migration
+    clean-disabled: true
+  mvc:
+    problemdetails:
+      enabled: true
+  web:
+    error:
+      include-message: never
+      include-stacktrace: never
+      include-binding-errors: never
+
+server:
+  port: ${SERVER_PORT:8083}
+  shutdown: graceful
+  forward-headers-strategy: none
+
+# mysql은 prod에서도 활성화되므로 공통 설정은 쿼리 출력을 기본 비활성화한다.
+logging:
+  level:
+    org.hibernate.SQL: ${SQL_LOG_LEVEL:OFF}
+    org.hibernate.orm.jdbc.bind: ${SQL_BIND_LOG_LEVEL:OFF}
+
+# 기본 운영 모드는 외부 인증 서버의 토큰을 검증한다.
+app:
+  auth:
+    mode: ${AUTH_MODE:external}
+    issuer: ${JWT_ISSUER:}
+    audience: ${JWT_AUDIENCE:${spring.application.name}}
+    jwk-set-uri: ${JWT_JWK_SET_URI:}
+    username: ${APP_USERNAME:}
+    password: ${APP_PASSWORD:}
+    private-key: ${JWT_PRIVATE_KEY:}
+    public-key: ${JWT_PUBLIC_KEY:}
+
+springdoc:
+  api-docs:
+    enabled: ${API_DOCS_ENABLED:false}
+  swagger-ui:
+    enabled: ${API_DOCS_ENABLED:false}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never
+      probes:
+        enabled: true
+      group:
+        readiness:
+          # 일시적인 DB 장애가 liveness 실패로 이어져 반복 재시작되는 것을 방지한다.
+          include: readinessState,db

@@ -1,0 +1,7 @@
+CREATE TABLE notes (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    title VARCHAR(100) NOT NULL,
+    content VARCHAR(2000) NOT NULL,
+    created_at DATETIME(6) NOT NULL,
+    PRIMARY KEY (id)
+);
