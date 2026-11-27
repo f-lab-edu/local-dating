@@ -1,0 +1,17 @@
+.git
+.idea
+.gradle
+build
+.env*
+*.pem
+*.key
+*.p12
+*.jks
+**/*.pem
+**/*.key
+**/*.p12
+**/*.jks
+config
+logs
+data
+**/application-local-private.*

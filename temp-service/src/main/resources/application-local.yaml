@@ -1,0 +1,34 @@
+# Disposable local environment. Never use this profile for deployment.
+spring:
+  datasource:
+    url: jdbc:h2:mem:template;MODE=MySQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ''
+  jpa:
+    properties:
+      hibernate:
+        format_sql: ${SQL_FORMAT:true}
+
+# 로컬 개발에서 실행 SQL과 PreparedStatement 바인딩 값을 확인한다.
+logging:
+  level:
+    org.hibernate.SQL: ${SQL_LOG_LEVEL:DEBUG}
+    org.hibernate.orm.jdbc.bind: ${SQL_BIND_LOG_LEVEL:TRACE}
+
+server:
+  address: 127.0.0.1
+
+app:
+  auth:
+    mode: ${AUTH_MODE:self}
+    issuer: ${JWT_ISSUER:urn:template:local}
+    ephemeral-key: true
+    username: developer
+    password: local-change-me
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
